@@ -14,7 +14,7 @@ jobs:
           distribution: 'adopt'
           cache: maven
       - name: Build with Maven
-        run: mvn clean install -P allModules -Drat.numUnapprovedLicenses=200 -Denforcer.skip=true
+        run: mvn clean install -P -e allModules -Drat.numUnapprovedLicenses=200 -Denforcer.skip=true
         # mvn --batch-mode --update-snapshots package
       - uses: actions/upload-artifact@v3
         with:
