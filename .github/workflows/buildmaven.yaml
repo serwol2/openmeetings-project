@@ -14,7 +14,7 @@ jobs:
           distribution: 'adopt'
           cache: maven
       - name: Build with Maven
-        run:  clean install -P allModules
+        run: mvn clean install -P allModules
         # mvn --batch-mode --update-snapshots package
       - uses: actions/upload-artifact@v3
         with:
