@@ -14,7 +14,8 @@ jobs:
           distribution: 'adopt'
           cache: maven
       - name: Build with Maven
-        run: mvn -X clean install -PallModules --update-snapshots package -Drat.numUnapprovedLicenses=200 -Denforcer.fail=false # -Denforcer.skip=true
+        run: mvn install -P allModules,quick,mysql -pl openmeetings-util,openmeetings-db,openmeetings-core,openmeetings-install,openmeetings-service,openmeetings-web,openmeetings-server,openmeetings-webservice -Dwicket.configuration=DEVELOPMENT
+        #run: mvn clean install -PallModules --update-snapshots package -Drat.numUnapprovedLicenses=200 -Denforcer.fail=false # -Denforcer.skip=true
         # mvn --batch-mode --update-snapshots package
       - uses: actions/upload-artifact@v3
         with:
