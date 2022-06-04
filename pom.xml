@@ -1687,7 +1687,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
-				<!--<module>openmeetings-util</module>-->
+				<module>openmeetings-util</module>
 				<module>openmeetings-db</module>
 				<module>openmeetings-core</module>
 				<module>openmeetings-install</module>
