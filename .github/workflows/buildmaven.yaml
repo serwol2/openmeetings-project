@@ -20,4 +20,4 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: Package
-          path: staging     
+          path: /home/runner/work/openmeetings-project/openmeetings-project/openmeetings-service/target/openmeetings-service-7.0.0-SNAPSHOT.jar   
