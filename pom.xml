@@ -444,11 +444,11 @@
 				<artifactId>openmeetings-web</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
+			<!-- <dependency>
 				<groupId>org.apache.openmeetings</groupId>
 				<artifactId>openmeetings-webservice</artifactId>
 				<version>${project.version}</version>
-			</dependency>
+			</dependency> -->
 			<dependency>
 				<groupId>org.apache.openmeetings</groupId>
 				<artifactId>openmeetings-util</artifactId>
@@ -1693,7 +1693,7 @@
 				<module>openmeetings-core</module>
 				<module>openmeetings-install</module>
 				<module>openmeetings-service</module>
-				<module>openmeetings-webservice</module>
+				<!--<module>openmeetings-webservice</module>-->
 				<module>openmeetings-web</module>
 				<module>openmeetings-screenshare</module>
 				<module>openmeetings-server</module>
