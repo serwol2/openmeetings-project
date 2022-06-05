@@ -30,7 +30,6 @@ import org.apache.openmeetings.web.admin.backup.BackupPanel;
 import org.apache.openmeetings.web.admin.configurations.ConfigsPanel;
 import org.apache.openmeetings.web.admin.connection.ConnectionsPanel;
 import org.apache.openmeetings.web.admin.email.EmailPanel;
-import org.apache.openmeetings.web.admin.extra.ExtraPanel;
 import org.apache.openmeetings.web.admin.groups.GroupsPanel;
 import org.apache.openmeetings.web.admin.labels.LangPanel;
 import org.apache.openmeetings.web.admin.ldaps.LdapsPanel;
@@ -74,7 +73,6 @@ public class OmUrlFragment implements Serializable {
 	public static final String TYPE_BACKUP = "backup";
 	public static final String TYPE_OAUTH2 = "oauth2";
 	public static final String TYPE_EMAIL = "email";
-	public static final String TYPE_EXTRA = "extra";
 	public static final String TYPE_SEARCH = "search";
 	public static final String TYPE_INVITATION = "invitation";
 	public static final String TYPE_WIDGET = "widget";
@@ -111,7 +109,6 @@ public class OmUrlFragment implements Serializable {
 		, ADMIN_BACKUP
 		, ADMIN_OAUTH
 		, ADMIN_EMAIL
-		, ADMIN_EXTRA
 		, PROFILE_MESSAGE
 		, PROFILE_EDIT
 		, PROFILE_SEARCH
@@ -190,10 +187,6 @@ public class OmUrlFragment implements Serializable {
 				setArea(AreaKeys.admin);
 				setType(TYPE_EMAIL);
 				break;
-			case ADMIN_EXTRA:
-				setArea(AreaKeys.admin);
-				setType(TYPE_EXTRA);
-				break;
 			case PROFILE_MESSAGE:
 				setArea(AreaKeys.profile);
 				setType(TYPE_MESSAGES);
@@ -269,8 +262,6 @@ public class OmUrlFragment implements Serializable {
 					basePanel = new OAuthPanel(CHILD_ID);
 				} else if (TYPE_EMAIL.equals(type)) {
 					basePanel = new EmailPanel(CHILD_ID);
-				} else if (TYPE_EXTRA.equals(type)) {
-					basePanel = new ExtraPanel(CHILD_ID);
 				}
 				break;
 			case profile:
@@ -286,8 +277,21 @@ public class OmUrlFragment implements Serializable {
 					basePanel = new WidgetsPanel(CHILD_ID);
 				}
 				break;
-			case room:
-				basePanel = getRoomPanel(type);
+			case room: {
+				Room r = null;
+				try {
+					Long roomId = Long.valueOf(type);
+					r = Application.get().getBean(RoomDao.class).get(roomId);
+				} catch(NumberFormatException ne) {
+					r = Application.get().getBean(RoomDao.class).get(type);
+				}
+				if (r != null) {
+					moveToServer(r);
+					basePanel = new RoomPanel(CHILD_ID, r);
+				} else {
+					basePanel = new OmDashboardPanel(CHILD_ID);
+				}
+			}
 				break;
 			case rooms:
 				basePanel = new RoomsSelectorPanel(CHILD_ID, type);
@@ -305,22 +309,6 @@ public class OmUrlFragment implements Serializable {
 				break;
 		}
 		return basePanel;
-	}
-
-	private static BasePanel getRoomPanel(String type) {
-		Room r = null;
-		try {
-			Long roomId = Long.valueOf(type);
-			r = Application.get().getBean(RoomDao.class).get(roomId);
-		} catch(NumberFormatException ne) {
-			r = Application.get().getBean(RoomDao.class).get(type);
-		}
-		if (r != null) {
-			moveToServer(r);
-			return new RoomPanel(CHILD_ID, r);
-		} else {
-			return new OmDashboardPanel(CHILD_ID);
-		}
 	}
 
 	public String getLink() {

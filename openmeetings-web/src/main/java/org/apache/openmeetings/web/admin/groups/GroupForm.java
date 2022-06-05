@@ -23,7 +23,6 @@ import static org.apache.openmeetings.util.OmFileHelper.getGroupLogo;
 import static org.apache.openmeetings.util.OmFileHelper.getGroupLogoDir;
 import static org.apache.openmeetings.web.app.WebSession.getRights;
 import static org.apache.openmeetings.web.app.WebSession.getUserId;
-import static org.apache.openmeetings.web.common.BasePanel.EVT_CHANGE;
 import static org.apache.openmeetings.web.util.GroupLogoResourceReference.getUrl;
 
 import java.io.File;
@@ -116,29 +115,34 @@ public class GroupForm extends AdminBaseForm<Group> {
 				return formatUser(choice);
 			}
 		}));
-		userToadd.add(AjaxFormComponentUpdatingBehavior.onUpdate(EVT_CHANGE, target -> {
-			Group o = GroupForm.this.getModelObject();
-			User u = userToadd.getModelObject();
-			boolean found = false;
-			if (o.getId() != null) {
-				found = null != groupUserDao.getByGroupAndUser(o.getId(), u.getId());
-			}
-			if (!found && u != null) {
-				for (GroupUser ou : usersPanel.getUsers2add()) {
-					if (ou.getUser().getId().equals(u.getId())) {
-						found = true;
-						break;
+		userToadd.add(new AjaxFormComponentUpdatingBehavior("change") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				Group o = GroupForm.this.getModelObject();
+				User u = userToadd.getModelObject();
+				boolean found = false;
+				if (o.getId() != null) {
+					found = null != groupUserDao.getByGroupAndUser(o.getId(), u.getId());
+				}
+				if (!found && u != null) {
+					for (GroupUser ou : usersPanel.getUsers2add()) {
+						if (ou.getUser().getId().equals(u.getId())) {
+							found = true;
+							break;
+						}
+					}
+					if (!found) {
+						GroupUser ou = new GroupUser(o, u);
+						usersPanel.getUsers2add().add(ou);
+
+						userToadd.setModelObject(null);
+						target.add(usersPanel, userToadd);
 					}
 				}
-				if (!found) {
-					GroupUser ou = new GroupUser(o, u);
-					usersPanel.getUsers2add().add(ou);
-
-					userToadd.setModelObject(null);
-					target.add(usersPanel, userToadd);
-				}
 			}
-		}));
+		});
 	}
 
 	static String formatUser(User choice) {

@@ -36,19 +36,17 @@ import com.github.openjson.JSONObject;
 
 class TestSetupFlowMocked extends BaseMockedTest {
 	@Override
-	protected JSONObject getBaseMsg() {
-		return super.getBaseMsg().put(TAG_MODE, MODE_TEST);
-	}
-
 	@BeforeEach
 	public void setup() {
+		super.setup();
 		doReturn(true).when(handler).isConnected();
+		MSG_BASE.put(TAG_MODE, MODE_TEST);
 	}
 
 	@Test
 	void testMsgTestWannaRecord() throws Exception {
 		runWrapped(() -> {
-			JSONObject msg = getBaseMsg().put("id", "wannaRecord");
+			JSONObject msg = new JSONObject(MSG_BASE.toString()).put("id", "wannaRecord");
 			WsClient c = new WsClient("sessionId", 0);
 			handler.onMessage(c, msg);
 		});
@@ -62,7 +60,7 @@ class TestSetupFlowMocked extends BaseMockedTest {
 			WsClient c = new WsClient("sessionId", 0);
 			for (boolean audio : new boolean[] {true, false}) {
 				for (boolean video : new boolean[] {true, false}) {
-					JSONObject msg = getBaseMsg()
+					JSONObject msg = new JSONObject(MSG_BASE.toString())
 							.put("id", "record")
 							.put("sdpOffer", "")
 							.put("audio", audio)
@@ -70,14 +68,14 @@ class TestSetupFlowMocked extends BaseMockedTest {
 					handler.onMessage(c, msg);
 				}
 			}
-			JSONObject iceMsg = getBaseMsg()
+			JSONObject iceMsg = new JSONObject(MSG_BASE.toString())
 					.put("id", "iceCandidate")
 					.put(PARAM_CANDIDATE, new JSONObject()
 							.put(PARAM_CANDIDATE, "candidate")
 							.put("sdpMid", "sdpMid")
 							.put("sdpMLineIndex", 1));
 			handler.onMessage(c, iceMsg);
-			handler.onMessage(c, getBaseMsg()
+			handler.onMessage(c, new JSONObject(MSG_BASE.toString())
 					.put("id", "play")
 					.put("sdpOffer", "sdpOffer"));
 			testProcessor.destroy();
@@ -87,7 +85,7 @@ class TestSetupFlowMocked extends BaseMockedTest {
 	@Test
 	void testMsgTestIceCandidate() throws Exception {
 		runWrapped(() -> {
-			JSONObject msg = getBaseMsg()
+			JSONObject msg = new JSONObject(MSG_BASE.toString())
 					.put("id", "iceCandidate")
 					.put(KurentoHandler.PARAM_CANDIDATE, new JSONObject());
 			WsClient c = new WsClient("sessionId", 0);
@@ -98,7 +96,7 @@ class TestSetupFlowMocked extends BaseMockedTest {
 	@Test
 	void testMsgTestWannaPlay() throws Exception {
 		runWrapped(() -> {
-			JSONObject msg = getBaseMsg().put("id", "wannaPlay");
+			JSONObject msg = new JSONObject(MSG_BASE.toString()).put("id", "wannaPlay");
 			WsClient c = new WsClient("sessionId", 0);
 			handler.onMessage(c, msg);
 		});
@@ -107,7 +105,7 @@ class TestSetupFlowMocked extends BaseMockedTest {
 	@Test
 	void testMsgTestPlay() throws Exception {
 		runWrapped(() -> {
-			JSONObject msg = getBaseMsg().put("id", "play");
+			JSONObject msg = new JSONObject(MSG_BASE.toString()).put("id", "play");
 			WsClient c = new WsClient("sessionId", 0);
 			handler.onMessage(c, msg);
 		});

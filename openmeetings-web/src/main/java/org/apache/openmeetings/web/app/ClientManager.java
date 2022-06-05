@@ -107,10 +107,14 @@ public class ClientManager implements IClientManager {
 		onlineServers.putAll(servers());
 		map().addEntryListener(new ClientListener(), true);
 		rooms().addEntryListener(new RoomListener(), true);
-		servers().addEntryListener((EntryUpdatedListener<String, ServerInfo>)(event -> {
-			log.debug("Cluster:: Server was updated {} -> {}", event.getKey(), event.getValue());
-			onlineServers.put(event.getKey(), event.getValue());
-		}), true);
+		servers().addEntryListener(new EntryUpdatedListener<String, ServerInfo>() {
+
+			@Override
+			public void entryUpdated(EntryEvent<String, ServerInfo> event) {
+				log.debug("Cluster:: Server was updated {} -> {}", event.getKey(), event.getValue());
+				onlineServers.put(event.getKey(), event.getValue());
+			}
+		}, true);
 	}
 
 	public void add(Client c) {
@@ -216,12 +220,12 @@ public class ClientManager implements IClientManager {
 	}
 
 	public void serverAdded(String serverId, String url) {
-		onlineServers.computeIfAbsent(serverId, id -> {
+		if (!onlineServers.containsKey(serverId)) {
 			ServerInfo si = new ServerInfo(url);
-			servers().put(id, si);
-			log.debug("Cluster:: server with id '{}' was added", id);
-			return si;
-		});
+			servers().put(serverId, si);
+			log.debug("Cluster:: server with id '{}' was added", serverId);
+			onlineServers.put(serverId, si);
+		}
 	}
 
 	public void serverRemoved(String serverId) {

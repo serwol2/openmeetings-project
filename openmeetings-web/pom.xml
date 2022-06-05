@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>org.apache.openmeetings</groupId>
 		<artifactId>openmeetings-parent</artifactId>
-		<version>6.3.0</version>
+		<version>6.0.0</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>openmeetings-web</artifactId>
@@ -46,6 +46,7 @@
 				<dependency>
 					<groupId>mysql</groupId>
 					<artifactId>mysql-connector-java</artifactId>
+					<version>${mysql.version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -64,6 +65,21 @@
 				<db_user>system</db_user>
 				<db_pass>openmeetings_test</db_pass>
 			</properties>
+		</profile>
+		<profile>
+			<id>Jenkins</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<inherited>true</inherited>
+						<configuration>
+							<excludedGroups>org.apache.openmeetings.test.HeavyTests,org.apache.openmeetings.test.NonJenkinsTests</excludedGroups>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 	<build>
@@ -171,6 +187,14 @@
 			<plugin>
 				<groupId>com.samaxes.maven</groupId>
 				<artifactId>minify-maven-plugin</artifactId>
+				<version>${minify-maven-plugin.version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>com.google.javascript</groupId>
+						<artifactId>closure-compiler</artifactId>
+						<version>v20170521</version>
+					</dependency>
+				</dependencies>
 				<executions>
 					<execution>
 						<id>theme-minify</id>
@@ -442,6 +466,7 @@
 				<inherited>true</inherited>
 				<configuration>
 					<workingDirectory>${project.build.directory}</workingDirectory>
+					<excludedGroups>org.apache.openmeetings.test.HeavyTests</excludedGroups>
 					<systemPropertyVariables>
 						<om.home>${project.build.directory}/test-root</om.home>
 						<languages.home>${project.build.directory}/test-root/languages</languages.home>
@@ -455,31 +480,34 @@
 					</additionalClasspathElements>
 					<skip>${maven.test.skip}</skip>
 				</configuration>
-				<executions>
-					<execution>
-						<id>default-test</id>
-						<configuration>
-							<groups>regular</groups>
-						</configuration>
-					</execution>
-					<execution>
-						<id>isolated-test</id>
-						<goals><goal>test</goal></goals>
-						<configuration>
-							<reuseForks>false</reuseForks>
-							<groups>isolated</groups>
-						</configuration>
-					</execution>
-					<execution>
-						<id>webservice-test</id>
-						<goals><goal>test</goal></goals>
-						<configuration>
-							<groups>webservice</groups>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<version>${jetty.version}</version>
+					<configuration>
+						<systemProperties>
+							<systemProperty>
+								<name>current_openmeetings_log_dir</name>
+								<value>${project.build.directory}</value>
+							</systemProperty>
+							<systemProperty>
+								<name>maven.project.build.directory.test-classes</name>
+								<value>${project.basedir}/src/test/resources</value>
+							</systemProperty>
+						</systemProperties>
+						<webApp>
+							<contextPath>/openmeetings</contextPath>
+							<descriptor>${project.basedir}/src/test/jetty/web.xml</descriptor>
+						</webApp>
+						<jettyXml>${project.basedir}/src/test/jetty/jetty.xml,${project.basedir}/src/test/jetty/jetty-ssl.xml,${project.basedir}/src/test/jetty/jetty-http.xml,${project.basedir}/src/test/jetty/jetty-https.xml</jettyXml>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 	<dependencies>
 		<dependency>
@@ -509,6 +537,13 @@
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>jasny-bootstrap</artifactId>
+			<version>${jasny-bootstrap.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.webjars</groupId>
+					<artifactId>bootstrap</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -521,72 +556,89 @@
 		<dependency>
 			<groupId>org.wicketstuff</groupId>
 			<artifactId>wicketstuff-dashboard-core</artifactId>
+			<version>${wickets.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.wicket</groupId>
 			<artifactId>wicket-auth-roles</artifactId>
+			<version>${wicket.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.wicket</groupId>
 			<artifactId>wicket-native-websocket-javax</artifactId>
+			<version>${wicket.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.wicket</groupId>
 			<artifactId>wicket-devutils</artifactId>
+			<version>${wicket.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.wicket-jquery-ui</groupId>
 			<artifactId>wicket-jquery-ui-core</artifactId>
+			<version>${wicketju.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.wicket-jquery-ui</groupId>
 			<artifactId>wicket-jquery-ui</artifactId>
+			<version>${wicketju.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.wicket-jquery-ui</groupId>
 			<artifactId>wicket-jquery-ui-calendar</artifactId>
+			<version>${wicketju.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.googlecode.wicket-jquery-ui</groupId>
 			<artifactId>wicket-jquery-ui-plugins</artifactId>
+			<version>${wicketju.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wicketstuff</groupId>
 			<artifactId>wicketstuff-urlfragment</artifactId>
+			<version>${wickets.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wicketstuff</groupId>
 			<artifactId>wicketstuff-select2</artifactId>
+			<version>${wickets.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wicketstuff</groupId>
 			<artifactId>jqplot</artifactId>
+			<version>${wickets.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>de.agilecoders.wicket</groupId>
 			<artifactId>wicket-bootstrap-extensions</artifactId>
+			<version>${wicket-bootstrap.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>de.agilecoders.wicket</groupId>
 			<artifactId>wicket-bootstrap-themes</artifactId>
+			<version>${wicket-bootstrap.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>font-awesome</artifactId>
+			<version>${font-awesome.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>io.prometheus</groupId>
+			<artifactId>simpleclient_servlet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-catalina</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>jquery-ui-touch-punch</artifactId>
-		</dependency>
-		<!-- FIXME TODO -->
-		<dependency>
-			<groupId>com.sun.activation</groupId>
-			<artifactId>jakarta.activation</artifactId> <!-- required for jakarta.mail -->
-			<version>2.0.1</version>
+			<version>0.2.3-2</version>
 		</dependency>
 		<!-- Test dependencies -->
 		<dependency>
@@ -615,22 +667,35 @@
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-websocket</artifactId>
+			<version>${tomcat.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.directory.server</groupId>
 			<artifactId>apacheds-test-framework</artifactId>
+			<version>2.0.0.AM26</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.directory.api</groupId>
+					<artifactId>api-ldap-schema-data</artifactId>
+				</exclusion>
+			</exclusions>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-inline</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-junit-jupiter</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-params</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

@@ -240,7 +240,7 @@ function _askPermission(callback) {
 		perm.data('callbacks', []).dialog({
 			appendTo: '.room-block .room-container'
 			, dialogClass: "ask-video-play-permission"
-			, autoOpen: false
+			, autoOpen: true
 			, buttons: [
 				{
 					text: perm.data('btn-ok')
@@ -253,9 +253,8 @@ function _askPermission(callback) {
 				}
 			]
 		});
-	}
-	if (!perm.dialog('isOpen')) {
-		perm.dialog('open');
+	} else if (!perm.dialog('isOpen')) {
+		perm.dialog('open')
 	}
 	perm.data('callbacks').push(callback);
 }
@@ -269,15 +268,13 @@ function _disconnect(node) {
 function _sharingSupported() {
 	const b = OmUtil.browser;
 	return (b.name === 'Edge' && b.major > 16)
-		|| (typeof(navigator.mediaDevices.getDisplayMedia) === 'function'
-			&& (b.name === 'Firefox'
-				|| b.name === 'Opera'
-				|| b.name === 'Yandex'
-				|| OmUtil.isSafari()
-				|| OmUtil.isChrome()
-				|| OmUtil.isEdgeChromium()
-				|| (b.name === 'Mozilla' && b.major > 4)
-			));
+		|| b.name === 'Firefox'
+		|| b.name === 'Opera'
+		|| b.name === 'Yandex'
+		|| (OmUtil.isSafari() && typeof(navigator.mediaDevices.getDisplayMedia) === 'function')
+		|| OmUtil.isChrome()
+		|| OmUtil.isEdgeChromium()
+		|| (b.name === 'Mozilla' && b.major > 4);
 }
 function _highlight(el, clazz, count) {
 	if (!el || el.length < 1 || el.hasClass('disabled') || count < 0) {

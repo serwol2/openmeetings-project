@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.net.http.HttpRequest;
 import java.security.NoSuchAlgorithmException;
 
-import org.apache.openmeetings.RegularTest;
 import org.apache.openmeetings.db.dao.user.GroupDao;
 import org.apache.openmeetings.db.dao.user.UserDao;
 import org.apache.openmeetings.db.entity.server.OAuthServer;
@@ -56,7 +55,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
-@RegularTest
 @ExtendWith(MockitoExtension.class)
 class TestUserManagerMocked {
 	@Mock

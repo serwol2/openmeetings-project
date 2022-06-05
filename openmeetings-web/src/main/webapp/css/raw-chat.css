@@ -1,7 +1,7 @@
 /* Licensed under the Apache License, Version 2.0 (the "License") http://www.apache.org/licenses/LICENSE-2.0 */
 #chatPanel {
 	position: fixed;
-	z-index: var(--chat-zindex);
+	z-index: 2000;
 	bottom: 0px;
 	right: 10px;
 	width: var(--chat-width);
@@ -53,7 +53,7 @@
 	content: "\f104";
 }
 #chat .messageArea .msg-row.need-moderation {
-	background-color: var(--bs-warning);
+	background-color: var(--warning);
 }
 #chat .messageArea .time {
 	margin-right: 5px;
@@ -200,7 +200,4 @@ html[dir="rtl"] .main.room #chatPanel {
 }
 .chat-toolbar .chat-btn.under, .wysiwyg-toolbar .tool-btn.under {
 	text-decoration: underline;
-}
-.chat-delete.confirmation {
-	z-index: calc(var(--chat-zindex) + 1);
 }

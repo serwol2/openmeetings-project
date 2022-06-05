@@ -34,7 +34,6 @@ public class InvitationDialog extends Modal<Invitation> {
 
 	public InvitationDialog(String id, final InvitationForm form) {
 		super(id, form.getModel());
-		setMarkupId(id);
 		this.form = form;
 	}
 

@@ -23,7 +23,6 @@ import static org.apache.openmeetings.util.CalendarHelper.getDate;
 import static org.apache.openmeetings.web.app.Application.getInvitationLink;
 import static org.apache.openmeetings.web.app.WebSession.AVAILABLE_TIMEZONES;
 import static org.apache.openmeetings.web.app.WebSession.getUserId;
-import static org.apache.openmeetings.web.common.BasePanel.EVT_CHANGE;
 import static org.apache.openmeetings.web.util.CalendarWebHelper.getZoneId;
 
 import java.time.LocalDateTime;
@@ -41,7 +40,6 @@ import org.apache.openmeetings.db.entity.user.User.Type;
 import org.apache.openmeetings.service.room.InvitationManager;
 import org.apache.openmeetings.util.crypt.CryptProvider;
 import org.apache.openmeetings.web.app.WebSession;
-import org.apache.openmeetings.web.common.datetime.OmDateTimePicker;
 import org.apache.openmeetings.web.util.UserMultiChoice;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormChoiceComponentUpdatingBehavior;
@@ -81,8 +79,6 @@ public abstract class InvitationForm extends Form<Invitation> {
 	protected final TextField<String> url = new TextField<>("url", Model.of((String)null));
 	protected final UserMultiChoice recipients = new UserMultiChoice("recipients", new CollectionModel<>(new ArrayList<>()));
 	protected InvitationDialog dialog;
-	protected String dropDownParentId;
-
 	@SpringBean
 	private InvitationDao inviteDao;
 	@SpringBean
@@ -95,22 +91,23 @@ public abstract class InvitationForm extends Form<Invitation> {
 		, SEND
 	}
 
-	protected InvitationForm(String id, String dropDownParentId) {
+	protected InvitationForm(String id) {
 		super(id, new CompoundPropertyModel<>(new Invitation()));
-		this.dropDownParentId = dropDownParentId;
 		setOutputMarkupId(true);
 	}
 
 	@Override
 	protected void onInitialize() {
 		add(subject, message);
-		recipients.setLabel(new ResourceModel("216")).setRequired(true).add(AjaxFormComponentUpdatingBehavior.onUpdate(EVT_CHANGE, target -> {
-			url.setModelObject(null);
-			updateButtons(target);
-		})).setOutputMarkupId(true);
-		if (dropDownParentId != null) {
-			recipients.getSettings().setDropdownParent(dropDownParentId);
-		}
+		recipients.setLabel(new ResourceModel("216")).setRequired(true).add(new AjaxFormComponentUpdatingBehavior("change") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				url.setModelObject(null);
+				updateButtons(target);
+			}
+		}).setOutputMarkupId(true);
 		add(new AjaxCheckBox("passwordProtected") {
 			private static final long serialVersionUID = 1L;
 
@@ -140,9 +137,14 @@ public abstract class InvitationForm extends Form<Invitation> {
 		add(from.setLabel(new ResourceModel("530")).setOutputMarkupId(true)
 				, to.setLabel(new ResourceModel("531")).setOutputMarkupId(true)
 				, timeZoneId.setOutputMarkupId(true));
-		timeZoneId.add(AjaxFormComponentUpdatingBehavior.onUpdate(EVT_CHANGE, target -> {
-			//no-op added to preserve selection
-		}));
+		timeZoneId.add(new AjaxFormComponentUpdatingBehavior("change") {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				//no-op added to preserve selection
+			}
+		});
 		add(url.setOutputMarkupId(true));
 		add(lang, feedback.setOutputMarkupId(true));
 		super.onInitialize();

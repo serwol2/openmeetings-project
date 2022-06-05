@@ -68,8 +68,10 @@ class TestRecordingFlowMocked extends BaseMockedTest {
 	//This variable hold a reference to the UID of the StreamDesc that will be created
 	private String streamDescUID;
 
+	@Override
 	@BeforeEach
 	public void setup() {
+		super.setup();
 		User u = new User();
 		u.setId(USER_ID);
 		u.setFirstname("firstname");
@@ -144,7 +146,7 @@ class TestRecordingFlowMocked extends BaseMockedTest {
 	 * @throws Exception
 	 */
 	private void testStartRecordWhenSharingWasNot() throws Exception {
-		JSONObject msg = getBaseMsg()
+		JSONObject msg = new JSONObject(MSG_BASE.toString())
 				.put("id", "wannaRecord")
 				.put("shareType", "shareType")
 				.put("fps", "fps")
@@ -163,7 +165,7 @@ class TestRecordingFlowMocked extends BaseMockedTest {
 		//save UID for stopping the stream later
 		streamDescUID = streamDesc.getUid();
 
-		JSONObject msgBroadcastStarted = getBaseMsg()
+		JSONObject msgBroadcastStarted = new JSONObject(MSG_BASE.toString())
 				.put("id", "broadcastStarted")
 				.put("type", "kurento")
 				.put("uid", streamDescUID)
@@ -204,7 +206,7 @@ class TestRecordingFlowMocked extends BaseMockedTest {
 		// Needed for stopping, needs to stop by sid
 		doReturn(c).when(streamProcessor).getBySid(c.getSid());
 
-		JSONObject msg = getBaseMsg()
+		JSONObject msg = new JSONObject(MSG_BASE.toString())
 				.put("id", "stopRecord")
 				.put("type", "kurento")
 				.put("uid", streamDescUID)

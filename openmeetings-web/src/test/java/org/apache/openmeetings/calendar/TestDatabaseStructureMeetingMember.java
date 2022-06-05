@@ -18,10 +18,10 @@
  */
 package org.apache.openmeetings.calendar;
 
-import org.apache.openmeetings.AbstractOmServerTest;
+import org.apache.openmeetings.AbstractJUnitDefaults;
 import org.junit.jupiter.api.Test;
 
-class TestDatabaseStructureMeetingMember extends AbstractOmServerTest {
+class TestDatabaseStructureMeetingMember extends AbstractJUnitDefaults {
 
 	@Test
 	void testUpdateMeetingMember(){

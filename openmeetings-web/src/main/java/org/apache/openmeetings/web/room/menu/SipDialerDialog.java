@@ -103,11 +103,6 @@ public class SipDialerDialog extends Modal<String> {
 		target.add(feedback);
 	}
 
-	/**
-	 * handler for "Call" button
-	 *
-	 * @param target - {@link AjaxRequestTarget} to perform additional actions(s) if any
-	 */
 	protected void onSubmit(AjaxRequestTarget target) {
 		sipDao.joinToConfCall(number.getModelObject(), room.getRoom());
 	}

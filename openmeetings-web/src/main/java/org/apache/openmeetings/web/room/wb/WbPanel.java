@@ -193,8 +193,8 @@ public class WbPanel extends AbstractWbPanel {
 			return;
 		}
 		switch (a) {
-			case CREATE_OBJ:
-			case MODIFY_OBJ:
+			case createObj:
+			case modifyObj:
 			{
 				JSONObject o = obj.optJSONObject("obj");
 				if (o != null && "pointer".equals(o.getString(ATTR_OMTYPE))) {
@@ -203,7 +203,7 @@ public class WbPanel extends AbstractWbPanel {
 				}
 			}
 				break;
-			case DOWNLOAD:
+			case download:
 			{
 				boolean moder = c.hasRight(Room.Right.MODERATOR);
 				Room r = rp.getRoom();
@@ -212,7 +212,7 @@ public class WbPanel extends AbstractWbPanel {
 				}
 				return;
 			}
-			case LOAD_VIDEOS:
+			case loadVideos:
 			{
 				StringBuilder sb = new StringBuilder("WbArea.initVideos(");
 				JSONArray arr = new JSONArray();
@@ -246,56 +246,56 @@ public class WbPanel extends AbstractWbPanel {
 		//presenter-right
 		if (c.hasRight(Right.PRESENTER)) {
 			switch (a) {
-				case CREATE_WB:
+				case createWb:
 				{
 					Whiteboard wb = wbm.add(roomId, c.getUser().getLanguageId());
-					sendWbAll(WbAction.CREATE_WB, wb.getAddJson());
+					sendWbAll(WbAction.createWb, wb.getAddJson());
 				}
 					break;
-				case REMOVE_WB:
+				case removeWb:
 				{
 					long id = obj.optLong("wbId", -1);
 					if (id > -1) {
 						long prevId = obj.optLong("prevWbId", -1);
 						wbm.remove(roomId, id, prevId);
-						sendWbAll(WbAction.REMOVE_WB, obj);
+						sendWbAll(WbAction.removeWb, obj);
 					}
 				}
 					break;
-				case ACTIVATE_WB:
+				case activateWb:
 				{
 					long wbId = obj.optLong("wbId", -1);
 					if (wbId > -1) {
 						wbm.activate(roomId, wbId);
-						sendWbAll(WbAction.ACTIVATE_WB, obj);
+						sendWbAll(WbAction.activateWb, obj);
 					}
 				}
 					break;
-				case RENAME_WB:
+				case renameWb:
 				{
 					Whiteboard wb = wbm.get(roomId).get(obj.optLong("wbId", -1));
 					if (wb != null) {
 						wbm.update(roomId, wb.setName(obj.getString("name")));
-						sendWbAll(WbAction.RENAME_WB, obj);
+						sendWbAll(WbAction.renameWb, obj);
 					}
 				}
 					break;
-				case SET_SLIDE:
+				case setSlide:
 				{
 					Whiteboard wb = wbm.get(roomId).get(obj.optLong("wbId", -1));
 					if (wb != null) {
 						wb.setSlide(obj.optInt(ATTR_SLIDE, 0));
 						wbm.update(roomId, wb);
-						sendWbOthers(WbAction.SET_SLIDE, obj);
+						sendWbOthers(WbAction.setSlide, obj);
 					}
 				}
 					break;
-				case CLEAR_ALL:
+				case clearAll:
 				{
 					wbm.clearAll(roomId, obj.getLong("wbId"), addUndo);
 				}
 					break;
-				case SET_SIZE:
+				case setSize:
 				{
 					Whiteboard wb = wbm.get(roomId).get(obj.getLong("wbId"));
 					wb.setWidth(obj.getInt(ATTR_WIDTH));
@@ -303,7 +303,7 @@ public class WbPanel extends AbstractWbPanel {
 					wb.setZoom(obj.getDouble(ATTR_ZOOM));
 					wb.setZoomMode(ZoomMode.valueOf(obj.getString("zoomMode")));
 					wbm.update(roomId, wb);
-					sendWbOthers(WbAction.SET_SIZE, wb.getAddJson());
+					sendWbOthers(WbAction.setSize, wb.getAddJson());
 				}
 					break;
 				default:
@@ -313,17 +313,17 @@ public class WbPanel extends AbstractWbPanel {
 		//wb-right
 		if (c.hasRight(Right.PRESENTER) || c.hasRight(Right.WHITEBOARD)) {
 			switch (a) {
-				case CREATE_OBJ:
+				case createObj:
 				{
 					Whiteboard wb = wbm.get(roomId).get(obj.getLong("wbId"));
 					JSONObject o = obj.getJSONObject("obj");
 					wb.put(o.getString("uid"), o);
 					wbm.update(roomId, wb);
 					addUndo(wb.getId(), new UndoObject(UndoObject.Type.add, o));
-					sendWbOthers(WbAction.CREATE_OBJ, obj);
+					sendWbOthers(WbAction.createObj, obj);
 				}
 					break;
-				case MODIFY_OBJ:
+				case modifyObj:
 				{
 					Whiteboard wb = wbm.get(roomId).get(obj.getLong("wbId"));
 					JSONArray arr = obj.getJSONArray("obj");
@@ -341,10 +341,10 @@ public class WbPanel extends AbstractWbPanel {
 						wbm.update(roomId, wb);
 						addUndo(wb.getId(), new UndoObject(UndoObject.Type.modify, undo));
 					}
-					sendWbOthers(WbAction.MODIFY_OBJ, obj);
+					sendWbOthers(WbAction.modifyObj, obj);
 				}
 					break;
-				case DELETE_OBJ:
+				case deleteObj:
 				{
 					Whiteboard wb = wbm.get(roomId).get(obj.getLong("wbId"));
 					JSONArray arr = obj.getJSONArray("obj");
@@ -360,20 +360,20 @@ public class WbPanel extends AbstractWbPanel {
 						wbm.update(roomId, wb);
 						addUndo(wb.getId(), new UndoObject(UndoObject.Type.remove, undo));
 					}
-					sendWbAll(WbAction.DELETE_OBJ, obj);
+					sendWbAll(WbAction.deleteObj, obj);
 				}
 					break;
-				case CLEAR_SLIDE:
+				case clearSlide:
 				{
 					wbm.cleanSlide(roomId, obj.getLong("wbId"), obj.getInt(ATTR_SLIDE)
 							, (wb, arr) -> addUndo(wb.getId(), new UndoObject(UndoObject.Type.remove, arr)));
 				}
 					break;
-				case SAVE:
+				case save:
 					wb2save = obj.getLong("wbId");
 					fileName.show(handler);
 					break;
-				case UNDO:
+				case undo:
 				{
 					Long wbId = obj.getLong("wbId");
 					UndoObject uo = getUndo(wbId);
@@ -385,7 +385,7 @@ public class WbPanel extends AbstractWbPanel {
 								JSONObject o = new JSONObject(uo.getObject());
 								wb.remove(o.getString("uid"));
 								wbm.update(roomId, wb);
-								sendWbAll(WbAction.DELETE_OBJ, obj.put("obj", new JSONArray().put(o)));
+								sendWbAll(WbAction.deleteObj, obj.put("obj", new JSONArray().put(o)));
 							}
 								break;
 							case remove:
@@ -396,7 +396,7 @@ public class WbPanel extends AbstractWbPanel {
 									wb.put(o.getString("uid"), o);
 								}
 								wbm.update(roomId, wb);
-								sendWbAll(WbAction.CREATE_OBJ, obj.put("obj", new JSONArray(uo.getObject())));
+								sendWbAll(WbAction.createObj, obj.put("obj", new JSONArray(uo.getObject())));
 							}
 								break;
 							case modify:
@@ -407,14 +407,14 @@ public class WbPanel extends AbstractWbPanel {
 									wb.put(o.getString("uid"), o);
 								}
 								wbm.update(roomId, wb);
-								sendWbAll(WbAction.MODIFY_OBJ, obj.put("obj", arr));
+								sendWbAll(WbAction.modifyObj, obj.put("obj", arr));
 							}
 								break;
 						}
 					}
 				}
 					break;
-				case VIDEO_STATUS:
+				case videoStatus:
 				{
 					Whiteboard wb = wbm.get(roomId).get(obj.getLong("wbId"));
 					String uid = obj.getString("uid");
@@ -424,7 +424,7 @@ public class WbPanel extends AbstractWbPanel {
 						po.put(PARAM_STATUS, ns.put(PARAM_UPDATED, System.currentTimeMillis()));
 						wbm.update(roomId, wb.put(uid, po));
 						obj.put(ATTR_SLIDE, po.getInt(ATTR_SLIDE));
-						sendWbAll(WbAction.VIDEO_STATUS, obj);
+						sendWbAll(WbAction.videoStatus, obj);
 					}
 				}
 					break;
@@ -515,8 +515,8 @@ public class WbPanel extends AbstractWbPanel {
 							if (updated[0]) {
 								wbm.update(roomId, wb);
 							}
-							sendWbAll(WbAction.SET_SIZE, wb.getAddJson());
-							sendWbAll(WbAction.LOAD, getObjWbJson(wb.getId(), arr));
+							sendWbAll(WbAction.setSize, wb.getAddJson());
+							sendWbAll(WbAction.load, getObjWbJson(wb.getId(), arr));
 						} catch (Exception e) {
 							log.error("Unexpected error while loading WB", e);
 						}
@@ -553,7 +553,7 @@ public class WbPanel extends AbstractWbPanel {
 					wb.put(wuid, file);
 					updateWbSize(wb, fi);
 					wbm.update(roomId, wb);
-					sendWbAll(WbAction.SET_SIZE, wb.getAddJson());
+					sendWbAll(WbAction.setSize, wb.getAddJson());
 					WbWebSocketHelper.sendWbFile(roomId, wb.getId(), ruid, file, fi);
 				}
 					break;
@@ -578,9 +578,10 @@ public class WbPanel extends AbstractWbPanel {
 		if (wbId == null) {
 			return;
 		}
-		undoList
-			.computeIfAbsent(wbId, id -> new LimitedLinkedList<>())
-			.push(u);
+		if (!undoList.containsKey(wbId)) {
+			undoList.put(wbId, new LimitedLinkedList<>());
+		}
+		undoList.get(wbId).push(u);
 	}
 
 	private UndoObject getUndo(Long wbId) {

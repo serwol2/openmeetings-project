@@ -62,7 +62,7 @@ public abstract class BaseConverter {
 	private static final Pattern p = Pattern.compile("\\d{2,5}(x)\\d{2,5}");
 	public static final String EXEC_EXT = System.getProperty("os.name").toUpperCase(Locale.ROOT).indexOf("WINDOWS") < 0 ? "" : ".exe";
 	private static final int MINUTE_MULTIPLIER = 60 * 1000;
-	public static final int TIME_TO_WAIT_FOR_FRAME = 5 * MINUTE_MULTIPLIER;
+	public static final int TIME_TO_WAIT_FOR_FRAME = 15 * MINUTE_MULTIPLIER;
 	public static final double HALF_STEP = 1. / 2;
 
 	@Autowired
@@ -140,7 +140,7 @@ public abstract class BaseConverter {
 		}
 	}
 
-	private List<String> mergeAudioToWaves(List<File> waveFiles, File wav) throws IOException {
+	private String[] mergeAudioToWaves(List<File> waveFiles, File wav) throws IOException {
 		List<String> argv = new ArrayList<>();
 
 		argv.add(getPathToSoX());
@@ -150,7 +150,7 @@ public abstract class BaseConverter {
 		}
 		argv.add(wav.getCanonicalPath());
 
-		return argv;
+		return argv.toArray(new String[0]);
 	}
 
 	protected void createWav(Recording r, ProcessResultList logs, File streamFolder, List<File> waveFiles, File wav, List<RecordingChunk> chunks) throws IOException {
@@ -163,25 +163,27 @@ public abstract class BaseConverter {
 			// Calculate delta at beginning
 			double duration = diffSeconds(r.getRecordEnd(), r.getRecordStart());
 
-			List<String> cmd = List.of(getPathToSoX(), oneSecWav, wav.getCanonicalPath(), "pad", "0", String.valueOf(duration));
+			String[] cmd = new String[] { getPathToSoX(), oneSecWav, wav.getCanonicalPath(), "pad", "0", String.valueOf(duration) };
 
-			logs.add(ProcessHelper.exec("generateSampleAudio", cmd));
+			logs.add(ProcessHelper.executeScript("generateSampleAudio", cmd));
 		} else if (waveFiles.size() == 1) {
 			copyFile(waveFiles.get(0), wav);
 		} else {
-			logs.add(ProcessHelper.exec("mergeAudioToWaves", mergeAudioToWaves(waveFiles, wav)));
+			String[] soxArgs = mergeAudioToWaves(waveFiles, wav);
+
+			logs.add(ProcessHelper.executeScript("mergeAudioToWaves", soxArgs));
 		}
 	}
 
-	private List<String> addSoxPad(ProcessResultList logs, String job, double length, double position, File inFile, File outFile) throws IOException {
+	private String[] addSoxPad(ProcessResultList logs, String job, double length, double position, File inFile, File outFile) throws IOException {
 		if (length < 0 || position < 0) {
 			log.debug("::addSoxPad {} Invalid parameters: length = {}; position = {}; inFile = {}", job, length, position, inFile);
 		}
-		List<String> argv = List.of(getPathToSoX(), inFile.getCanonicalPath(), outFile.getCanonicalPath(), "pad"
+		String[] argv = new String[] { getPathToSoX(), inFile.getCanonicalPath(), outFile.getCanonicalPath(), "pad"
 				, String.valueOf(length < 0 ? 0 : length)
-				, String.valueOf(position < 0 ? 0 : position));
+				, String.valueOf(position < 0 ? 0 : position) };
 
-		logs.add(ProcessHelper.exec(job, argv));
+		logs.add(ProcessHelper.executeScript(job, argv));
 		return argv;
 	}
 
@@ -190,47 +192,43 @@ public abstract class BaseConverter {
 			log.debug("### {}:: recording id {}; stream with id {}; current status: {} ", prefix, chunk.getRecording().getId()
 					, chunk.getId(), chunk.getStreamStatus());
 			File chunkFlv = getRecordingChunk(chunk.getRecording().getRoomId(), chunk.getStreamName());
-			log.debug("### {}:: Chunk file [{}] exists ? {}; size: {}, lastModified: {} ", prefix, chunkFlv.getPath(), chunkFlv.exists(), chunkFlv.length(), chunkFlv.lastModified());
+			log.debug("### {}:: Flv file [{}] exists ? {}; size: {}, lastModified: {} ", prefix, chunkFlv.getPath(), chunkFlv.exists(), chunkFlv.length(), chunkFlv.lastModified());
 		}
 	}
 
-	protected RecordingChunk waitForTheStream(long chunkId) {
+	protected RecordingChunk waitForTheStream(long chunkId) throws InterruptedException {
 		RecordingChunk chunk = chunkDao.get(chunkId);
-		try {
-			if (chunk.getStreamStatus() != Status.STOPPED) {
-				log.debug("### Chunk Stream not yet written to disk {}", chunkId);
-				long counter = 0;
-				long maxTimestamp = 0;
-				while (true) {
-					log.trace("### Stream not yet written Thread Sleep - {}", chunkId);
+		if (chunk.getStreamStatus() != Status.STOPPED) {
+			log.debug("### Chunk Stream not yet written to disk {}", chunkId);
+			long counter = 0;
+			long maxTimestamp = 0;
+			while(true) {
+				log.trace("### Stream not yet written Thread Sleep - {}", chunkId);
 
-					chunk = chunkDao.get(chunkId);
+				chunk = chunkDao.get(chunkId);
 
-					if (chunk.getStreamStatus() == Status.STOPPED) {
-						printChunkInfo(chunk, "Stream now written");
-						log.debug("### Thread continue ... " );
+				if (chunk.getStreamStatus() == Status.STOPPED) {
+					printChunkInfo(chunk, "Stream now written");
+					log.debug("### Thread continue ... " );
+					break;
+				} else {
+					File chunkFlv = getRecordingChunk(chunk.getRecording().getRoomId(), chunk.getStreamName());
+					if (chunkFlv.exists() && maxTimestamp < chunkFlv.lastModified()) {
+						maxTimestamp = chunkFlv.lastModified();
+					}
+					if (maxTimestamp + TIME_TO_WAIT_FOR_FRAME < System.currentTimeMillis()) {
+						log.debug("### long time without any update, closing ... ");
+						chunk.setStreamStatus(Status.STOPPED);
+						chunkDao.update(chunk);
 						break;
-					} else {
-						File chunkFlv = getRecordingChunk(chunk.getRecording().getRoomId(), chunk.getStreamName());
-						if (chunkFlv.exists() && maxTimestamp < chunkFlv.lastModified()) {
-							maxTimestamp = chunkFlv.lastModified();
-						}
-						if (maxTimestamp + TIME_TO_WAIT_FOR_FRAME < System.currentTimeMillis()) {
-							log.debug("### long time without any update, closing ... ");
-							chunk.setStreamStatus(Status.STOPPED);
-							chunkDao.update(chunk);
-							break;
-						}
 					}
-					if (++counter % 1000 == 0) {
-						printChunkInfo(chunk, "Still waiting");
-					}
-
-					Thread.sleep(100L);
 				}
+				if (++counter % 1000 == 0) {
+					printChunkInfo(chunk, "Still waiting");
+				}
+
+				Thread.sleep(100L);
 			}
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
 		}
 		return chunk;
 	}
@@ -261,13 +259,13 @@ public abstract class BaseConverter {
 				log.debug("FLV File Name: {} Length: {} ", inputFlvFile.getName(), inputFlvFile.length());
 
 				if (inputFlvFile.exists()) {
-					List<String> argv = List.of(
+					String[] argv = new String[] {
 							getPathToFFMPEG(), "-y"
 							, "-i", inputFlvFile.getCanonicalPath()
 							, "-af", String.format("aresample=%s:min_comp=0.001:min_hard_comp=0.100000", getAudioBitrate())
-							, outputWav.getCanonicalPath());
+							, outputWav.getCanonicalPath()};
 					//there might be no audio in the stream
-					logs.add(ProcessHelper.exec("stripAudioFromFLVs", argv, true));
+					logs.add(ProcessHelper.executeScript("stripAudioFromFLVs", argv, true));
 				}
 
 				if (outputWav.exists() && outputWav.length() != 0) {
@@ -321,12 +319,13 @@ public abstract class BaseConverter {
 		return List.of();
 	}
 
-	private List<String> addMp4OutParams(Recording r, List<String> argv, boolean interview, String mp4path) {
+	private List<String> addMp4OutParams(Recording r, List<String> argv, String mp4path) {
 		argv.addAll(List.of(
 				"-c:v", "h264" //
 				, "-crf", "24"
 				, "-vsync", "0"
 				, "-pix_fmt", "yuv420p"
+				, "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2"
 				, "-preset", getVideoPreset()
 				, "-profile:v", "baseline"
 				, "-level", "3.0"
@@ -335,19 +334,16 @@ public abstract class BaseConverter {
 				, "-ar", String.valueOf(getAudioRate())
 				, "-b:a", getAudioBitrate()
 				));
-		if (!interview) {
-			argv.addAll(List.of("-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2"));
-		}
 		argv.addAll(additionalMp4OutParams(r));
 		argv.add(mp4path);
 		return argv;
 	}
 
-	protected String convertToMp4(Recording r, List<String> inArgv, boolean interview, ProcessResultList logs) throws IOException {
+	protected String convertToMp4(Recording r, List<String> inArgv, ProcessResultList logs) throws IOException {
 		String mp4path = r.getFile().getCanonicalPath();
 		List<String> argv = new ArrayList<>(List.of(getPathToFFMPEG(), "-y"));
 		argv.addAll(inArgv);
-		logs.add(ProcessHelper.exec("generate MP4", addMp4OutParams(r, argv, interview, mp4path)));
+		logs.add(ProcessHelper.executeScript("generate MP4", addMp4OutParams(r, argv, mp4path).toArray(new String[]{})));
 		return mp4path;
 	}
 
@@ -355,13 +351,13 @@ public abstract class BaseConverter {
 		// Extract first Image for preview purpose
 		// ffmpeg -i movie.mp4 -vf  "thumbnail,scale=640:-1" -frames:v 1 movie.png
 		File png = f.getFile(EXTENSION_PNG);
-		List<String> argv = List.of(
-				getPathToFFMPEG(), "-y"
-				, "-i", mp4path
-				, "-vf", "thumbnail,scale=640:-1"
-				, "-frames:v", "1"
-				, png.getCanonicalPath());
-		logs.add(ProcessHelper.exec("generate preview PNG :: " + f.getHash(), argv));
+		String[] argv = new String[] { //
+				getPathToFFMPEG(), "-y" //
+				, "-i", mp4path //
+				, "-vf", "thumbnail,scale=640:-1" //
+				, "-frames:v", "1" //
+				, png.getCanonicalPath() };
+		logs.add(ProcessHelper.executeScript(String.format("generate preview PNG :: %s", f.getHash()), argv));
 	}
 
 	/**

@@ -19,8 +19,7 @@ function reset() {
 function _init() {
 	reset();
 	sharer = $('#sharer').dialog({
-		appendTo: '.room-block .room-container'
-		, classes: {
+		classes: {
 			'ui-dialog': 'sharer'
 			, 'ui-dialog-titlebar': ''
 		}

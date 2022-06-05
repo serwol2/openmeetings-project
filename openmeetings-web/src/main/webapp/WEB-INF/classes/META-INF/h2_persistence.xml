@@ -44,7 +44,6 @@
 		<class>org.apache.openmeetings.db.entity.room.RoomModerator</class>
 		<class>org.apache.openmeetings.db.entity.room.RoomPoll</class>
 		<class>org.apache.openmeetings.db.entity.room.RoomPollAnswer</class>
-		<class>org.apache.openmeetings.db.entity.room.ExtraMenu</class>
 		<class>org.apache.openmeetings.db.entity.server.LdapConfig</class>
 		<class>org.apache.openmeetings.db.entity.server.OAuthServer</class>
 		<class>org.apache.openmeetings.db.entity.server.Sessiondata</class>
@@ -63,7 +62,8 @@
 			<property name="openjpa.ConnectionDriverName" value="org.apache.commons.dbcp2.BasicDataSource" />
 			<property name="openjpa.ConnectionProperties"
 				value="DriverClassName=org.h2.Driver
-					, Url=jdbc:h2:./omdb
+					, Url=jdbc:h2:./omdb;create=true
+					, create=true
 					, maxTotal=100
 					, maxIdle=100
 					, minIdle=0
@@ -71,8 +71,6 @@
 					, TestOnBorrow=true
 					, Username=
 					, Password=" />
-			<property name="javax.persistence.schema-generation.database.action" value="create" />
-			<property name="javax.persistence.schema-generation.create-database-schemas" value="true" />
 			<property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema" />
 			<property name="openjpa.Log" value="DefaultLevel=WARN, Tool=INFO" />
 			<property name="openjpa.DataCache" value="true" />

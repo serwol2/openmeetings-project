@@ -46,8 +46,7 @@ public class RedirectMessageDialog extends IconTextModal {
 		header(new ResourceModel("204"));
 		setCloseOnEscapeKey(false);
 		show(autoOpen);
-		withLabel(new ResourceModel(labelId));
-		getLabel().setOutputMarkupId(true);
+		withLabel(labelId);
 		withErrorIcon();
 		super.onInitialize();
 		if (autoOpen) {
@@ -67,7 +66,7 @@ public class RedirectMessageDialog extends IconTextModal {
 					throw new RedirectToUrlException(url);
 				}
 			}
-		});
+		}).setOutputMarkupId(true);
 		if (handler != null) {
 			handler.add(getLabel());
 		}

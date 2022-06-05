@@ -19,7 +19,6 @@
 package org.apache.openmeetings.db.dao.file;
 
 import static org.apache.openmeetings.db.util.DaoHelper.UNSUPPORTED;
-import static org.apache.openmeetings.db.util.DaoHelper.single;
 
 import java.util.List;
 
@@ -54,36 +53,27 @@ public class BaseFileItemDao implements IDataProviderDao<BaseFileItem> {
 	@Autowired
 	private UserDao userDao;
 
-	public <T extends BaseFileItem> T get(String hash, Class<T> clazz) {
-		return getAny("getFileByHash", hash, clazz);
-	}
-
-	public <T extends BaseFileItem> T getAny(String hash, Class<T> clazz) {
-		return getAny("getAnyFileByHash", hash, clazz);
+	public BaseFileItem get(String hash) {
+		log.debug("getByHash() started");
+		List<BaseFileItem> list = em.createNamedQuery("getFileByHash", BaseFileItem.class)
+				.setParameter("hash", hash).getResultList();
+		return list.size() == 1 ? list.get(0) : null;
 	}
 
 	@Override
 	public BaseFileItem get(Long id) {
-		return getBase(id);
-	}
-
-	public BaseFileItem getBase(Long id) {
 		if (id == null || id.longValue() <= 0) {
 			return null;
 		}
-		return single(em.createNamedQuery("getFileById", BaseFileItem.class)
-				.setParameter("id", id).getResultList());
+		List<BaseFileItem> list = em.createNamedQuery("getFileById", BaseFileItem.class)
+					.setParameter("id", id).getResultList();
+		return list.size() == 1 ? list.get(0) : null;
 	}
 
 	public BaseFileItem getAny(Long id) {
-		return single(em.createNamedQuery("getAnyFileById", BaseFileItem.class)
-				.setParameter("id", id).getResultList());
-	}
-
-	private <T extends BaseFileItem> T getAny(String query, String hash, Class<T> clazz) {
-		log.debug("getAny[{}]() started", query);
-		return single(em.createNamedQuery(query, clazz)
-				.setParameter("hash", hash).getResultList());
+		List<BaseFileItem> list = em.createNamedQuery("getAnyFileById", BaseFileItem.class)
+					.setParameter("id", id).getResultList();
+		return list.size() == 1 ? list.get(0) : null;
 	}
 
 	public void delete(BaseFileItem f) {

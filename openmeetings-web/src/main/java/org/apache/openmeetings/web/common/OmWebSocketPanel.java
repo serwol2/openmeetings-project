@@ -113,7 +113,17 @@ public abstract class OmWebSocketPanel extends Panel {
 								kHandler.onMessage(getWsClient(), m);
 								break;
 							case "mic":
-								micMessage(m);
+							{
+								IWsClient curClient = getWsClient();
+								if (!(curClient instanceof Client)) {
+									break;
+								}
+								Client c = (Client)curClient;
+								if (c.getRoomId() == null) {
+									break;
+								}
+								WebSocketHelper.sendRoomOthers(c.getRoomId(), c.getUid(), m.put("uid", c.getUid()));
+							}
 								break;
 							case "ping":
 								log.trace("Sending WebSocket PING");
@@ -142,18 +152,6 @@ public abstract class OmWebSocketPanel extends Panel {
 			@Override
 			protected void onError(WebSocketRequestHandler handler, ErrorMessage msg) {
 				closeHandler(msg);
-			}
-
-			private void micMessage(final JSONObject m) {
-				IWsClient curClient = getWsClient();
-				if (!(curClient instanceof Client)) {
-					return;
-				}
-				Client c = (Client)curClient;
-				if (c.getRoomId() == null) {
-					return;
-				}
-				WebSocketHelper.sendRoomOthers(c.getRoomId(), c.getUid(), m.put("uid", c.getUid()));
 			}
 		};
 	}

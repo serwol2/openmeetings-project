@@ -18,23 +18,44 @@
  */
 package org.apache.openmeetings.web.room.sidebar;
 
+import static org.apache.openmeetings.util.OpenmeetingsVariables.getMaxUploadSize;
+
+import org.apache.openmeetings.core.data.file.FileProcessor;
+import org.apache.openmeetings.db.dao.file.FileItemLogDao;
+import org.apache.openmeetings.web.app.WebSession;
 import org.apache.openmeetings.web.common.OmModalCloseButton;
+import org.apache.openmeetings.web.room.RoomPanel;
+import org.apache.openmeetings.web.util.upload.BootstrapFileUploadBehavior;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.PriorityHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.ResourceModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.apache.wicket.request.resource.JavaScriptResourceReference;
+import org.apache.wicket.spring.injection.annot.SpringBean;
+import org.apache.wicket.util.lang.Bytes;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.dialog.Modal;
 
 public class UploadDialog extends Modal<String> {
 	private static final long serialVersionUID = 1L;
-	static final String DIALOG_CLASS = "room-file-upload-dlg";
-	private RoomUploadForm wsUpload;
+	private final WebMarkupContainer form = new WebMarkupContainer("form");
 	private final RoomFilePanel roomFiles;
+	private final RoomPanel room;
+	private final WebMarkupContainer lastSelected = new WebMarkupContainer("lastSelected");
 
-	public UploadDialog(String id, RoomFilePanel roomFiles) {
+	@SpringBean
+	private FileProcessor processor;
+	@SpringBean
+	private FileItemLogDao fileLogDao;
+
+	public UploadDialog(String id, RoomPanel room, RoomFilePanel roomFiles) {
 		super(id);
 		this.roomFiles = roomFiles;
+		this.room = room;
 	}
 
 	@Override
@@ -43,22 +64,32 @@ public class UploadDialog extends Modal<String> {
 		setCloseOnEscapeKey(false);
 		setBackdrop(Backdrop.STATIC);
 
-		add(wsUpload = new RoomUploadForm("wsupload", roomFiles));
+		add(form.add(AttributeModifier.append("data-max-size", getMaxUploadSize()))
+				.add(AttributeModifier.append("data-max-size-lbl", Bytes.bytes(getMaxUploadSize()).toString(WebSession.get().getLocale())))
+				.add(AttributeModifier.append("data-upload-lbl", getString("593")))
+				.add(AttributeModifier.append("data-max-upload-lbl", getString("1491")))
+				.add(AttributeModifier.append("action", "" + urlFor(new RoomFileUploadResourceReference(), new PageParameters())))
+				.setOutputMarkupId(true)
+				.setOutputMarkupPlaceholderTag(true));
+		form.add(new WebMarkupContainer("sid").add(AttributeModifier.append("value", room.getClient().getSid())).setMarkupId("room-upload-sid").setOutputMarkupId(true));
+		form.add(lastSelected.setMarkupId("room-upload-last-selected").setOutputMarkupId(true));
+		add(BootstrapFileUploadBehavior.INSTANCE);
 		addButton(OmModalCloseButton.of("85"));
 
 		super.onInitialize();
 	}
 
 	@Override
-	protected WebMarkupContainer createDialog(String id) {
-		WebMarkupContainer dialog = super.createDialog(id);
-		dialog.add(AttributeModifier.append("class", DIALOG_CLASS));
-		return dialog;
+	public Modal<String> show(IPartialPageRequestHandler handler) {
+		lastSelected.add(AttributeModifier.replace("value", roomFiles.getLastSelected().getId()));
+		handler.add(form.setVisible(true));
+		handler.appendJavaScript("Upload.bindUpload();");
+		return super.show(handler);
 	}
 
 	@Override
-	public Modal<String> show(IPartialPageRequestHandler handler) {
-		wsUpload.show(handler);
-		return super.show(handler);
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(new PriorityHeaderItem(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(UploadDialog.class, "upload.js"))));
 	}
 }

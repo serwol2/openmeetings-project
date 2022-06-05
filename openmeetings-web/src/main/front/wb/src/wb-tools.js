@@ -53,15 +53,10 @@ module.exports = class WbTools {
 		function _initGroupHandle(c) {
 			c.find('a').off().click(function(e) {
 				e.stopImmediatePropagation()
-				//let's close all other dropdowns
-				$(this).parents('.tools').find('.dropdown-toggle.show').toArray().forEach(menu => {
-					const dd = bootstrap.Dropdown.getInstance(menu);
-					if (menu !== this && dd) {
-						dd.hide();
-					}
-				});
 				const stub = $(this).find('.stub');
-				if (!stub.hasClass(ACTIVE)) {
+				if (stub.hasClass(ACTIVE)) {
+					$(this).dropdown('toggle')
+				} else {
 					_btnClick(stub.data('toolType'));
 					stub.addClass(ACTIVE);
 				}
@@ -324,7 +319,6 @@ module.exports = class WbTools {
 
 			const clearAll = tools.find('.om-icon.clear-all')
 				, sBtn = tools.find('.om-icon.settings');;
-			clearAll.attr('data-bs-placement', Settings.isRtl ? 'right' : 'left');
 			let _firstToolItem = true;
 			switch (role) {
 				case Role.PRESENTER:
@@ -351,7 +345,9 @@ module.exports = class WbTools {
 					tools.find('.om-icon.clear-slide')
 						.confirmation({
 							confirmationEvent: 'om-clear-slide'
-							, onConfirm: () => OmUtil.wbAction({action: 'clearSlide', data: {wbId: wb.getId(), slide: wb.slide}})
+							, onConfirm: function() {
+								OmUtil.wbAction({action: 'clearSlide', data: {wbId: wb.getId(), slide: slide}});
+							}
 						});
 					tools.find('.om-icon.save').click(function() {
 						OmUtil.wbAction({action: 'save', data: {wbId: wb.getId()}});
@@ -365,13 +361,6 @@ module.exports = class WbTools {
 					_initToolBtn('apointer', _firstToolItem, new APointer(wb, settings, sBtn));
 				default:
 					//no-op
-			}
-		};
-		this.reactivateBtn = () => {
-			const b = _getBtn();
-			if (__validBtn(b)) {
-				b.data().deactivate();
-				b.data().activate();
 			}
 		};
 		this.updateCoordinates = (o) => {

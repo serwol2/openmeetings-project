@@ -8,7 +8,12 @@ iframe {
 	min-height: 700px;
 }
 .apachecon-banner {
-	margin: 5px;
+  float: left;
+  margin: 5px;
+}
+.apachecon-banner.bannerRight img {
+	max-width: 250px;
+	height: initial !important;
 }
 .bannerRight img, .bannerLeft img {
 	height: 80px !important;

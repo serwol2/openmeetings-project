@@ -60,7 +60,7 @@ public class SCryptImplementation implements ICrypt {
 			props.load(is);
 			cost = Integer.valueOf(props.getProperty("scrypt.cost", "" + cost));
 		} catch (Exception e) {
-			log.error("Failed to initialize the cost {}", e.getMessage());
+			log.error("Failed to initialize the cost", e);
 		}
 	}
 
@@ -103,7 +103,10 @@ public class SCryptImplementation implements ICrypt {
 
 	@Override
 	public boolean fallback(String str, String hash) {
-		return SHA256Implementation.verify(str, hash);
+		if (SHA256Implementation.verify(str, hash)) {
+			return true;
+		}
+		return false;
 	}
 
 	@Override

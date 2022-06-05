@@ -34,8 +34,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -57,8 +55,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -128,7 +124,6 @@ import org.apache.wicket.util.string.Strings;
 		, @Index(name = "type_idx", columnList = "type")
 })
 @XmlRootElement(name = USER_NODE)
-@XmlAccessorType(XmlAccessType.FIELD)
 public class User extends HistoricalEntity {
 	private static final long serialVersionUID = 1L;
 	public static final String DISPLAY_NAME_NA = "N/A";
@@ -140,35 +135,12 @@ public class User extends HistoricalEntity {
 
 	@XmlType(namespace="org.apache.openmeetings.user.right")
 	public enum Right {
-		ADMIN(false)			// access to Admin module
-		, GROUP_ADMIN(false)	// partial access to Admin module (should not be directly assigned)
-		, ADMIN_CONFIG(false)
-		, ADMIN_CONNECTIONS(false)
-		, ADMIN_BACKUP(false)
-		, ADMIN_LABEL(false)
-		, ROOM(true)			// enter the room
-		, DASHBOARD(true)		// access the dashboard
-		, LOGIN(true)			// login to Om internal DB
-		, SOAP(false);			// use rest/soap calls
-
-		private final boolean groupAdminAllowed;
-
-		private Right(boolean groupAdminAllowed) {
-			this.groupAdminAllowed = groupAdminAllowed;
-		}
-
-		public boolean isGroupAdminAllowed() {
-			return groupAdminAllowed;
-		}
-
-		public static List<Right> getAllowed(boolean groupAdmin) {
-			Stream<Right> stream = Stream.of(Right.values())
-					.filter(r -> Right.GROUP_ADMIN != r);
-			if (groupAdmin) {
-				stream = stream.filter(Right::isGroupAdminAllowed);
-			}
-			return stream.collect(Collectors.toList());
-		}
+		ADMIN			// access to Admin module
+		, GROUP_ADMIN	// partial access to Admin module (should not be directly assigned)
+		, ROOM			// enter the room
+		, DASHBOARD		// access the dashboard
+		, LOGIN			// login to Om internal DB
+		, SOAP			// use rest/soap calls
 	}
 
 	@XmlType(namespace="org.apache.openmeetings.user.type")

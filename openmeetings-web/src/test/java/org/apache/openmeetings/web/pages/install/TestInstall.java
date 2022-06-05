@@ -19,14 +19,13 @@
 package org.apache.openmeetings.web.pages.install;
 
 import static org.apache.commons.io.FileUtils.deleteQuietly;
-import static org.apache.openmeetings.AbstractOmServerTest.adminUsername;
-import static org.apache.openmeetings.AbstractOmServerTest.email;
-import static org.apache.openmeetings.AbstractOmServerTest.group;
-import static org.apache.openmeetings.AbstractOmServerTest.setOmHome;
-import static org.apache.openmeetings.AbstractOmServerTest.userpass;
-import static org.apache.openmeetings.AbstractWicketTesterTest.checkErrors;
-import static org.apache.openmeetings.AbstractWicketTesterTest.countErrors;
-import static org.apache.openmeetings.AbstractWicketTesterTest.getWicketTester;
+import static org.apache.openmeetings.AbstractJUnitDefaults.adminUsername;
+import static org.apache.openmeetings.AbstractJUnitDefaults.email;
+import static org.apache.openmeetings.AbstractJUnitDefaults.group;
+import static org.apache.openmeetings.AbstractJUnitDefaults.userpass;
+import static org.apache.openmeetings.AbstractWicketTester.checkErrors;
+import static org.apache.openmeetings.AbstractWicketTester.countErrors;
+import static org.apache.openmeetings.AbstractWicketTester.getWicketTester;
 import static org.apache.openmeetings.cli.ConnectionPropertiesPatcher.DEFAULT_DB_NAME;
 import static org.apache.openmeetings.db.util.ApplicationHelper.ensureApplication;
 import static org.apache.openmeetings.util.OpenmeetingsVariables.DEFAULT_APP_NAME;
@@ -42,8 +41,8 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
 
-import org.apache.openmeetings.AbstractWicketTesterTest;
-import org.apache.openmeetings.IsolatedTest;
+import org.apache.openmeetings.AbstractSpringTest;
+import org.apache.openmeetings.AbstractWicketTester;
 import org.apache.openmeetings.cli.ConnectionPropertiesPatcher;
 import org.apache.openmeetings.util.ConnectionProperties.DbType;
 import org.apache.openmeetings.util.crypt.SCryptImplementation;
@@ -52,7 +51,7 @@ import org.apache.openmeetings.web.app.WebSession;
 import org.apache.wicket.ajax.AjaxClientInfoBehavior;
 import org.apache.wicket.behavior.AbstractAjaxBehavior;
 import org.apache.wicket.extensions.wizard.WizardButton;
-import org.apache.wicket.protocol.ws.WebSocketAwareResourceIsolationRequestCycleListener;
+import org.apache.wicket.protocol.ws.WebSocketAwareCsrfPreventionRequestCycleListener;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycleListenerCollection;
 import org.apache.wicket.util.tester.FormTester;
@@ -63,7 +62,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@IsolatedTest
 public class TestInstall {
 	private static final Logger log = LoggerFactory.getLogger(TestInstall.class);
 	private static final String WIZARD_PATH = "wizard";
@@ -93,7 +91,7 @@ public class TestInstall {
 	@BeforeEach
 	public void setUp() throws Exception {
 		log.info("Going to perform setup for TestInstall");
-		setOmHome();
+		AbstractSpringTest.setOmHome();
 		setWicketApplicationName(DEFAULT_APP_NAME);
 		tempFolder = Files.createTempDirectory("omtempdb").toFile();
 		setH2Home(tempFolder);
@@ -101,7 +99,7 @@ public class TestInstall {
 		RequestCycleListenerCollection listeners = tester.getApplication().getRequestCycleListeners();
 		for (Iterator<IRequestCycleListener> iter = listeners.iterator(); iter.hasNext();) {
 			IRequestCycleListener l = iter.next();
-			if (l instanceof WebSocketAwareResourceIsolationRequestCycleListener) {
+			if (l instanceof WebSocketAwareCsrfPreventionRequestCycleListener) {
 				listeners.remove(l);
 				break;
 			}
@@ -115,7 +113,7 @@ public class TestInstall {
 	@AfterEach
 	public void tearDown() throws Exception {
 		log.info("Going to perform clean-up for TestInstall");
-		AbstractWicketTesterTest.destroy(tester);
+		AbstractWicketTester.destroy(tester);
 		log.info("WicketTester is destroyed");
 		resetH2Home();
 		deleteQuietly(tempFolder);

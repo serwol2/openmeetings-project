@@ -18,22 +18,20 @@
  */
 package org.apache.openmeetings.web.app;
 
-import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import javax.servlet.http.Cookie;
 
-import org.apache.openmeetings.AbstractWicketTesterTest;
+import org.apache.openmeetings.AbstractWicketTester;
 import org.apache.openmeetings.db.entity.user.User;
 import org.junit.jupiter.api.Test;
 
-class TestOmAuthenticationStrategy extends AbstractWicketTesterTest {
+class TestOmAuthenticationStrategy extends AbstractWicketTester {
 	@Test
 	void test() {
-		String encKey = randomUUID().toString();
-		OmAuthenticationStrategy s = new OmAuthenticationStrategy(encKey, "test");
+		OmAuthenticationStrategy s = new OmAuthenticationStrategy();
 		s.save(null, null, User.Type.OAUTH, null);
 		assertNull(s.load(), "Wasn't saved, should not be loaded");
 

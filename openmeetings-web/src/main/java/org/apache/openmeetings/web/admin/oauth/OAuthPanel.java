@@ -57,11 +57,16 @@ public class OAuthPanel extends AdminBasePanel {
 				final OAuthServer server = item.getModelObject();
 				item.add(new Label("id"));
 				item.add(new Label("name"));
-				item.add(AjaxEventBehavior.onEvent(EVT_CLICK, target -> {
-					form.setModelObject(server);
-					form.setNewRecordVisible(false);
-					target.add(form, listContainer);
-				}));
+				item.add(new AjaxEventBehavior(EVT_CLICK) {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					protected void onEvent(AjaxRequestTarget target) {
+						form.setModelObject(server);
+						form.setNewRecordVisible(false);
+						target.add(form, listContainer);
+					}
+				});
 				item.add(AttributeModifier.replace(ATTR_CLASS, getRowClass(server.getId(), form.getModelObject().getId())));
 			}
 

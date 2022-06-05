@@ -18,12 +18,13 @@
  */
 package org.apache.openmeetings.service.mail.template;
 
+import static org.apache.openmeetings.db.util.FormatHelper.isRtlLanguage;
+
 import java.util.Locale;
 
 import org.apache.openmeetings.IApplication;
 import org.apache.openmeetings.IWebSession;
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.TransparentWebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.protocol.http.WebSession;
@@ -40,7 +41,7 @@ public abstract class AbstractTemplatePanel extends Panel {
 	protected AbstractTemplatePanel(Locale locale) {
 		super(COMP_ID);
 		this.locale = locale;
-		add(new TransparentWebMarkupContainer("container").add(AttributeModifier.append("dir", Session.isRtlLanguage(this.locale) ? "rtl" : "ltr")));
+		add(new TransparentWebMarkupContainer("container").add(AttributeModifier.append("dir", isRtlLanguage(this.locale.toLanguageTag()) ? "rtl" : "ltr")));
 	}
 
 	public static IWebSession getOmSession() {

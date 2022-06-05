@@ -26,6 +26,5 @@ module.exports = class WbAreaBase {
 		this.setRole = () => {};
 		this.addDeleteHandler = () => {};
 		this.removeDeleteHandler = () => {};
-		this.resize = () => {};
 	}
 };

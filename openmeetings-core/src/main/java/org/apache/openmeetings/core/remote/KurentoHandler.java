@@ -41,7 +41,9 @@ import javax.annotation.PreDestroy;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.openmeetings.core.sip.SipManager;
 import org.apache.openmeetings.core.util.WebSocketHelper;
+import org.apache.openmeetings.db.dao.record.RecordingChunkDao;
 import org.apache.openmeetings.db.dao.room.RoomDao;
 import org.apache.openmeetings.db.entity.basic.Client;
 import org.apache.openmeetings.db.entity.basic.Client.Activity;
@@ -54,7 +56,6 @@ import org.apache.openmeetings.db.manager.IClientManager;
 import org.apache.openmeetings.db.util.ws.RoomMessage;
 import org.apache.openmeetings.db.util.ws.TextRoomMessage;
 import org.apache.wicket.util.string.Strings;
-import org.kurento.client.CertificateKeyType;
 import org.kurento.client.Continuation;
 import org.kurento.client.Endpoint;
 import org.kurento.client.EventListener;
@@ -113,7 +114,6 @@ public class KurentoHandler {
 	private int watchThreadCount = 10;
 	@Value("${kurento.kuid}")
 	private String kuid;
-	private CertificateKeyType certificateType;
 	private KurentoClient client;
 	private final AtomicBoolean connected = new AtomicBoolean(false);
 	private final Map<Long, KRoom> rooms = new ConcurrentHashMap<>();
@@ -125,9 +125,13 @@ public class KurentoHandler {
 	@Autowired
 	private RoomDao roomDao;
 	@Autowired
+	private RecordingChunkDao chunkDao;
+	@Autowired
 	private TestStreamProcessor testProcessor;
 	@Autowired
 	private StreamProcessor streamProcessor;
+	@Autowired
+	private SipManager sipManager;
 
 	boolean isConnected() {
 		boolean connctd = connected.get() && client != null && !client.isClosed();
@@ -305,7 +309,7 @@ public class KurentoHandler {
 		return rooms.computeIfAbsent(roomId, k -> {
 			log.debug("Room {} does not exist. Will create now!", roomId);
 			Room r = roomDao.get(roomId);
-			return new KRoom(r);
+			return new KRoom(this, r);
 		});
 	}
 
@@ -393,16 +397,20 @@ public class KurentoHandler {
 		return kuid;
 	}
 
-	@Value("${kurento.certificateType}")
-	public void setCertificateType(String certificateType) {
-		if (certificateType.isEmpty()) {
-			return;
-		}
-		this.certificateType = CertificateKeyType.valueOf(certificateType);
+	public TestStreamProcessor getTestProcessor() {
+		return testProcessor;
 	}
 
-	public CertificateKeyType getCertificateType() {
-		return certificateType;
+	StreamProcessor getStreamProcessor() {
+		return streamProcessor;
+	}
+
+	SipManager getSipManager() {
+		return sipManager;
+	}
+
+	RecordingChunkDao getChunkDao() {
+		return chunkDao;
 	}
 
 	static int getFlowoutTimeout() {

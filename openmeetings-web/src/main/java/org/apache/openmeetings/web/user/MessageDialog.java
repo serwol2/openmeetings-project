@@ -53,8 +53,8 @@ import org.apache.openmeetings.db.manager.IInvitationManager;
 import org.apache.openmeetings.util.CalendarHelper;
 import org.apache.openmeetings.web.app.Application;
 import org.apache.openmeetings.web.app.WebSession;
+import org.apache.openmeetings.web.common.OmDateTimePicker;
 import org.apache.openmeetings.web.common.OmModalCloseButton;
-import org.apache.openmeetings.web.common.datetime.OmDateTimePicker;
 import org.apache.openmeetings.web.user.calendar.AppointmentDialog;
 import org.apache.openmeetings.web.util.CalendarWebHelper;
 import org.apache.openmeetings.web.util.RoomTypeDropDown;
@@ -107,7 +107,6 @@ public class MessageDialog extends Modal<PrivateMessage> {
 
 	public MessageDialog(String id, CompoundPropertyModel<PrivateMessage> model) {
 		super(id, model);
-		setMarkupId(id);
 		form = new Form<>("form", getModel());
 	}
 
@@ -209,9 +208,7 @@ public class MessageDialog extends Modal<PrivateMessage> {
 		addButton(OmModalCloseButton.of());
 
 		form.add(feedback.setOutputMarkupId(true));
-		final UserMultiChoice recepients = new UserMultiChoice("to", modelTo);
-		recepients.getSettings().setDropdownParent(MessageDialog.this.getMarkupId());
-		form.add(recepients.setRequired(true));
+		form.add(new UserMultiChoice("to", modelTo).setRequired(true));
 		form.add(new TextField<String>("subject"));
 		OmWysiwygToolbar toolbar = new OmWysiwygToolbar("toolbarContainer");
 		form.add(toolbar);

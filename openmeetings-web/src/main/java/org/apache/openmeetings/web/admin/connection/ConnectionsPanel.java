@@ -20,7 +20,7 @@ package org.apache.openmeetings.web.admin.connection;
 
 import static org.apache.openmeetings.util.OpenmeetingsVariables.ATTR_CLASS;
 import static org.apache.openmeetings.web.app.WebSession.getDateFormat;
-import static org.apache.openmeetings.web.common.confirmation.ConfirmationHelper.newOkCancelConfirm;
+import static org.apache.openmeetings.web.common.confirmation.ConfirmationBehavior.newOkCancelConfirm;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -42,7 +42,6 @@ import org.apache.openmeetings.web.data.SearchableDataProvider;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.authroles.authorization.strategies.role.annotations.AuthorizeInstantiation;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.repeater.Item;
@@ -53,7 +52,6 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
 import de.agilecoders.wicket.core.markup.html.bootstrap.button.BootstrapAjaxLink;
 import de.agilecoders.wicket.core.markup.html.bootstrap.button.Buttons;
 
-@AuthorizeInstantiation({"ADMIN", "ADMIN_CONNECTIONS"})
 public class ConnectionsPanel extends AdminBasePanel {
 	private static final long serialVersionUID = 1L;
 	@SpringBean
@@ -132,31 +130,36 @@ public class ConnectionsPanel extends AdminBasePanel {
 					}.add(newOkCancelConfirm(this, getString("605"))));
 				}
 
-				item.add(AjaxEventBehavior.onEvent(EVT_CLICK, target -> {
-					Field[] ff = (item.getModelObject() instanceof KStreamDto ? KStreamDto.class : Client.class).getDeclaredFields();
-					RepeatingView lines = new RepeatingView("line");
-					Object c = item.getModelObject();
+				item.add(new AjaxEventBehavior(EVT_CLICK) {
+					private static final long serialVersionUID = 1L;
 
-					for (Field f : ff) {
-						int mod = f.getModifiers();
-						if (Modifier.isStatic(mod) || Modifier.isTransient(mod)) {
-							continue;
+					@Override
+					protected void onEvent(AjaxRequestTarget target) {
+						Field[] ff = (item.getModelObject() instanceof KStreamDto ? KStreamDto.class : Client.class).getDeclaredFields();
+						RepeatingView lines = new RepeatingView("line");
+						Object c = item.getModelObject();
+
+						for (Field f : ff) {
+							int mod = f.getModifiers();
+							if (Modifier.isStatic(mod) || Modifier.isTransient(mod)) {
+								continue;
+							}
+							WebMarkupContainer line = new WebMarkupContainer(lines.newChildId());
+							line.add(new Label("name", f.getName()));
+							String val = "";
+							try {
+								f.setAccessible(true);
+								val = "" + f.get(c);
+							} catch (Exception e) {
+								//noop
+							}
+							line.add(new Label("value", val));
+							lines.add(line);
 						}
-						WebMarkupContainer line = new WebMarkupContainer(lines.newChildId());
-						line.add(new Label("name", f.getName()));
-						String val = "";
-						try {
-							f.setAccessible(true);
-							val = "" + f.get(c);
-						} catch (Exception e) {
-							//noop
-						}
-						line.add(new Label("value", val));
-						lines.add(line);
+						details.addOrReplace(lines);
+						target.add(details.setVisible(true));
 					}
-					details.addOrReplace(lines);
-					target.add(details.setVisible(true));
-				}));
+				});
 
 				item.add(AttributeModifier.append(ATTR_CLASS, ROW_CLASS));
 			}

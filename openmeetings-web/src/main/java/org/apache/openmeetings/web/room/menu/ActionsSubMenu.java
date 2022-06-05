@@ -67,9 +67,8 @@ public class ActionsSubMenu implements Serializable {
 	}
 
 	public void init() {
-		final String roomInviteDialogId = "roomInviteDialog";
-		RoomInvitationForm rif = new RoomInvitationForm("form", room.getRoom().getId(), roomInviteDialogId);
-		mp.add(invite = new InvitationDialog(roomInviteDialogId, rif));
+		RoomInvitationForm rif = new RoomInvitationForm("form", room.getRoom().getId());
+		mp.add(invite = new InvitationDialog("invite", rif));
 		rif.setDialog(invite);
 		mp.add(sipDialer = new SipDialerDialog("sipDialer", room));
 		actionsMenu = new OmMenuItem(mp.getString("635"), null, false);

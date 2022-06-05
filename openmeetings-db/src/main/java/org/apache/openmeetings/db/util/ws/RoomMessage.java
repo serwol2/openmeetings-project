@@ -57,7 +57,6 @@ public class RoomMessage implements IWebSocketPushMessage {
 		, WB_RELOAD
 		, MODERATOR_IN_ROOM
 		, WB_PUT_FILE
-		, FILE_TREE_UPDATE
 	}
 	private final Date timestamp;
 	private final String uid;

@@ -18,8 +18,6 @@
  */
 package org.apache.openmeetings.web.common;
 
-import static org.apache.openmeetings.web.common.BasePanel.EVT_CHANGE;
-
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -55,13 +53,18 @@ public abstract class PagingNavigatorPanel extends Panel {
 		final Form<Void> f = new Form<>("pagingForm");
 		f.add(new OmPagingNavigator("navigator", dataView).setOutputMarkupId(true))
 			.add(new DropDownChoice<>("entitiesPerPage", new PropertyModel<>(this, "entitiesPerPage"), numbers)
-				.add(AjaxFormComponentUpdatingBehavior.onUpdate(EVT_CHANGE, target -> {
-					long newPage = dataView.getCurrentPage() * dataView.getItemsPerPage() / entitiesPerPage;
-					dataView.setItemsPerPage(entitiesPerPage);
-					dataView.setCurrentPage(newPage);
-					target.add(f);
-					PagingNavigatorPanel.this.onEvent(target);
-				})));
+				.add(new AjaxFormComponentUpdatingBehavior("change") {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					protected void onUpdate(AjaxRequestTarget target) {
+						long newPage = dataView.getCurrentPage() * dataView.getItemsPerPage() / entitiesPerPage;
+						dataView.setItemsPerPage(entitiesPerPage);
+						dataView.setCurrentPage(newPage);
+						target.add(f);
+						PagingNavigatorPanel.this.onEvent(target);
+					}
+				}));
 		add(f.setOutputMarkupId(true));
 	}
 

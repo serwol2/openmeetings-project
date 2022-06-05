@@ -29,14 +29,9 @@ public class RecordingInvitationForm extends InvitationForm {
 	@SpringBean
 	private RecordingDao recDao;
 
-	public RecordingInvitationForm(String id, String dropDownParentId) {
-		super(id, dropDownParentId);
-	}
-
-	@Override
-	protected void onInitialize() {
+	public RecordingInvitationForm(String id) {
+		super(id);
 		add(recipients);
-		super.onInitialize();
 	}
 
 	@Override

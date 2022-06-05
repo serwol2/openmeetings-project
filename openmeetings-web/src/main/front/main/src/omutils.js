@@ -17,7 +17,9 @@ function __alert(level, msg, autohideAfter) {
 	const holder = $('#alert-holder');
 	const curId = 'om-alert' + alertId++;
 	holder.append($(`<div id="${curId}" class="alert alert-${level} alert-dismissible fade show m-0" role="alert">${msg}
-			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="${holder.data('lbl-close')}"></button>
+			<button type="button" class="close" data-dismiss="alert" aria-label="${holder.data('lbl-close')}">
+				<span aria-hidden="true">&times;</span>
+			</button>
 		</div>`));
 	if (autohideAfter > 0) {
 		setTimeout(() => { $(`#${curId}`).alert('close');}, autohideAfter);
@@ -52,9 +54,7 @@ function _sendMessage(_m, _base) {
 	Wicket.WebSocket.send(msg);
 }
 function _requestNotifyPermission(callback, elseCallback) {
-	if (typeof(Notification) !== "undefined"
-		&& Notification.permission !== 'granted'
-		&& Notification.permission !== 'denied') {
+	if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
 		function onRequest(permission) {
 			if (permission === 'granted') {
 				callback();
@@ -65,36 +65,25 @@ function _requestNotifyPermission(callback, elseCallback) {
 		} else {
 			Notification.requestPermission().then(onRequest);
 		}
-	} else {
-		_info("No notification API for this browser");
-		if (typeof(elseCallback) === 'function') {
-			elseCallback();
-		}
+	} else if (typeof(elseCallback) === 'function') {
+		elseCallback();
 	}
 }
 function _notify(msg, tag, elseCallback) {
-	if (typeof(Notification) !== "undefined"
-		&& window === window.parent) {
+	if (window === window.parent) {
 		function _newMessage() {
 			const opts = {
 					tag: tag
 				};
-			try {
-				new Notification(msg, opts);
-			} catch (e) {
-				console.error("Failed to create Notification" + e)
-			}
+			new Notification(msg, opts);
 		}
 		if (Notification.permission === 'granted') {
 			_newMessage();
 		} else {
 			_requestNotifyPermission(() => _newMessage());
 		}
-	} else {
-		_info("No notification API for this browser");
-		if (typeof(elseCallback) === 'function') {
-			elseCallback();
-		}
+	} else if (typeof(elseCallback) === 'function') {
+		elseCallback();
 	}
 }
 function _isSafari() {
@@ -134,10 +123,7 @@ module.exports = {
 		($('body')[0]).style.setProperty(key, val);
 	}
 	, ping: function() {
-		setTimeout(() => {
-			_sendMessage({type: 'ping'});
-			fetch('./ping', {cache: "no-store"});
-		}, 30000);
+		setTimeout(() => _sendMessage({type: 'ping'}), 30000);
 	}
 	, notify: _notify
 	, requestNotifyPermission: _requestNotifyPermission

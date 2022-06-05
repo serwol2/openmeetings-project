@@ -18,6 +18,7 @@
  */
 package org.apache.openmeetings.web.pages;
 
+import org.apache.openmeetings.db.util.FormatHelper;
 import org.apache.openmeetings.web.app.WebSession;
 
 public abstract class BaseInitedPage extends BasePage {
@@ -30,6 +31,6 @@ public abstract class BaseInitedPage extends BasePage {
 
 	@Override
 	public boolean isRtl() {
-		return WebSession.get().isRtlLocale();
+		return FormatHelper.isRtlLanguage(getLanguageCode());
 	}
 }

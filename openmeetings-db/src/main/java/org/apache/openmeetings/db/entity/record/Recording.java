@@ -35,8 +35,6 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -100,7 +98,6 @@ import org.apache.openmeetings.db.entity.file.BaseFileItem;
 		+ "    OR r.roomId IN (SELECT rg.room.id FROM RoomGroup rg WHERE rg.group.id = :groupId)"
 		+ "  ) order by r.inserted ASC")
 @XmlRootElement(name = RECORDING_NODE)
-@XmlAccessorType(XmlAccessType.FIELD)
 public class Recording extends BaseFileItem {
 	private static final long serialVersionUID = 1L;
 

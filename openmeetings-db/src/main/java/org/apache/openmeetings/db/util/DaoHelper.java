@@ -19,7 +19,6 @@
 package org.apache.openmeetings.db.util;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.function.Function;
 
 import javax.persistence.EntityManager;
@@ -91,7 +90,7 @@ public class DaoHelper {
 					inSb.append(" OR ");
 				}
 				StringBuilder placeholder = new StringBuilder();
-				placeholder.append("%").append(StringUtils.lowerCase(searchItems[i], Locale.ROOT)).append("%");
+				placeholder.append("%").append(StringUtils.lowerCase(searchItems[i])).append("%");
 
 				inSb.append("(");
 				for (int j = 0; j < fields.length; ++j) {
@@ -118,7 +117,7 @@ public class DaoHelper {
 	}
 
 	public static String getStringParam(String param) {
-		return param == null ? "%" : "%" + StringUtils.lowerCase(param, Locale.ROOT) + "%";
+		return param == null ? "%" : "%" + StringUtils.lowerCase(param) + "%";
 	}
 
 	public static <T> TypedQuery<T> setLimits(TypedQuery<T> q, Long first, Long max) {

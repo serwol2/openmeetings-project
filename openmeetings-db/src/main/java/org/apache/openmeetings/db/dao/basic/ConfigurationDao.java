@@ -21,7 +21,7 @@ package org.apache.openmeetings.db.dao.basic;
 import static org.apache.commons.lang3.math.NumberUtils.toInt;
 import static org.apache.openmeetings.db.util.DaoHelper.setLimits;
 import static org.apache.openmeetings.util.OpenmeetingsVariables.*;
-import static org.apache.openmeetings.util.OmVersion.getLine;
+import static org.apache.openmeetings.util.Version.getLine;
 import static org.apache.wicket.csp.CSPDirectiveSrcValue.SELF;
 import static org.apache.wicket.csp.CSPDirectiveSrcValue.STRICT_DYNAMIC;
 
@@ -351,9 +351,6 @@ public class ConfigurationDao implements IDataProviderDao<Configuration> {
 			case CONFIG_RECORDING_ENABLED:
 				reloadRecordingEnabled();
 				break;
-			case CONFIG_THEME:
-				reloadTheme();
-				break;
 		}
 		return entity;
 	}
@@ -496,11 +493,6 @@ public class ConfigurationDao implements IDataProviderDao<Configuration> {
 		setRecordingsEnabled(getBool(CONFIG_RECORDING_ENABLED, true));
 	}
 
-	private void reloadTheme() {
-		setTheme(getString(CONFIG_THEME, ""));
-		app.updateTheme();
-	}
-
 	public void reinit() {
 		reloadMaxUpload();
 		reloadCrypt();
@@ -528,7 +520,6 @@ public class ConfigurationDao implements IDataProviderDao<Configuration> {
 		reloadMailSettings();
 		reloadAppointmentSettings();
 		reloadRecordingEnabled();
-		reloadTheme();
 
 		updateCsp();
 	}

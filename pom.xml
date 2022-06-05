@@ -22,18 +22,17 @@
 	<parent>
 		<groupId>org.apache</groupId>
 		<artifactId>apache</artifactId>
-		<version>26</version>
+		<version>23</version>
 	</parent>
 	<groupId>org.apache.openmeetings</groupId>
 	<artifactId>openmeetings-parent</artifactId>
-	<version>6.3.0</version>
+	<version>6.0.0</version>
 	<packaging>pom</packaging>
 	<name>Openmeetings</name>
 	<description>Parent project for all OpenMeetings Maven modules. Required to hold general settings</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.build.outputTimestamp>2022-05-13T05:16:56Z</project.build.outputTimestamp>
-		<!--maven.build.timestamp.format>yyyy/MM/dd HH:mm</maven.build.timestamp.format-->
+		<maven.build.timestamp.format>yyyy/MM/dd HH:mm</maven.build.timestamp.format>
 		<wicket.configuration>DEPLOYMENT</wicket.configuration>
 		<om.quick.build>false</om.quick.build>
 		<om.notquick.build>true</om.notquick.build>
@@ -42,103 +41,96 @@
 		<autoModuleName>apache.openmeetings.parent</autoModuleName>
 		<jdk.version>11</jdk.version>
 		<!-- plugin versions -->
-		<maven-javadoc-plugin.version>3.4.0</maven-javadoc-plugin.version>
-		<maven-surefire-plugin.version>3.0.0-M6</maven-surefire-plugin.version>
-		<maven-site-plugin.version>4.0.0-M1</maven-site-plugin.version>
-		<exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
+		<maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
+		<maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+		<maven-site-plugin.version>3.9.1</maven-site-plugin.version>
+		<exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
 		<minify-maven-plugin.version>1.7.6</minify-maven-plugin.version>
-		<maven-enforcer-plugin.version>3.0.0</maven-enforcer-plugin.version>
-		<maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-		<checksum-maven-plugin.version>1.11</checksum-maven-plugin.version>
-		<maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
-		<license-maven-plugin.version>2.0.0</license-maven-plugin.version>
+		<maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
+		<maven-source-plugin.version>3.2.0</maven-source-plugin.version>
+		<checksum-maven-plugin.version>1.8</checksum-maven-plugin.version>
+		<maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+		<license-maven-plugin.version>1.16</license-maven-plugin.version>
 		<reflow-maven-skin.version>2.3.0</reflow-maven-skin.version>
 		<reflow-theme>cerulean</reflow-theme>
-		<maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-		<maven-project-info-reports-plugin.version>3.3.0</maven-project-info-reports-plugin.version>
-		<maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
+		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+		<maven-project-info-reports-plugin.version>3.1.1</maven-project-info-reports-plugin.version>
+		<maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
 		<maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
-		<maven-dependency-plugin.version>3.3.0</maven-dependency-plugin.version>
-		<maven-bundle-plugin.version>5.1.4</maven-bundle-plugin.version>
-		<maven-war-plugin.version>3.3.2</maven-war-plugin.version>
-		<maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
+		<maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
+		<maven-bundle-plugin.version>5.1.1</maven-bundle-plugin.version>
+		<maven-war-plugin.version>3.3.1</maven-war-plugin.version>
+		<maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
 		<wagon-maven-plugin.version>2.0.2</wagon-maven-plugin.version>
-		<maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
+		<maven-antrun-plugin.version>3.0.0</maven-antrun-plugin.version>
 		<maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
 		<replacer.version>1.5.3</replacer.version>
 		<xml-maven-plugin.version>1.0.2</xml-maven-plugin.version>
 		<saxon.version>8.7</saxon.version>
-		<buildnumber-maven-plugin.version>3.0.0</buildnumber-maven-plugin.version>
+		<buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
 		<apache-rat-plugin.version>0.13</apache-rat-plugin.version>
 		<keytool-maven-plugin.version>1.5</keytool-maven-plugin.version>
 		<maven-jarsigner-plugin.version>3.0.0</maven-jarsigner-plugin.version>
-		<sonar-maven-plugin.version>3.9.1.2184</sonar-maven-plugin.version>
-		<jacoco-maven-plugin.versoin>0.8.8</jacoco-maven-plugin.versoin>
-		<forbiddenapis.version>3.3</forbiddenapis.version>
-		<maven-checkstyle-plugin.version>3.1.2</maven-checkstyle-plugin.version>
-		<frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
-		<swagger-plugin.version>2.1.6</swagger-plugin.version>
+		<sonar-maven-plugin.version>3.8.0.2131</sonar-maven-plugin.version>
+		<jacoco-maven-plugin.versoin>0.8.6</jacoco-maven-plugin.versoin>
+		<forbiddenapis.version>3.1</forbiddenapis.version>
+		<maven-checkstyle-plugin.version>3.1.1</maven-checkstyle-plugin.version>
+		<frontend-maven-plugin.version>1.11.0</frontend-maven-plugin.version>
 		<!-- dependency versions -->
-		<junit.version>5.8.2</junit.version>
-		<wicket.version>9.10.0</wicket.version>
-		<wicket-jquery-ui.version>9.8.0</wicket-jquery-ui.version>
-		<wicketstuff.version>9.10.0</wicketstuff.version>
-		<wicket-bootstrap.version>6.0.0-M6</wicket-bootstrap.version>
-		<font-awesome.version>6.1.0</font-awesome.version>
-		<spring.version>5.3.20</spring.version>
-		<tomcat.version>9.0.62</tomcat.version>
-		<ical4j.version>4.0.0-alpha11</ical4j.version>
-		<cxf.version>3.5.2</cxf.version>
-		<io.prometheus.version>0.15.0</io.prometheus.version>
-		<aspectjtools.version>1.9.9.1</aspectjtools.version>
+		<junit.version>5.7.1</junit.version>
+		<wicket.version>9.2.0</wicket.version>
+		<wicketju.version>9.2.1</wicketju.version>
+		<wickets.version>9.2.0</wickets.version>
+		<wicket-bootstrap.version>5.0.3</wicket-bootstrap.version>
+		<font-awesome.version>5.15.2</font-awesome.version>
+		<spring.version>5.3.4</spring.version>
+		<tomcat.version>9.0.43</tomcat.version>
+		<ical4j.version>3.0.21</ical4j.version>
+		<cxf.version>3.4.2</cxf.version>
+		<io.prometheus.version>0.10.0</io.prometheus.version>
+		<aspectjtools.version>1.9.6</aspectjtools.version>
 		<simple-xml.version>2.7.1</simple-xml.version>
 		<jettison.version>1.4.1</jettison.version>
 		<site.basedir>${project.basedir}</site.basedir>
 		<src.pack.skip>false</src.pack.skip>
-		<h2.version>2.1.212</h2.version>
+		<h2.version>1.4.200</h2.version>
 		<commons-lang3.version>3.12.0</commons-lang3.version>
-		<jakarta.mail.version>2.0.1</jakarta.mail.version>
-		<openjpa.version>3.2.2</openjpa.version>
-		<asterisk-java.version>3.29.0</asterisk-java.version>
-		<commons-dbcp.version>2.9.0</commons-dbcp.version>
-		<commons-pool2.version>2.11.1</commons-pool2.version>
-		<commons-cli.version>1.5.0</commons-cli.version>
+		<javax.mail.version>1.6.2</javax.mail.version>
+		<openjpa.version>3.1.2</openjpa.version>
+		<asterisk-java.version>3.10.0</asterisk-java.version>
+		<commons-dbcp.version>2.8.0</commons-dbcp.version>
+		<commons-pool2.version>2.9.0</commons-pool2.version>
+		<commons-cli.version>1.4</commons-cli.version>
 		<dom4j.version>2.1.3</dom4j.version>
 		<commons-codec.version>1.15</commons-codec.version>
-		<commons-io.version>2.11.0</commons-io.version>
-		<postgresql.version>42.3.5</postgresql.version>
-		<mysql.version>8.0.29</mysql.version>
-		<mssql.version>10.2.0.jre11</mssql.version>
-		<ojdbc.version>19.14.0.0</ojdbc.version>
+		<commons-io.version>2.8.0</commons-io.version>
+		<postgresql.version>42.2.19</postgresql.version>
+		<mysql.version>8.0.23</mysql.version>
+		<mssql.version>9.2.1.jre11</mssql.version>
+		<ojdbc.version>19.10.0.0</ojdbc.version>
 		<commons-collections4.version>4.4</commons-collections4.version>
-		<xstream.version>1.4.19</xstream.version>
-		<api-all.version>2.1.0</api-all.version>
-		<caldav4j.version>1.0.5</caldav4j.version>
-		<tika-parsers.version>2.4.0</tika-parsers.version>
+		<xstream.version>1.4.15</xstream.version>
+		<api-all.version>2.0.1</api-all.version>
+		<caldav4j.version>1.0.1</caldav4j.version>
+		<tika-parsers.version>1.25</tika-parsers.version>
 		<commons-text.version>1.9</commons-text.version>
-		<slf4j.version>1.7.36</slf4j.version>
-		<logback.version>1.2.11</logback.version>
-		<jetty.version>9.4.46.v20220331</jetty.version>
+		<slf4j.version>1.7.30</slf4j.version>
+		<logback.version>1.2.3</logback.version>
+		<jetty.version>9.4.38.v20210224</jetty.version>
 		<license.excludedScopes>test</license.excludedScopes>
-		<bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
-		<mockito.version>4.5.1</mockito.version>
+		<bcprov-jdk15on.version>1.68</bcprov-jdk15on.version>
+		<mockito.version>3.8.0</mockito.version>
 		<quartz.version>2.3.2</quartz.version>
-		<kurento.version>6.16.5</kurento.version>
+		<kurento.version>6.16.0</kurento.version>
 		<jain-sip.version>1.2.307</jain-sip.version><!-- other versions are broken! -->
 		<jasny-bootstrap.version>3.1.3-2</jasny-bootstrap.version>
 		<jodconverter.version>4.4.2</jodconverter.version>
-		<jaxb-runtime.version>2.3.5</jaxb-runtime.version>
-		<javax.servlet-api.version>3.1.0</javax.servlet-api.version>
-		<jquery-ui-touch-punch.version>0.2.3-2</jquery-ui-touch-punch.version>
-		<apacheds-test-framework.version>2.0.0.AM26</apacheds-test-framework.version>
-		<swagger.version>2.2.0</swagger.version>
 		<!--  Exclude all generated code  -->
 		<sonar.exclusions>file:**/generated-sources/**, file:**/jquery-ui.css, file:**/cssemoticons.js, file:**/bootstrap-confirmation.js</sonar.exclusions>
 		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.junit.reportPaths>target/surefire-reports</sonar.junit.reportPaths>
 		<jacoco.binary.path>${project.basedir}/../target/jacoco.exec</jacoco.binary.path>
-		<excluded.test.groups>heavy-test</excluded.test.groups>
 		<db_user></db_user>
 		<db_pass></db_pass>
 	</properties>
@@ -321,19 +313,6 @@
 				<role>pmc</role>
 			</roles>
 		</developer>
-		<developer>
-			<id>alialhaidary</id>
-			<name>Ali Alhaidary</name>
-			<email>ali.alhaidary@the5stars.org</email>
-			<organization>the5stars.org</organization>
-			<organizationUrl>https://the5stars.org</organizationUrl>
-			<roles>
-				<role>RTL Examinar</role>
-				<role>RTL Translator</role>
-				<role>Load tester</role>
-				<role>pmc</role>
-			</roles>
-		</developer>
 	</developers>
 	<contributors>
 		<contributor>
@@ -346,7 +325,7 @@
 	<scm>
 		<connection>scm:git:https://github.com/apache/openmeetings.git</connection>
 		<developerConnection>scm:git:https://github.com/apache/openmeetings.git</developerConnection>
-		<url>https://github.com/apache/openmeetings/tree/6.3.0</url>
+		<url>https://github.com/apache/openmeetings/tree/6.0.0</url>
 		<tag>HEAD</tag>
 	</scm>
 	<mailingLists>
@@ -355,34 +334,46 @@
 			<post>mailto:user@openmeetings.apache.org</post>
 			<subscribe>mailto:user-subscribe@openmeetings.apache.org</subscribe>
 			<unsubscribe>mailto:user-unsubscribe@openmeetings.apache.org</unsubscribe>
-			<archive>https://lists.apache.org/list.html?user@openmeetings.apache.org</archive>
+			<archive>https://mail-archives.apache.org/mod_mbox/openmeetings-user</archive>
+			<otherArchives>
+				<otherArchive>https://openmeetings.markmail.org</otherArchive>
+			</otherArchives>
 		</mailingList>
 		<mailingList>
 			<name>Lista de usuarios en español</name>
 			<post>mailto:user-espanol@openmeetings.apache.org</post>
 			<subscribe>mailto:user-espanol-subscribe@openmeetings.apache.org</subscribe>
 			<unsubscribe>mailto:user-espanol-unsubscribe@openmeetings.apache.org</unsubscribe>
-			<archive>https://lists.apache.org/list.html?user-espanol@openmeetings.apache.org</archive>
+			<archive>https://mail-archives.apache.org/mod_mbox/openmeetings-user-espanol</archive>
+			<otherArchives>
+				<otherArchive>https://openmeetings.markmail.org</otherArchive>
+			</otherArchives>
 		</mailingList>
 		<mailingList>
 			<name>Русский список рассылки</name>
 			<post>mailto:user-russian@openmeetings.apache.org</post>
 			<subscribe>mailto:user-russian-subscribe@openmeetings.apache.org</subscribe>
 			<unsubscribe>mailto:user-russian-unsubscribe@openmeetings.apache.org</unsubscribe>
-			<archive>https://lists.apache.org/list.html?user-russian@openmeetings.apache.org</archive>
+			<archive>https://mail-archives.apache.org/mod_mbox/openmeetings-user-russian</archive>
+			<otherArchives>
+				<otherArchive>https://openmeetings.markmail.org</otherArchive>
+			</otherArchives>
 		</mailingList>
 		<mailingList>
 			<name>Development List</name>
 			<post>mailto:dev@openmeetings.apache.org</post>
 			<subscribe>mailto:dev-subscribe@openmeetings.apache.org</subscribe>
 			<unsubscribe>mailto:dev-unsubscribe@openmeetings.apache.org</unsubscribe>
-			<archive>https://lists.apache.org/list.html?dev@openmeetings.apache.org</archive>
+			<archive>https://mail-archives.apache.org/mod_mbox/openmeetings-dev</archive>
+			<otherArchives>
+				<otherArchive>https://openmeetings.markmail.org</otherArchive>
+			</otherArchives>
 		</mailingList>
 		<mailingList>
 			<name>Commits List</name>
 			<subscribe>mailto:commits-subscribe@openmeetings.apache.org</subscribe>
 			<unsubscribe>mailto:commits-unsubscribe@openmeetings.apache.org</unsubscribe>
-			<archive>https://lists.apache.org/list.html?commits@openmeetings.apache.org</archive>
+			<archive>https://mail-archives.apache.org/mod_mbox/openmeetings-commits/</archive>
 		</mailingList>
 		<mailingList>
 			<name>Security List</name>
@@ -510,21 +501,6 @@
 				</exclusions>
 			</dependency>
 			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-webmvc</artifactId>
-				<version>${spring.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-tx</artifactId>
-				<version>${spring.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-web</artifactId>
-				<version>${spring.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.mnode.ical4j</groupId>
 				<artifactId>ical4j</artifactId>
 				<version>${ical4j.version}</version>
@@ -585,6 +561,11 @@
 			</dependency>
 			<dependency>
 				<groupId>io.prometheus</groupId>
+				<artifactId>simpleclient</artifactId>
+				<version>${io.prometheus.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.prometheus</groupId>
 				<artifactId>simpleclient_servlet</artifactId>
 				<version>${io.prometheus.version}</version>
 			</dependency>
@@ -592,6 +573,11 @@
 				<groupId>org.aspectj</groupId>
 				<artifactId>aspectjtools</artifactId>
 				<version>${aspectjtools.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.tomcat</groupId>
+				<artifactId>tomcat-catalina</artifactId>
+				<version>${tomcat.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.jettison</groupId>
@@ -606,53 +592,19 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.wicket</groupId>
-				<artifactId>wicket-util</artifactId>
-				<version>${wicket.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.wicket</groupId>
-				<artifactId>wicket-native-websocket-core</artifactId>
-				<version>${wicket.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.wicket</groupId>
-				<artifactId>wicket-core</artifactId>
-				<version>${wicket.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.wicket</groupId>
-				<artifactId>wicket-ioc</artifactId>
-				<version>${wicket.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.wicket</groupId>
 				<artifactId>wicket-extensions</artifactId>
 				<version>${wicket.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.wicket</groupId>
-				<artifactId>wicket-auth-roles</artifactId>
-				<version>${wicket.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.wicket</groupId>
-				<artifactId>wicket-native-websocket-javax</artifactId>
-				<version>${wicket.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.wicket</groupId>
-				<artifactId>wicket-devutils</artifactId>
-				<version>${wicket.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.wicket</groupId>
-				<artifactId>wicket-spring</artifactId>
-				<version>${wicket.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>javax.servlet</groupId>
 				<artifactId>javax.servlet-api</artifactId>
-				<version>${javax.servlet-api.version}</version>
+				<version>3.1.0</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -687,9 +639,21 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.tika</groupId>
-				<artifactId>tika-parsers-standard-package</artifactId>
+				<artifactId>tika-parsers</artifactId>
 				<version>${tika-parsers.version}</version>
 				<exclusions>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>slf4j-log4j12</artifactId>
+					</exclusion>
+					<exclusion> <!-- TIKA-2801 -->
+						<groupId>com.google.guava</groupId>
+						<artifactId>guava</artifactId>
+					</exclusion>
+					<exclusion> <!-- TIKA-2801 -->
+						<groupId>com.google.protobuf</groupId>
+						<artifactId>protobuf-java</artifactId>
+					</exclusion>
 					<exclusion>
 						<groupId>xml-apis</groupId>
 						<artifactId>xml-apis</artifactId>
@@ -698,24 +662,7 @@
 						<groupId>xerces</groupId>
 						<artifactId>xercesImpl</artifactId>
 					</exclusion>
-					<exclusion>
-						<groupId>org.apache.logging.log4j</groupId>
-						<artifactId>log4j-core</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.apache.logging.log4j</groupId>
-						<artifactId>log4j-slf4j-impl</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>commons-logging</groupId>
-						<artifactId>commons-logging</artifactId>
-					</exclusion>
 				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.tika</groupId>
-				<artifactId>tika-core</artifactId>
-				<version>${tika-parsers.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.websocket</groupId>
@@ -727,12 +674,6 @@
 				<groupId>org.kurento</groupId>
 				<artifactId>kurento-client</artifactId>
 				<version>${kurento.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>commons-logging</groupId>
-						<artifactId>commons-logging</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.jodconverter</groupId>
@@ -749,204 +690,6 @@
 				<artifactId>jain-sip-ri</artifactId>
 				<version>${jain-sip.version}</version>
 			</dependency>
-			<dependency>
-				<!-- required for JAXB/CXF -->
-				<groupId>org.glassfish.jaxb</groupId>
-				<artifactId>jaxb-runtime</artifactId>
-				<version>${jaxb-runtime.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.webjars</groupId>
-				<artifactId>jquery-ui-touch-punch</artifactId>
-				<version>${jquery-ui-touch-punch.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-collections4</artifactId>
-				<version>${commons-collections4.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.thoughtworks.xstream</groupId>
-				<artifactId>xstream</artifactId>
-				<version>${xstream.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.directory.api</groupId>
-				<artifactId>api-all</artifactId>
-				<version>${api-all.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>xml-apis</groupId>
-						<artifactId>xml-apis</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.mail</groupId>
-				<artifactId>jakarta.mail</artifactId>
-				<version>${jakarta.mail.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.dom4j</groupId>
-				<artifactId>dom4j</artifactId>
-				<version>${dom4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-codec</groupId>
-				<artifactId>commons-codec</artifactId>
-				<version>${commons-codec.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-io</groupId>
-				<artifactId>commons-io</artifactId>
-				<version>${commons-io.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.wicketstuff</groupId>
-				<artifactId>wicketstuff-datastore-hazelcast</artifactId>
-				<version>${wicketstuff.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.openjpa</groupId>
-				<artifactId>openjpa</artifactId>
-				<version>${openjpa.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-dbcp2</artifactId>
-				<version>${commons-dbcp.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>commons-logging</groupId>
-						<artifactId>commons-logging</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-pool2</artifactId>
-				<version>${commons-pool2.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.h2database</groupId>
-				<artifactId>h2</artifactId>
-				<version>${h2.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.postgresql</groupId>
-				<artifactId>postgresql</artifactId>
-				<version>${postgresql.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.microsoft.sqlserver</groupId>
-				<artifactId>mssql-jdbc</artifactId>
-				<version>${mssql.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.oracle.database.jdbc</groupId>
-				<artifactId>ojdbc10</artifactId>
-				<version>${ojdbc.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>commons-cli</groupId>
-				<artifactId>commons-cli</artifactId>
-				<version>${commons-cli.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.github.caldav4j</groupId>
-				<artifactId>caldav4j</artifactId>
-				<version>${caldav4j.version}</version>
-				<exclusions>
-					<exclusion>
-						<!-- Remove the need for ehcache, since we use the Methods directly -->
-						<groupId>net.sf.ehcache</groupId>
-						<artifactId>ehcache</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>mysql</groupId>
-				<artifactId>mysql-connector-java</artifactId>
-				<version>${mysql.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.webjars</groupId>
-				<artifactId>jasny-bootstrap</artifactId>
-				<version>${jasny-bootstrap.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.webjars</groupId>
-						<artifactId>bootstrap</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.wicketstuff</groupId>
-				<artifactId>wicketstuff-dashboard-core</artifactId>
-				<version>${wicketstuff.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.googlecode.wicket-jquery-ui</groupId>
-				<artifactId>wicket-jquery-ui-core</artifactId>
-				<version>${wicket-jquery-ui.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.googlecode.wicket-jquery-ui</groupId>
-				<artifactId>wicket-jquery-ui</artifactId>
-				<version>${wicket-jquery-ui.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.googlecode.wicket-jquery-ui</groupId>
-				<artifactId>wicket-jquery-ui-calendar</artifactId>
-				<version>${wicket-jquery-ui.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.googlecode.wicket-jquery-ui</groupId>
-				<artifactId>wicket-jquery-ui-plugins</artifactId>
-				<version>${wicket-jquery-ui.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.wicketstuff</groupId>
-				<artifactId>wicketstuff-urlfragment</artifactId>
-				<version>${wicketstuff.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.wicketstuff</groupId>
-				<artifactId>wicketstuff-select2</artifactId>
-				<version>${wicketstuff.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.wicketstuff</groupId>
-				<artifactId>jqplot</artifactId>
-				<version>${wicketstuff.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>de.agilecoders.wicket</groupId>
-				<artifactId>wicket-bootstrap-extensions</artifactId>
-				<version>${wicket-bootstrap.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>de.agilecoders.wicket</groupId>
-				<artifactId>wicket-bootstrap-themes</artifactId>
-				<version>${wicket-bootstrap.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.webjars</groupId>
-				<artifactId>font-awesome</artifactId>
-				<version>${font-awesome.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.quartz-scheduler</groupId>
-				<artifactId>quartz</artifactId>
-				<version>${quartz.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.swagger.core.v3</groupId>
-				<artifactId>swagger-annotations</artifactId>
-				<version>${swagger.version}</version>
-			</dependency>
-
-			<!-- TESTS -->
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-inline</artifactId>
@@ -965,36 +708,19 @@
 				<version>${junit.version}</version>
 				<scope>test</scope>
 			</dependency>
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-engine</artifactId>
-				<version>${junit.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.directory.server</groupId>
-				<artifactId>apacheds-test-framework</artifactId>
-				<version>${apacheds-test-framework.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.apache.directory.api</groupId>
-						<artifactId>api-ldap-schema-data</artifactId>
-					</exclusion>
-				</exclusions>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.tomcat.embed</groupId>
-				<artifactId>tomcat-embed-websocket</artifactId>
-				<version>${tomcat.version}</version>
-				<scope>test</scope>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -1028,7 +754,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
 				<configuration>
-					<skip>${site.skip}</skip>
+					<skip>${om.quick.build}</skip>
 				</configuration>
 				<executions>
 					<execution>
@@ -1039,6 +765,13 @@
 						</goals>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>io.github.devacfr.maven.skins</groupId>
+						<artifactId>reflow-velocity-tools</artifactId>
+						<version>${reflow-maven-skin.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -1111,6 +844,33 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
+				<version>${maven-checkstyle-plugin.version}</version>
+				<configuration>
+					<checkstyleRules>
+						<module name = "Checker">
+							<property name="fileExtensions" value="java,js,css,xml"/>
+							<module name="NewlineAtEndOfFile">
+								<property name="fileExtensions" value="java"/>
+							</module>
+							<module name="TreeWalker">
+								<module name="UnusedImports"></module>
+								<module name="RegexpSinglelineJava">
+									<property name="format" value="^\t* "/>
+									<property name="message" value="Indent must use tab characters"/>
+									<property name="ignoreComments" value="true"/>
+								</module>
+							</module>
+							<module name="RegexpSingleline">
+								<property name="format" value="\s+$"/>
+								<property name="message" value="Line has trailing spaces."/>
+							</module>
+						</module>
+					</checkstyleRules>
+					<includeTestSourceDirectory>true</includeTestSourceDirectory>
+					<encoding>UTF-8</encoding>
+					<consoleOutput>true</consoleOutput>
+					<failsOnError>true</failsOnError>
+				</configuration>
 				<executions>
 					<execution>
 						<goals>
@@ -1129,9 +889,8 @@
 					<configuration>
 						<doclint>none</doclint>
 						<additionalOptions>-html5</additionalOptions>
-						<source>8</source>
+						<source>${jdk.version}</source>
 						<javadocVersion>${jdk.version}</javadocVersion>
-						<notimestamp>true</notimestamp>
 						<links>
 							<link>https://openmeetings.apache.org/openmeetings-db/apidocs/</link>
 						</links>
@@ -1172,38 +931,6 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-checkstyle-plugin</artifactId>
-					<version>${maven-checkstyle-plugin.version}</version>
-					<configuration>
-						<checkstyleRules>
-							<module name = "Checker">
-								<property name="fileExtensions" value="java,js,css,xml"/>
-								<module name="NewlineAtEndOfFile">
-									<property name="fileExtensions" value="java"/>
-								</module>
-								<module name="TreeWalker">
-									<module name="UnusedImports"></module>
-									<module name="RegexpSinglelineJava">
-										<property name="format" value="^\t* "/>
-										<property name="message" value="Indent must use tab characters"/>
-										<property name="ignoreComments" value="true"/>
-									</module>
-								</module>
-								<module name="RegexpSingleline">
-									<property name="format" value="\s+$"/>
-									<property name="message" value="Line has trailing spaces."/>
-								</module>
-							</module>
-						</checkstyleRules>
-						<includeTestSourceDirectory>true</includeTestSourceDirectory>
-						<encoding>UTF-8</encoding>
-						<consoleOutput>true</consoleOutput>
-						<failsOnError>true</failsOnError>
-						<excludes>**/module-info.java</excludes>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
 					<version>${maven-assembly-plugin.version}</version>
 				</plugin>
@@ -1216,13 +943,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
 					<version>${maven-site-plugin.version}</version>
-					<dependencies>
-						<dependency>
-							<groupId>io.github.devacfr.maven.skins</groupId>
-							<artifactId>reflow-velocity-tools</artifactId>
-							<version>${reflow-maven-skin.version}</version>
-						</dependency>
-					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -1230,16 +950,14 @@
 					<version>${maven-surefire-plugin.version}</version>
 					<configuration>
 						<forkCount>1</forkCount>
-						<reuseForks>true</reuseForks>
-						<useModulePath>false</useModulePath>
-						<excludedGroups>${excluded.test.groups}</excludedGroups>
+						<reuseForks>false</reuseForks>
 						<includes>
 							<include>**/Test*.java</include>
 						</includes>
 						<excludes>
 							<exclude/>
 						</excludes>
-						<argLine>@{argLine} --add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens=java.base/sun.security.util=ALL-UNNAMED --add-opens=java.base/sun.security.x509=ALL-UNNAMED</argLine>
+						<argLine>@{argLine} --add-modules java.se --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.management/sun.management=ALL-UNNAMED --add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED</argLine>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -1367,10 +1085,6 @@
 							<exclude>**/localhost.jks</exclude>
 							<exclude>**/node_modules/**</exclude>
 							<exclude>**/package-lock.json</exclude>
-							<exclude>**/target/**</exclude>
-							<exclude>**/.project</exclude>
-							<exclude>**/.classpath</exclude>
-							<exclude>**/.settings/**</exclude>
 						</excludes>
 					</configuration>
 				</plugin>
@@ -1447,151 +1161,6 @@
 						<nodeVersion>v14.15.3</nodeVersion>
 						<installDirectory>${project.build.directory}</installDirectory>
 					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.openjpa</groupId>
-					<artifactId>openjpa-maven-plugin</artifactId>
-					<version>${openjpa.version}</version>
-					<dependencies>
-						<dependency>
-							<groupId>org.apache.openjpa</groupId>
-							<artifactId>openjpa</artifactId>
-							<!-- set the version to be the same as the level in your runtime -->
-							<version>${openjpa.version}</version>
-						</dependency>
-					</dependencies>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>exec-maven-plugin</artifactId>
-					<version>${exec-maven-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>com.samaxes.maven</groupId>
-					<artifactId>minify-maven-plugin</artifactId>
-					<version>${minify-maven-plugin.version}</version>
-					<dependencies>
-						<dependency>
-							<groupId>com.google.javascript</groupId>
-							<artifactId>closure-compiler</artifactId>
-							<version>v20170521</version>
-						</dependency>
-					</dependencies>
-				</plugin>
-				<plugin>
-					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-maven-plugin</artifactId>
-					<version>${jetty.version}</version>
-					<configuration>
-						<systemProperties>
-							<systemProperty>
-								<name>current_openmeetings_log_dir</name>
-								<value>${project.build.directory}</value>
-							</systemProperty>
-							<systemProperty>
-								<name>maven.project.build.directory.test-classes</name>
-								<value>${project.basedir}/src/test/resources</value>
-							</systemProperty>
-						</systemProperties>
-						<webApp>
-							<contextPath>/openmeetings</contextPath>
-							<descriptor>${project.basedir}/src/test/jetty/web.xml</descriptor>
-						</webApp>
-						<jettyXml>${project.basedir}/src/test/jetty/jetty.xml,${project.basedir}/src/test/jetty/jetty-ssl.xml,${project.basedir}/src/test/jetty/jetty-http.xml,${project.basedir}/src/test/jetty/jetty-https.xml</jettyXml>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>license-maven-plugin</artifactId>
-					<version>${license-maven-plugin.version}</version>
-					<configuration>
-						<outputDirectory>${project.build.directory}</outputDirectory>
-						<excludedScopes>test,provided</excludedScopes>
-						<useMissingFile>true</useMissingFile>
-						<fileTemplate>${project.basedir}/src/license/license-template.ftl</fileTemplate>
-						<licenseMerges>
-							<licenseMerge>
-								Apache License Version 2.0|
-								The Apache Software License, Version 2.0|
-								Apache 2.0|
-								ASF 2.0|
-								Apache License 2.0|
-								Apache License v2.0|
-								Apache 2.0 License|
-								Apache License v2|
-								The Apache License, Version 2.0|
-								Apache License, Version 2.0|
-								Apache Software Licenses|
-								Apache License, Version 2.0 and
-    Common Development And Distribution License (CDDL) Version 1.0|
-								http://www.apache.org/licenses/LICENSE-2.0.txt
-							</licenseMerge>
-							<licenseMerge>
-								Eclipse Public License - v 1.0|
-								MPL 2.0 or EPL 1.0
-							</licenseMerge>
-							<licenseMerge>
-								Eclipse Public License - v 2.0|
-								EPL 2.0
-							</licenseMerge>
-							<licenseMerge>
-								Eclipse Distribution License - v 1.0|
-								EDL 1.0
-							</licenseMerge>
-							<licenseMerge>
-								MIT License|
-								The MIT License|
-								MIT
-							</licenseMerge>
-							<licenseMerge>
-								Common Development and Distribution License (CDDL) v1.0|
-								CDDL/GPLv2+CE|
-								CDDL + GPLv2 with classpath exception|
-								CDDL, v1.0
-							</licenseMerge>
-							<licenseMerge>
-								BSD License|
-								BSD license|
-								BSD|
-								The BSD License
-							</licenseMerge>
-							<licenseMerge>
-								BSD 3-Clause|
-								BSD-3-Clause|
-								iCal4j - License|
-								The BSD 3-Clause License (BSD3)|
-								BSD 3-clause License w/nuclear disclaimer|
-								BSD 3-clause New License
-							</licenseMerge>
-						</licenseMerges>
-						<verbose>false</verbose>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-gpg-plugin</artifactId>
-					<version>${maven-gpg-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>net.nicoulaj.maven.plugins</groupId>
-					<artifactId>checksum-maven-plugin</artifactId>
-					<version>${checksum-maven-plugin.version}</version>
-					<configuration>
-						<shasumSummary>true</shasumSummary>
-						<algorithms>
-							<algorithm>SHA-512</algorithm>
-						</algorithms>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-source-plugin</artifactId>
-					<version>${maven-source-plugin.version}</version>
-				</plugin>
-				<plugin>
-					<groupId>io.openapitools.swagger</groupId>
-					<artifactId>swagger-maven-plugin</artifactId>
-					<version>${swagger-plugin.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -1684,8 +1253,8 @@
 				<module>openmeetings-install</module>
 				<module>openmeetings-service</module>
 				<module>openmeetings-webservice</module>
-				<module>openmeetings-web</module>
-				<module>openmeetings-screenshare</module> -->
+				<module>openmeetings-web</module> -->
+				<module>openmeetings-screenshare</module>
 				<module>openmeetings-server</module>
 			</modules>
 		</profile>
@@ -1693,7 +1262,6 @@
 			<id>quick</id>
 			<properties>
 				<maven.test.skip>true</maven.test.skip>
-				<site.skip>true</site.skip>
 				<om.quick.build>true</om.quick.build>
 				<om.notquick.build>false</om.notquick.build>
 				<wicket.configuration>DEVELOPMENT</wicket.configuration>
@@ -1708,6 +1276,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
+						<version>${maven-source-plugin.version}</version>
 						<executions>
 							<execution>
 								<id>attach-sources</id>
@@ -1732,6 +1301,7 @@
 					<plugin>
 						<groupId>net.nicoulaj.maven.plugins</groupId>
 						<artifactId>checksum-maven-plugin</artifactId>
+						<version>${checksum-maven-plugin.version}</version>
 						<executions>
 							<execution>
 								<goals>
@@ -1739,10 +1309,16 @@
 								</goals>
 							</execution>
 						</executions>
+						<configuration>
+							<shasumSummary>true</shasumSummary>
+							<algorithms>
+								<algorithm>SHA-512</algorithm>
+							</algorithms>
+						</configuration>
 					</plugin>
 					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
+						<version>${maven-gpg-plugin.version}</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
@@ -1776,6 +1352,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>license-maven-plugin</artifactId>
+						<version>${license-maven-plugin.version}</version>
 						<executions>
 							<execution>
 								<id>download-licenses</id>
@@ -1841,9 +1418,17 @@
 		</profile>
 		<profile>
 			<id>Jenkins</id>
-			<properties>
-				<excluded.test.groups>heavy-test,non-jenkins</excluded.test.groups>
-			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<excludedGroups>org.apache.openmeetings.test.NonJenkinsTests</excludedGroups>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<profile>
 			<id>only-eclipse</id>

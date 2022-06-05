@@ -154,7 +154,13 @@ public class UserForm extends AdminBaseForm<User> {
 			@Override
 			public void query(String term, int page, Response<Right> response) {
 				boolean isGroupAdmin = hasGroupAdminLevel(getRights());
-				for (Right r : Right.getAllowed(isGroupAdmin)) {
+				for (Right r : Right.values()) {
+					if (Right.GROUP_ADMIN == r) {
+						continue;
+					}
+					if (isGroupAdmin && (Right.ADMIN == r || Right.SOAP == r)) {
+						continue;
+					}
 					if (Strings.isEmpty(term) || r.name().contains(term)) {
 						response.add(r);
 					}

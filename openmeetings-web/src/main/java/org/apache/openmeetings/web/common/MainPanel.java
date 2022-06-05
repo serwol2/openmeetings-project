@@ -23,7 +23,7 @@ import static org.apache.openmeetings.db.util.AuthLevelUtil.hasGroupAdminLevel;
 import static org.apache.openmeetings.util.OpenmeetingsVariables.PARAM_USER_ID;
 import static org.apache.openmeetings.util.OpenmeetingsVariables.isMyRoomsEnabled;
 import static org.apache.openmeetings.web.app.WebSession.getUserId;
-import static org.apache.openmeetings.web.common.confirmation.ConfirmationHelper.newOkCancelConfirm;
+import static org.apache.openmeetings.web.common.confirmation.ConfirmationBehavior.newOkCancelConfirm;
 import static org.apache.openmeetings.web.util.CallbackFunctionHelper.getNamedFunction;
 import static org.apache.openmeetings.web.util.CallbackFunctionHelper.getParam;
 import static org.apache.openmeetings.web.util.OmUrlFragment.CHILD_ID;
@@ -103,7 +103,7 @@ public class MainPanel extends Panel {
 	private ChatPanel chat;
 	private MessageDialog newMessage;
 	private UserInfoDialog userInfo;
-	private BasePanel curPanel;
+	private BasePanel panel;
 	private InviteUserToRoomDialog inviteUser;
 
 	@SpringBean
@@ -119,9 +119,9 @@ public class MainPanel extends Panel {
 		this(id, null);
 	}
 
-	public MainPanel(String id, BasePanel curPanel) {
+	public MainPanel(String id, BasePanel panel) {
 		super(id);
-		this.curPanel = curPanel;
+		this.panel = panel;
 		setAuto(true);
 		setOutputMarkupId(true);
 		setOutputMarkupPlaceholderTag(true);
@@ -161,8 +161,8 @@ public class MainPanel extends Panel {
 
 			@Override
 			protected void onConnect(WebSocketRequestHandler handler) {
-				if (curPanel != null) {
-					updateContents(curPanel, handler);
+				if (panel != null) {
+					updateContents(panel, handler);
 				}
 			}
 
@@ -191,7 +191,7 @@ public class MainPanel extends Panel {
 		});
 		menu = new MenuPanel("menu", getMainMenu());
 		add(topControls.setOutputMarkupPlaceholderTag(true).setMarkupId("topControls"));
-		add(contents.add(getClient() == null || curPanel == null ? empty : curPanel).setOutputMarkupId(true).setMarkupId("contents"));
+		add(contents.add(getClient() == null || panel == null ? empty : panel).setOutputMarkupId(true).setMarkupId("contents"));
 		topControls.add(menu.setVisible(false), topLinks.setVisible(false).setOutputMarkupPlaceholderTag(true).setMarkupId("topLinks"));
 		final AboutDialog about = new AboutDialog("aboutDialog");
 		topLinks.add(new AjaxLink<Void>("about") {
@@ -319,39 +319,23 @@ public class MainPanel extends Panel {
 		}
 		createSettingsMenu(mmenu);
 		Set<Right> r = WebSession.getRights();
-		if (r.stream().anyMatch(right -> right.name().contains("ADMIN"))) {
-			boolean isAdmin = hasAdminLevel(r);
-			boolean isGrpAdmin = hasGroupAdminLevel(r);
+		boolean isAdmin = hasAdminLevel(r);
+		if (isAdmin || hasGroupAdminLevel(r)) {
 			// Administration Menu Points
 			List<INavbarComponent> l = new ArrayList<>();
-			if (isAdmin || isGrpAdmin) {
-				l.add(getSubItem("125", "1454", MenuActions.ADMIN_USER));
-			}
-			if (isAdmin || r.contains(Right.ADMIN_CONNECTIONS)) {
+			l.add(getSubItem("125", "1454", MenuActions.ADMIN_USER));
+			if (isAdmin) {
 				l.add(getSubItem("597", "1455", MenuActions.ADMIN_CONNECTION));
 			}
-			if (isAdmin || isGrpAdmin) {
-				l.add(getSubItem("126", "1456", MenuActions.ADMIN_GROUP));
-				l.add(getSubItem("186", "1457", MenuActions.ADMIN_ROOM));
-			}
-			if (isAdmin || r.contains(Right.ADMIN_CONFIG)) {
-				l.add(getSubItem("263", "1458", MenuActions.ADMIN_CONFIG));
-			}
-			if (isAdmin || r.contains(Right.ADMIN_LABEL)) {
-				l.add(getSubItem("348", "1459", MenuActions.ADMIN_LABEL));
-			}
+			l.add(getSubItem("126", "1456", MenuActions.ADMIN_GROUP));
+			l.add(getSubItem("186", "1457", MenuActions.ADMIN_ROOM));
 			if (isAdmin) {
+				l.add(getSubItem("263", "1458", MenuActions.ADMIN_CONFIG));
+				l.add(getSubItem("348", "1459", MenuActions.ADMIN_LABEL));
 				l.add(getSubItem("1103", "1454", MenuActions.ADMIN_LDAP));
 				l.add(getSubItem("1571", "1572", MenuActions.ADMIN_OAUTH));
-			}
-			if (isAdmin || r.contains(Right.ADMIN_BACKUP)) {
 				l.add(getSubItem("367", "1461", MenuActions.ADMIN_BACKUP));
-			}
-			if (isAdmin) {
 				l.add(getSubItem("main.menu.admin.email", "main.menu.admin.email.desc", MenuActions.ADMIN_EMAIL));
-			}
-			if (isAdmin || isGrpAdmin) {
-				l.add(getSubItem("main.menu.admin.extra", "main.menu.admin.extra.desc", MenuActions.ADMIN_EXTRA));
 			}
 			mmenu.add(new OmMenuItem(getString("6"), l));
 		}
@@ -419,7 +403,7 @@ public class MainPanel extends Panel {
 			if (getClient() != null) {
 				updateContents(npanel, handler);
 			} else {
-				this.curPanel = npanel;
+				this.panel = npanel;
 			}
 			if (updateFragment) {
 				UrlFragment uf = new UrlFragment(handler);

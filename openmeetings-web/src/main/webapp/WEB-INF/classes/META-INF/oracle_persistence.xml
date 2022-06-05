@@ -44,7 +44,6 @@
 		<class>org.apache.openmeetings.db.entity.room.RoomModerator</class>
 		<class>org.apache.openmeetings.db.entity.room.RoomPoll</class>
 		<class>org.apache.openmeetings.db.entity.room.RoomPollAnswer</class>
-		<class>org.apache.openmeetings.db.entity.room.ExtraMenu</class>
 		<class>org.apache.openmeetings.db.entity.server.LdapConfig</class>
 		<class>org.apache.openmeetings.db.entity.server.OAuthServer</class>
 		<class>org.apache.openmeetings.db.entity.server.Sessiondata</class>
@@ -76,7 +75,7 @@
 			<property name="openjpa.Log" value="DefaultLevel=WARN, Tool=INFO" />
 			<property name="openjpa.DataCache" value="true" />
 			<property name="openjpa.QueryCache" value="true" />
-			<property name="openjpa.jdbc.DBDictionary" value="oracle(MaxAutoAssignNameLength=28, BatchLimit=100)" />
+			<property name="openjpa.jdbc.DBDictionary" value="oracle(UseTriggersForAutoAssign=true, MaxAutoAssignNameLength=28, BatchLimit=100)" />
 			<property name="openjpa.jdbc.QuerySQLCache" value="false" />
 			<!--property name="openjpa.RemoteCommitProvider" value="tcp(Addresses=127.0.0.1)" /-->
 		</properties>

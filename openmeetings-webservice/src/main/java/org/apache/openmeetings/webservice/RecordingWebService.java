@@ -40,19 +40,10 @@ import org.apache.openmeetings.db.dto.basic.ServiceResult.Type;
 import org.apache.openmeetings.db.dto.record.RecordingDTO;
 import org.apache.openmeetings.db.entity.user.User;
 import org.apache.openmeetings.webservice.error.ServiceException;
-import org.apache.openmeetings.webservice.schema.RecordingDTOListWrapper;
-import org.apache.openmeetings.webservice.schema.ServiceResultWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  *
@@ -65,7 +56,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @WebService(serviceName="org.apache.openmeetings.webservice.RecordingWebService", targetNamespace = TNS)
 @Features(features = "org.apache.cxf.ext.logging.LoggingFeature")
 @Produces({MediaType.APPLICATION_JSON})
-@Tag(name = "RecordingService")
 @Path("/record")
 public class RecordingWebService extends BaseWebService {
 	private static final Logger log = LoggerFactory.getLogger(RecordingWebService.class);
@@ -74,7 +64,7 @@ public class RecordingWebService extends BaseWebService {
 	private RecordingDao recordingDao;
 
 	/**
-	 * Deletes a recording
+	 * Deletes a flv recording
 	 *
 	 * @param sid
 	 *            The SID of the User. This SID must be marked as Loggedin
@@ -86,17 +76,8 @@ public class RecordingWebService extends BaseWebService {
 	 */
 	@DELETE
 	@Path("/{id}")
-	@Operation(
-			description = "Deletes a recording",
-			responses = {
-					@ApiResponse(responseCode = "200", description = "serviceResult object with the result",
-							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
-					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
-			}
-		)
-	public ServiceResult delete(
-			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @QueryParam("sid") @WebParam(name="sid") String sid
-			, @Parameter(required = true, description = "the id of the recording") @PathParam("id") @WebParam(name="id") Long id
+	public ServiceResult delete(@QueryParam("sid") @WebParam(name="sid") String sid
+			, @PathParam("id") @WebParam(name="id") Long id
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> {
@@ -118,18 +99,9 @@ public class RecordingWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/{externaltype}/{externalid}")
-	@Operation(
-			description = "Gets a list of recordings created by particular external USER",
-			responses = {
-					@ApiResponse(responseCode = "200", description = "list of recordings",
-							content = @Content(schema = @Schema(implementation = RecordingDTOListWrapper.class))),
-					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
-			}
-		)
-	public List<RecordingDTO> getExternal(
-			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
-			, @Parameter(required = true, description = "the externalUserId") @PathParam("externaltype") @WebParam(name="externaltype") String externalType
-			, @Parameter(required = true, description = "the externalUserType") @PathParam("externalid") @WebParam(name="externalid") String externalId
+	public List<RecordingDTO> getExternal(@WebParam(name="sid") @QueryParam("sid") String sid
+			, @PathParam("externaltype") @WebParam(name="externaltype") String externalType
+			, @PathParam("externalid") @WebParam(name="externalid") String externalId
 			) throws ServiceException
 	{
 		log.debug("getExternal:: type {}, id {}", externalType, externalId);
@@ -137,7 +109,7 @@ public class RecordingWebService extends BaseWebService {
 	}
 
 	/**
-	 * Gets a list of recordings
+	 * Gets a list of flv recordings
 	 *
 	 * @param sid
 	 *            The SID of the User. This SID must be marked as Loggedin
@@ -149,17 +121,8 @@ public class RecordingWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/{externaltype}")
-	@Operation(
-			description = "Gets a list of recordings",
-			responses = {
-					@ApiResponse(responseCode = "200", description = "list of recordings",
-							content = @Content(schema = @Schema(implementation = RecordingDTOListWrapper.class))),
-					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
-			}
-		)
-	public List<RecordingDTO> getExternalByType(
-			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
-			, @Parameter(required = true, description = "externalType specified when creating the room") @PathParam("externaltype") @WebParam(name="externaltype") String externalType
+	public List<RecordingDTO> getExternalByType(@WebParam(name="sid") @QueryParam("sid") String sid
+			, @PathParam("externaltype") @WebParam(name="externaltype") String externalType
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> RecordingDTO.list(recordingDao.getByExternalType(externalType)));
@@ -178,17 +141,8 @@ public class RecordingWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/room/{roomid}")
-	@Operation(
-			description = "Gets a list of recordings",
-			responses = {
-					@ApiResponse(responseCode = "200", description = "list of recordings",
-							content = @Content(schema = @Schema(implementation = RecordingDTOListWrapper.class))),
-					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
-			}
-		)
-	public List<RecordingDTO> getExternalByRoom(
-			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
-			, @Parameter(required = true, description = "the room id") @PathParam("roomid") @WebParam(name="roomid") Long roomId
+	public List<RecordingDTO> getExternalByRoom(@WebParam(name="sid") @QueryParam("sid") String sid
+			, @PathParam("roomid") @WebParam(name="roomid") Long roomId
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> RecordingDTO.list(recordingDao.getByRoomId(roomId)));

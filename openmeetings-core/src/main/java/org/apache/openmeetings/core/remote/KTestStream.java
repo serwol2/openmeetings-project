@@ -36,12 +36,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Inject;
-
 import org.apache.openmeetings.core.util.WebSocketHelper;
 import org.apache.openmeetings.db.entity.basic.IWsClient;
 import org.apache.openmeetings.util.OmFileHelper;
-import org.apache.wicket.injection.Injector;
 import org.kurento.client.Continuation;
 import org.kurento.client.IceCandidate;
 import org.kurento.client.MediaPipeline;
@@ -58,12 +55,7 @@ import com.github.openjson.JSONObject;
 public class KTestStream extends AbstractStream {
 	private static final Logger log = LoggerFactory.getLogger(KTestStream.class);
 	private static final Map<String, String> TAGS = Map.of(TAG_MODE, MODE_TEST, TAG_ROOM, MODE_TEST);
-
-	@Inject
-	private KurentoHandler kHandler;
-	@Inject
-	private TestStreamProcessor processor;
-
+	private final KurentoHandler kHandler;
 	private MediaPipeline pipeline;
 	private WebRtcEndpoint webRtcEndpoint;
 	private PlayerEndpoint player;
@@ -73,14 +65,14 @@ public class KTestStream extends AbstractStream {
 	private ScheduledFuture<?> recHandle;
 	private int recTime;
 
-	public KTestStream(IWsClient c, JSONObject msg) {
+	public KTestStream(IWsClient c, JSONObject msg, KurentoHandler kHandler) {
 		super(null, c.getUid());
-		Injector.get().inject(this);
+		this.kHandler = kHandler;
 		createPipeline(() -> startTestRecording(c, msg));
 	}
 
 	private void startTestRecording(IWsClient c, JSONObject msg) {
-		webRtcEndpoint = createWebRtcEndpoint(pipeline, null, kHandler.getCertificateType());
+		webRtcEndpoint = createWebRtcEndpoint(pipeline, null);
 		webRtcEndpoint.connect(webRtcEndpoint);
 
 		MediaProfileSpecType profile = getProfile(msg);
@@ -142,7 +134,7 @@ public class KTestStream extends AbstractStream {
 
 	public void play(final IWsClient inClient, JSONObject msg) {
 		createPipeline(() -> {
-			webRtcEndpoint = createWebRtcEndpoint(pipeline, true, kHandler.getCertificateType());
+			webRtcEndpoint = createWebRtcEndpoint(pipeline, true);
 			player = createPlayerEndpoint(pipeline, recPath);
 			player.connect(webRtcEndpoint);
 			webRtcEndpoint.addMediaSessionStartedListener(evt -> {
@@ -259,7 +251,7 @@ public class KTestStream extends AbstractStream {
 		releasePlayer();
 		releaseRecorder();
 		if (remove) {
-			processor.release(this, true);
+			kHandler.getTestProcessor().release(this, true);
 		}
 	}
 }

@@ -23,7 +23,6 @@ import static org.apache.openmeetings.db.bind.Constants.CALENDAR_LIST_NODE;
 import static org.apache.openmeetings.db.bind.Constants.CFG_LIST_NODE;
 import static org.apache.openmeetings.db.bind.Constants.CHAT_LIST_NODE;
 import static org.apache.openmeetings.db.bind.Constants.CONTACT_LIST_NODE;
-import static org.apache.openmeetings.db.bind.Constants.EXTRA_MENU_LIST_NODE;
 import static org.apache.openmeetings.db.bind.Constants.FILE_LIST_NODE;
 import static org.apache.openmeetings.db.bind.Constants.GROUP_LIST_NODE;
 import static org.apache.openmeetings.db.bind.Constants.LDAP_LIST_NODE;
@@ -58,7 +57,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -73,7 +71,6 @@ import org.apache.openmeetings.db.dao.calendar.MeetingMemberDao;
 import org.apache.openmeetings.db.dao.calendar.OmCalendarDao;
 import org.apache.openmeetings.db.dao.file.FileItemDao;
 import org.apache.openmeetings.db.dao.record.RecordingDao;
-import org.apache.openmeetings.db.dao.room.ExtraMenuDao;
 import org.apache.openmeetings.db.dao.room.PollDao;
 import org.apache.openmeetings.db.dao.room.RoomDao;
 import org.apache.openmeetings.db.dao.server.LdapConfigDao;
@@ -89,7 +86,6 @@ import org.apache.openmeetings.db.entity.calendar.Appointment;
 import org.apache.openmeetings.db.entity.calendar.OmCalendar;
 import org.apache.openmeetings.db.entity.file.FileItem;
 import org.apache.openmeetings.db.entity.record.Recording;
-import org.apache.openmeetings.db.entity.room.ExtraMenu;
 import org.apache.openmeetings.db.entity.room.Room;
 import org.apache.openmeetings.db.entity.room.RoomPoll;
 import org.apache.openmeetings.db.entity.server.LdapConfig;
@@ -151,68 +147,64 @@ public class BackupExport {
 	private GroupDao groupDao;
 	@Autowired
 	private RoomDao roomDao;
-	@Autowired
-	private ExtraMenuDao menuDao;
 
-	public void performExport(File zip, boolean includeFiles, AtomicInteger progress) throws Exception {
+	public void performExport(File zip, boolean includeFiles, ProgressHolder progressHolder) throws Exception {
 		if (zip.getParentFile() != null && !zip.getParentFile().exists()) {
 			zip.getParentFile().mkdirs();
 		}
 		try (FileOutputStream fos = new FileOutputStream(zip); ZipOutputStream zos = new ZipOutputStream(fos)) {
-			progress.set(0);
+			progressHolder.setProgress(0);
 			/*
 			 * ##################### Backup Groups
 			 */
 			writeList(zos, "version.xml", VERSION_LIST_NODE, List.of(BackupVersion.get()));
-			progress.set(2);
+			progressHolder.setProgress(2);
 			exportGroups(zos);
-			progress.set(5);
+			progressHolder.setProgress(5);
 			exportUsers(zos);
-			progress.set(10);
+			progressHolder.setProgress(10);
 			exportRoom(zos);
-			progress.set(15);
+			progressHolder.setProgress(15);
 			exportRoomGroup(zos);
-			progress.set(17);
+			progressHolder.setProgress(17);
 			exportRoomFile(zos);
-			progress.set(17);
+			progressHolder.setProgress(17);
 			exportCalendar(zos);
-			progress.set(22);
+			progressHolder.setProgress(22);
 			exportAppointment(zos);
-			progress.set(25);
+			progressHolder.setProgress(25);
 			exportMeetingMember(zos);
-			progress.set(30);
+			progressHolder.setProgress(30);
 			exportLdap(zos);
-			progress.set(35);
+			progressHolder.setProgress(35);
 			exportOauth(zos);
-			progress.set(45);
+			progressHolder.setProgress(45);
 			exportPrivateMsg(zos);
-			progress.set(50);
+			progressHolder.setProgress(50);
 			exportPrivateMsgFolder(zos);
-			progress.set(55);
+			progressHolder.setProgress(55);
 			exportContacts(zos);
-			progress.set(60);
+			progressHolder.setProgress(60);
 			exportFile(zos);
-			progress.set(65);
+			progressHolder.setProgress(65);
 			exportRecording(zos);
-			progress.set(70);
+			progressHolder.setProgress(70);
 			exportPoll(zos);
-			progress.set(75);
+			progressHolder.setProgress(75);
 			exportConfig(zos);
-			progress.set(80);
+			progressHolder.setProgress(80);
 			exportChat(zos);
-			progress.set(85);
-			exportExtraMenus(zos);
-			progress.set(87);
+			progressHolder.setProgress(85);
 
 			if (includeFiles) {
-				exportFiles(progress, zos);
+				exportFiles(progressHolder, zos);
 			}
 		}
-		progress.set(100);
+		progressHolder.setProgress(100);
 		log.debug("---Done");
 	}
 
-	private void exportFiles(AtomicInteger progress, ZipOutputStream zos) throws IOException {
+	private void exportFiles(ProgressHolder progressHolder, ZipOutputStream zos) throws IOException {
 		//##################### Backup Room Files
 		for (File file : getUploadDir().listFiles()) {
 			String fName = file.getName();
@@ -225,7 +217,7 @@ public class BackupExport {
 		//##################### Backup Recording Files
 		final File recDir = getStreamsHibernateDir();
 		writeZipDir(BCKP_RECORD_FILES, recDir.toURI(), recDir, zos);
-		progress.set(90);
+		progressHolder.setProgress(90);
 
 		final File customCss = getCustomCss();
 		if (customCss != null && customCss.exists() && customCss.isFile()) {
@@ -375,11 +367,6 @@ public class BackupExport {
 	private void exportChat(ZipOutputStream zos) throws Exception {
 		List<ChatMessage> list = chatDao.get(0, Integer.MAX_VALUE);
 		writeList(zos, "chat_messages.xml", CHAT_LIST_NODE, list);
-	}
-
-	private void exportExtraMenus(ZipOutputStream zos) throws Exception {
-		List<ExtraMenu> list = menuDao.get(0, Integer.MAX_VALUE);
-		writeList(zos, "extraMenus.xml", EXTRA_MENU_LIST_NODE, list);
 	}
 
 	/*

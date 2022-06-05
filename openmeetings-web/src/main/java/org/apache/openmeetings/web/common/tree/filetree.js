@@ -15,14 +15,13 @@ var OmFileTree = (function() {
 			return !dropped || (!!dropped.context && $(dropped.context).hasClass('wb', 'room'));
 		}
 		, confirmTrash: function(drop, ui, callback) {
-			$('.trash-toolbar').confirmation({
-				trigger: 'manual'
-				, onConfirm: () => {
-					drop.append(ui.draggable);
-					callback();
-				}
+			const dlg = $('#om-js-trash-confirm');
+			dlg.find('.ok-btn').off().click(function() {
+				drop.append(ui.draggable);
+				dlg.modal('hide');
+				callback();
 			});
-			$('.trash-toolbar').confirmation('show');
+			dlg.modal('show');
 		}
 	}
 })();

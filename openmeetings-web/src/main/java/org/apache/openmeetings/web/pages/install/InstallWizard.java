@@ -125,7 +125,7 @@ public class InstallWizard extends BootstrapWizard {
 	private ImportInitvalues initvalues;
 
 	//onInit, applyState
-	public InstallWizard(String id) {
+	public InstallWizard(String id, String title) {
 		super(id);
 		setOutputMarkupPlaceholderTag(true);
 		setOutputMarkupId(true);
@@ -414,14 +414,28 @@ public class InstallWizard extends BootstrapWizard {
 			pass.setVisible(props.getDbType() != DbType.H2);
 			try {
 				switch (props.getDbType()) {
-					case MSSQL:
-						dbMssql(props);
+					case MSSQL: {
+						String url = props.getURL().substring("jdbc:sqlserver://".length());
+						String[] parts = url.split(";");
+						String[] hp = parts[0].split(":");
+						host.setModelObject(hp[0]);
+						port.setModelObject(Integer.parseInt(hp[1]));
+						dbname.setModelObject(parts[1].substring(parts[1].indexOf('=') + 1));
+						}
 						break;
-					case ORACLE:
-						dbOracle(props);
+					case ORACLE: {
+						String[] parts = props.getURL().split(":");
+						host.setModelObject(parts[3].substring(1));
+						port.setModelObject(Integer.parseInt(parts[4]));
+						dbname.setModelObject(parts[5]);
+						}
 						break;
-					case H2:
-						dbH2(props);
+					case H2: {
+						host.setModelObject("");
+						port.setModelObject(0);
+						String[] parts = props.getURL().split(";");
+						dbname.setModelObject(parts[0].substring("jdbc:h2:".length()));
+						}
 						break;
 					default:
 						URI uri = URI.create(props.getURL().substring(5));
@@ -436,29 +450,6 @@ public class InstallWizard extends BootstrapWizard {
 			if (target != null) {
 				target.add(form);
 			}
-		}
-
-		private void dbMssql(ConnectionProperties props) {
-			String url = props.getURL().substring("jdbc:sqlserver://".length());
-			String[] parts = url.split(";");
-			String[] hp = parts[0].split(":");
-			host.setModelObject(hp[0]);
-			port.setModelObject(Integer.parseInt(hp[1]));
-			dbname.setModelObject(parts[1].substring(parts[1].indexOf('=') + 1));
-		}
-
-		private void dbOracle(ConnectionProperties props) {
-			String[] parts = props.getURL().split(":");
-			host.setModelObject(parts[3].substring(1));
-			port.setModelObject(Integer.parseInt(parts[4]));
-			dbname.setModelObject(parts[5]);
-		}
-
-		private void dbH2(ConnectionProperties props) {
-			host.setModelObject("");
-			port.setModelObject(0);
-			String[] parts = props.getURL().split(";");
-			dbname.setModelObject(parts[0].substring("jdbc:h2:".length()));
 		}
 
 		@Override
@@ -627,9 +618,8 @@ public class InstallWizard extends BootstrapWizard {
 		private void reportSuccess(TextField<String> path) {
 			path.success(path.getLabel().getObject() + " - " + getString("54"));
 		}
-
-		private boolean checkToolPath(TextField<String> path, List<String> args) {
-			ProcessResult result = ProcessHelper.exec(path.getInputName() + " path:: '" + path.getValue() + "'", args);
+		private boolean checkToolPath(TextField<String> path, String[] args) {
+			ProcessResult result = ProcessHelper.executeScript(path.getInputName() + " path:: '" + path.getValue() + "'", args);
 			if (!result.isOk()) {
 				path.error(result.getError().replaceAll(REGEX, ""));
 			} else {
@@ -639,15 +629,15 @@ public class InstallWizard extends BootstrapWizard {
 		}
 
 		private boolean checkMagicPath() {
-			return checkToolPath(imageMagicPath, List.of(getToolPath(imageMagicPath.getValue(), "convert" + EXEC_EXT), OPT_VERSION));
+			return checkToolPath(imageMagicPath, new String[] {getToolPath(imageMagicPath.getValue(), "convert" + EXEC_EXT), OPT_VERSION});
 		}
 
 		private boolean checkFfmpegPath() {
-			return checkToolPath(ffmpegPath, List.of(getToolPath(ffmpegPath.getValue(), "ffmpeg" + EXEC_EXT), OPT_VERSION));
+			return checkToolPath(ffmpegPath, new String[] {getToolPath(ffmpegPath.getValue(), "ffmpeg" + EXEC_EXT), OPT_VERSION});
 		}
 
 		private boolean checkSoxPath() {
-			return checkToolPath(soxPath, List.of(getToolPath(soxPath.getValue(), "sox" + EXEC_EXT), "--version"));
+			return checkToolPath(soxPath, new String[] {getToolPath(soxPath.getValue(), "sox" + EXEC_EXT), "--version"});
 		}
 
 		private boolean checkOfficePath() {
@@ -770,6 +760,8 @@ public class InstallWizard extends BootstrapWizard {
 					target.add(container.replace(new ErrorMessagePanel("status", getString("install.wizard.install.failed"), th))
 						, desc.setVisible(false)
 						);
+				} else {
+					//onComplete(target);
 				}
 				super.onPostProcessTarget(target);
 			}

@@ -29,7 +29,7 @@ public class Whiteboards implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private Long roomId;
 	private final String uid = randomUUID().toString();
-	private Map<Long, Whiteboard> boards = new ConcurrentHashMap<>();
+	private Map<Long, Whiteboard> whiteboards = new ConcurrentHashMap<>();
 	private AtomicLong whiteboardId = new AtomicLong(0);
 	private AtomicLong activeWb = new AtomicLong(0);
 
@@ -51,28 +51,28 @@ public class Whiteboards implements Serializable {
 
 	public Whiteboards add(Whiteboard wb) {
 		wb.setId(whiteboardId.getAndIncrement());
-		boards.put(wb.getId(), wb);
+		whiteboards.put(wb.getId(), wb);
 		return this;
 	}
 
 	public Whiteboard get(Long id) {
-		return boards.get(id);
+		return whiteboards.get(id);
 	}
 
 	public int count() {
-		return boards.size();
+		return whiteboards.size();
 	}
 
 	public Map<Long, Whiteboard> getWhiteboards() {
-		return boards;
+		return whiteboards;
 	}
 
 	public void setWhiteboards(Map<Long, Whiteboard> whiteboards) {
-		this.boards = whiteboards;
+		this.whiteboards = whiteboards;
 	}
 
 	public void update(Whiteboard wb) {
-		boards.put(wb.getId(), wb);
+		whiteboards.put(wb.getId(), wb);
 	}
 
 	public String getUid() {

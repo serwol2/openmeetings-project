@@ -53,7 +53,7 @@
 						To update the website you need to clone asf-site:<br />
 						<source><![CDATA[
 git clone https://github.com/apache/openmeetings-site.git site
-git checkout master
+git checkout asf-site
 						]]></source>
 						edit the files in the folder <tt>openmeetings-server/src/site</tt><br/>
 						then you run the command:

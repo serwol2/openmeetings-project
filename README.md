@@ -19,7 +19,7 @@ Documentation for Installation and Upgrade:
   - https://openmeetings.apache.org/Upgrade.html
 
 Along with the developer mailing list archive:
-  - https://openmeetings.apache.org/mailing-lists.html
+  - https://openmeetings.apache.org/mail-lists.html
 
 
 System Requirements
@@ -48,69 +48,17 @@ Builds and CI
 
 | Description | Jenkins CI |
 | :--- | :---: |
-| Master nightly | [![Build Status](https://ci-builds.apache.org/job/OpenMeetings/job/openmeetings/badge/icon)](https://ci-builds.apache.org/job/OpenMeetings/job/openmeetings/) |
-| Master Pull Request | [![Build Status](https://ci-builds.apache.org/job/OpenMeetings/job/openmeetings-pr-build/badge/icon)](https://ci-builds.apache.org/job/OpenMeetings/job/openmeetings-pr-build/) |
+| Master nightly | [![Build Status](https://ci-builds.apache.org/job/OpenMeetings/job/openmeetings//badge/icon)](https://builds.apache.org/view/M-R/view/OpenMeetings/job/openmeetings/) |
+| Master Pull Request | [![Build Status](https://ci-builds.apache.org/job/OpenMeetings/job/openmeetings-pr-build/badge/icon)](https://builds.apache.org/view/M-R/view/OpenMeetings/job/openmeetings-pr-build/) |
 
 Release Notes
 =============
 
 see [CHANGELOG.md](/CHANGELOG.md) file for detailed log
 
-6.3.0
------
-[Release 6.3.0](https://www.apache.org/dyn/closer.lua/openmeetings/6.3.0), provides following improvements:
-
-Stability and UI:
-* Multiple WB fixes
-* Confirm popups are unified
-* Multiple fixes for latest Safari
-* Libraries are updated with most recent versions
-
-Some other fixes and improvements, 26 issues were addressed
-
-
-6.2.0
------
-[Release 6.2.0](https://archive.apache.org/dist/openmeetings/6.2.0), provides following improvements:
-
-UI improvements, stability fixes, mobile version and adds OpenAPI spec in 3.0.x format
-
-Stability and UI:
-* UI fixes
-* Modal PopUpFix
-* Upgrade to Bootstrap5
-* Fixes for Mobile Version and landscape mode
-* Improve ability for starting from Home Screen on Mobile device
-
-Integration:
-* OpenAPI Spec in swagger format see https://openmeetings.apache.org/swagger
-* Improved Integration examples for Node and PHP
-
-Some other fixes and improvements, 28 issues were addressed
-
-
-6.1.0
------
-[Release 6.1.0](https://archive.apache.org/dist/openmeetings/6.1.0), provides following improvements:
-
-This release provides WebRTC audio/video/screen-sharing in the Room
-
-Stability:
-* Room is more stable
-* Screen sharing on Safari is fixed
-* Recording in interview room is fixed
-
-UI:
-* OM theme can selected in Admin -> Config
-* Configurable Extra menu is added to the rooms
-* Date/time picker is better localized
-
-Some other fixes and improvements, 27 issues were addressed
-
-
 6.0.0
 -----
-[Release 6.0.0](https://archive.apache.org/dist/openmeetings/6.0.0), provides following improvements:
+[Release 6.0.0](https://www.apache.org/dyn/closer.lua/openmeetings/6.0.0), provides following improvements:
 
 This release provides WebRTC audio/video/screen-sharing in the Room
 

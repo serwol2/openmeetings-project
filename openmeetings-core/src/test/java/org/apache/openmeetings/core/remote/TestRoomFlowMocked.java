@@ -57,8 +57,10 @@ class TestRoomFlowMocked extends BaseMockedTest {
 	@Mock
 	private IApplication app;
 
+	@Override
 	@BeforeEach
 	public void setup() {
+		super.setup();
 		lenient().doReturn(mock(MediaPipeline.class)).when(client).createMediaPipeline(any(Transaction.class));
 		User u = new User();
 		u.setId(USER_ID);
@@ -77,7 +79,7 @@ class TestRoomFlowMocked extends BaseMockedTest {
 	@Test
 	void testNoClient() {
 		runWrapped(() -> {
-			handler.onMessage(null, getBaseMsg().put("id", "aa"));
+			handler.onMessage(null, MSG_BASE.put("id", "aa"));
 		});
 	}
 
@@ -88,7 +90,7 @@ class TestRoomFlowMocked extends BaseMockedTest {
 	@Test
 	void testNoRoom() {
 		runWrapped(() -> {
-			handler.onMessage(getClient(), getBaseMsg().put("id", "aa"));
+			handler.onMessage(getClient(), MSG_BASE.put("id", "aa"));
 		});
 	}
 
@@ -117,7 +119,7 @@ class TestRoomFlowMocked extends BaseMockedTest {
 
 	@Test
 	void testWannaRecord1() throws Exception {
-		JSONObject msg = getBaseMsg().put("id", "wannaRecord");
+		JSONObject msg = new JSONObject(MSG_BASE.toString()).put("id", "wannaRecord");
 		handler.onMessage(getClientWithRoom(), msg);
 	}
 
@@ -131,7 +133,7 @@ class TestRoomFlowMocked extends BaseMockedTest {
 	@Test
 	void testWannaRecord2() throws Exception {
 		runWrapped(() -> {
-			JSONObject msg = getBaseMsg().put("id", "wannaRecord");
+			JSONObject msg = new JSONObject(MSG_BASE.toString()).put("id", "wannaRecord");
 			Client c = getClientFull();
 			c.getRoom().setType(Room.Type.INTERVIEW);
 			doReturn(c.getRoom()).when(roomDao).get(ROOM_ID);
@@ -142,7 +144,7 @@ class TestRoomFlowMocked extends BaseMockedTest {
 	@Test
 	void testRecordRecord() throws Exception {
 		runWrapped(() -> {
-			JSONObject msg = getBaseMsg()
+			JSONObject msg = new JSONObject(MSG_BASE.toString())
 					.put("id", "wannaRecord")
 					.put("shareType", "shareType")
 					.put("fps", "fps")

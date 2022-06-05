@@ -36,7 +36,8 @@ function __activityIcon(elem, selector, predicate, action, confirm) {
 		}
 		icon.off();
 		if (confirm) {
-			icon.confirmation(confirm);
+			icon.confirmation('dispose');
+			icon.confirmation(confirm)
 		} else {
 			icon.click(action);
 		}

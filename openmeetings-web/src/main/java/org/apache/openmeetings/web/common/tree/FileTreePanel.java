@@ -28,7 +28,6 @@ import static org.apache.openmeetings.util.OpenmeetingsVariables.ATTR_CLASS;
 import static org.apache.openmeetings.util.OpenmeetingsVariables.ATTR_TITLE;
 import static org.apache.openmeetings.web.app.WebSession.getUserId;
 import static org.apache.openmeetings.web.common.BasePanel.EVT_CLICK;
-import static org.apache.openmeetings.web.common.confirmation.ConfirmationHelper.newOkCancelDangerConfirmCfg;
 import static org.apache.openmeetings.web.pages.BasePage.ALIGN_LEFT;
 import static org.apache.openmeetings.web.pages.BasePage.ALIGN_RIGHT;
 
@@ -47,6 +46,8 @@ import org.apache.openmeetings.db.entity.file.FileItem;
 import org.apache.openmeetings.db.entity.record.Recording;
 import org.apache.openmeetings.util.OmFileHelper;
 import org.apache.openmeetings.web.common.NameDialog;
+import org.apache.openmeetings.web.common.confirmation.ConfirmableAjaxBorder;
+import org.apache.openmeetings.web.common.confirmation.ConfirmationDialog;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxEventBehavior;
@@ -84,13 +85,12 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.button.ButtonBehavior;
 import de.agilecoders.wicket.core.markup.html.bootstrap.button.Buttons;
 import de.agilecoders.wicket.core.markup.html.bootstrap.button.dropdown.SplitButton;
 import de.agilecoders.wicket.core.markup.html.bootstrap.image.IconType;
-import de.agilecoders.wicket.extensions.markup.html.bootstrap.confirmation.ConfirmationBehavior;
 import de.agilecoders.wicket.extensions.markup.html.bootstrap.icon.FontAwesome5IconType;
 
 public abstract class FileTreePanel extends Panel {
 	private static final long serialVersionUID = 1L;
 	private static final String BASE_CLASS = " om-icon big clickable";
-	private static final String UPLOAD_CLASS = "upload" + BASE_CLASS + " " + ALIGN_LEFT;
+	private static final String UPLOAD_CLASS = "add" + BASE_CLASS + " " + ALIGN_LEFT;
 	private static final String CREATE_DIR_CLASS = "folder-create" + BASE_CLASS + " " + ALIGN_LEFT;
 	private static final String TRASH_CLASS = "trash" + BASE_CLASS + " " + ALIGN_RIGHT;
 	private static final String DISABLED_CLASS = " disabled";
@@ -125,8 +125,7 @@ public abstract class FileTreePanel extends Panel {
 	private final WebMarkupContainer buttons = new WebMarkupContainer("buttons");
 	private final Form<Void> form = new Form<>("form");
 	private final NameDialog addFolder;
-	private final WebMarkupContainer trash = new WebMarkupContainer("trash");
-	private ConfirmationBehavior trashConfirm;
+	private ConfirmableAjaxBorder trashBorder;
 	private final Long roomId;
 	private boolean readOnly = true;
 	private final Component createDir = new WebMarkupContainer("create").add(new AjaxEventBehavior(EVT_CLICK) {
@@ -138,6 +137,7 @@ public abstract class FileTreePanel extends Panel {
 		}
 	});
 	private final Component upload = new WebMarkupContainer("upload");
+	private ConfirmationDialog confirmTrashDialog;
 
 	@SpringBean
 	private RecordingDao recDao;
@@ -212,25 +212,8 @@ public abstract class FileTreePanel extends Panel {
 				update(target);
 			}
 		}));
-		trashToolbar.add(trash.setOutputMarkupId(true));
-		trash.add(new AjaxEventBehavior("confirmed.bs.confirmation") {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void onEvent(AjaxRequestTarget target) {
-				deleteAll(target);
-			}
-		});
-
-		trashConfirm = new ConfirmationBehavior(newOkCancelDangerConfirmCfg(trashToolbar, getString("80")).withContent(getString("713"))) {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public boolean isEnabled(Component component) {
-				return !readOnly && !selected.isEmpty();
-			}
-		};
-		trash.add(trashConfirm);
+		trashToolbar.add(getTrashBorder());
+		add(confirmTrashDialog);
 
 		form.add(trees.add(tree).setOutputMarkupId(true));
 		updateSizes();
@@ -310,11 +293,7 @@ public abstract class FileTreePanel extends Panel {
 						? fi.getOriginal() : fi.getFile(ext);
 				if (f != null && f.exists()) {
 					dwnldFile = f;
-					String fileExt = OmFileHelper.getFileExt(f.getName());
-					dwnldName = fi.getName();
-					if (!dwnldName.endsWith(fileExt)) {
-						dwnldName += "." + fileExt;
-					}
+					dwnldName = fi.getName() + "." + OmFileHelper.getFileExt(f.getName());
 					downloader.initiate(target);
 				}
 			}
@@ -328,6 +307,28 @@ public abstract class FileTreePanel extends Panel {
 				item.add(item.getModelObject());
 			}
 		}));
+	}
+
+	private ConfirmableAjaxBorder getTrashBorder() {
+		if (trashBorder == null) {
+			confirmTrashDialog = new ConfirmationDialog("trash-confirm-dialog", new ResourceModel("80"), new ResourceModel("713")) {
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				protected void onConfirm(AjaxRequestTarget target) {
+					deleteAll(target);
+				}
+			};
+			trashBorder = new ConfirmableAjaxBorder("trash", confirmTrashDialog) {
+				private static final long serialVersionUID = 1L;
+
+				@Override
+				protected boolean isClickable() {
+					return !readOnly && !selected.isEmpty();
+				}
+			};
+		}
+		return trashBorder;
 	}
 
 	@Override
@@ -379,9 +380,9 @@ public abstract class FileTreePanel extends Panel {
 			createDir.add(AttributeModifier.replace(ATTR_CLASS, CREATE_DIR_CLASS + (readOnly ? DISABLED_CLASS : "")));
 			upload.setEnabled(!readOnly);
 			upload.add(AttributeModifier.replace(ATTR_CLASS, UPLOAD_CLASS + (readOnly ? DISABLED_CLASS : "")));
-			trash.add(AttributeModifier.replace(ATTR_CLASS, TRASH_CLASS + (readOnly ? DISABLED_CLASS : "")));
+			trashBorder.add(AttributeModifier.replace(ATTR_CLASS, TRASH_CLASS + (readOnly ? DISABLED_CLASS : "")));
 			if (handler != null) {
-				handler.add(createDir, upload, trash);
+				handler.add(createDir, upload, trashBorder);
 				update(handler);
 			}
 		}
@@ -504,16 +505,10 @@ public abstract class FileTreePanel extends Panel {
 		}
 		updateSelected(target); //all finally selected are in the update list
 		if (target != null) {
-			target.add(trash, buttons);
+			target.add(trashBorder, buttons);
 		}
 	}
 
-	/**
-	 * This method can be overridden to provide more buttons
-	 *
-	 * @param markupId - markup id for buttons
-	 * @return the list of additional buttons
-	 */
 	protected List<AbstractLink> newOtherButtons(String markupId) {
 		return List.of();
 	}

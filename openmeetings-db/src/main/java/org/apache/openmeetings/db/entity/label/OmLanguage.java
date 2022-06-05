@@ -21,7 +21,7 @@ package org.apache.openmeetings.db.entity.label;
 import java.io.Serializable;
 import java.util.Locale;
 
-import org.apache.wicket.Session;
+import org.apache.openmeetings.db.util.FormatHelper;
 
 public class OmLanguage implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -35,7 +35,7 @@ public class OmLanguage implements Serializable {
 	public OmLanguage(Long id, Locale locale) {
 		this.id = id;
 		this.locale = locale;
-		this.rtl = Session.isRtlLanguage(locale);
+		this.rtl = FormatHelper.isRtlLanguage(locale.toLanguageTag());
 	}
 
 	public long getId() {

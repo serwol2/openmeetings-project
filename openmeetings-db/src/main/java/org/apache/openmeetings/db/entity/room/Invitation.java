@@ -271,8 +271,4 @@ public class Invitation extends HistoricalEntity {
 	public void setAllowEntry(boolean allowEntry) {
 		this.allowEntry = allowEntry;
 	}
-
-	public boolean isOwner(Long userId) {
-		return invitedBy != null && invitedBy.getId().equals(userId);
-	}
 }

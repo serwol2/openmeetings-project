@@ -88,11 +88,11 @@
 }
 .onoff-checkbox + .onoff-label::before {
 	content: '\f204';
-	color: var(--bs-danger);
+	color: var(--danger);
 }
 .onoff-checkbox:checked + .onoff-label::before {
 	content: '\f205';
-	color: var(--bs-success);
+	color: var(--success);
 }
 .addLanguagePanel select {
 	padding: 0px 0px;

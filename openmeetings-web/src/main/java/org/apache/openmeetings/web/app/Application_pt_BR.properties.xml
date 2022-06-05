@@ -66,7 +66,7 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="82"><![CDATA[Flexible textbox]]></entry>
 	<entry key="84"><![CDATA[Tornar-se moderador]]></entry>
 	<entry key="85"><![CDATA[fechar]]></entry>
-	<entry key="86"><![CDATA[Itálico]]></entry>
+	<entry key="86"><![CDATA[Italic]]></entry>
 	<entry key="87"><![CDATA[negrito]]></entry>
 	<entry key="98"><![CDATA[Moderador:]]></entry>
 	<entry key="99"><![CDATA[A sala está cheia. Por favor tente novamente mais tarde.]]></entry>
@@ -125,8 +125,8 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="254"><![CDATA[de]]></entry>
 	<entry key="256"><![CDATA[Ir para página anterior]]></entry>
 	<entry key="257"><![CDATA[Ir para a próxima página]]></entry>
-	<entry key="259"><![CDATA[- zoom]]></entry>
-	<entry key="260"><![CDATA[+ zoom]]></entry>
+	<entry key="259"><![CDATA[Zoom --]]></entry>
+	<entry key="260"><![CDATA[Zoom ++]]></entry>
 	<entry key="263"><![CDATA[Configuração]]></entry>
 	<entry key="265"><![CDATA[Chave]]></entry>
 	<entry key="266"><![CDATA[Configuração]]></entry>
@@ -152,7 +152,7 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="311"><![CDATA[Esqueceu sua senha?]]></entry>
 	<entry key="312"><![CDATA[Redefinir a senha]]></entry>
 	<entry key="313"><![CDATA[Usando o endereço de e-mail]]></entry>
-	<entry key="314"><![CDATA[Usando login]]></entry>
+	<entry key="314"><![CDATA[Using login]]></entry>
 	<entry key="315"><![CDATA[Seu email]]></entry>
 	<entry key="316"><![CDATA[Seu login]]></entry>
 	<entry key="317"><![CDATA[Enviar e-mail com um link para redefinição]]></entry>
@@ -211,11 +211,11 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="531"><![CDATA[Valido até:]]></entry>
 	<entry key="537"><![CDATA[Verificar senha]]></entry>
 	<entry key="545"><![CDATA[x]]></entry>
-	<entry key="546"><![CDATA[eixo-x]]></entry>
+	<entry key="546"><![CDATA[x-axis]]></entry>
 	<entry key="547"><![CDATA[y]]></entry>
-	<entry key="548"><![CDATA[eixo-y]]></entry>
-	<entry key="549"><![CDATA[l]]></entry>
-	<entry key="551"><![CDATA[a]]></entry>
+	<entry key="548"><![CDATA[y-axis]]></entry>
+	<entry key="549"><![CDATA[w]]></entry>
+	<entry key="551"><![CDATA[h]]></entry>
 	<entry key="553"><![CDATA[Alterar transparência]]></entry>
 	<entry key="556"><![CDATA[A conexão com o servidor foi perdida. Você precisa reiniciar a aplicação e/ou verificar sua conexão com a internet.]]></entry>
 	<entry key="557"><![CDATA[Ponteiro]]></entry>
@@ -322,6 +322,8 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="1003"><![CDATA[Número SIP]]></entry>
 	<entry key="1004"><![CDATA[PIN]]></entry>
 	<entry key="1005"><![CDATA[Limpar objetos desenhados na lousa!]]></entry>
+	<entry key="1065"><![CDATA[Faça o backup do sistema. O backup inclui todos os dados de usuários. A configuração não está incluído, bem como as etiquetas de idiomas. Porque esses valores são importados com o instalador de sistema. Para atualizar seu sistema, exportar seu antigo sistema (1) re-instalar em um novo banco de dados um novo pacote (2) e importar o arquivo de backup novamente (3). O backup deve ser importado antes de gerar os dados no sistema recém-instalado.]]></entry>
+	<entry key="1066"><![CDATA[Backup do sistema]]></entry>
 	<entry key="1076"><![CDATA[Sala só com áudio]]></entry>
 	<entry key="1077"><![CDATA[Turn this Flag on and the users will have only the Audio-Option and no Video in a conference room. This can by good to save bandwidth.]]></entry>
 	<entry key="1089"><![CDATA[Qualidade do compartilhamento de tela:]]></entry>
@@ -350,6 +352,7 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="1137"><![CDATA[would like to invite you to the conference room:]]></entry>
 	<entry key="1138"><![CDATA[Mensagem convite]]></entry>
 	<entry key="1143"><![CDATA[Fuso horário]]></entry>
+	<entry key="1146"><![CDATA[Descrição]]></entry>
 	<entry key="1147"><![CDATA[Criado por]]></entry>
 	<entry key="1151"><![CDATA[Nova conferência {0}]]></entry>
 	<entry key="1152"><![CDATA[Detalhes:]]></entry>
@@ -470,11 +473,13 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="1485"><![CDATA[Votar se houver uma enquete para esta sala de conferência]]></entry>
 	<entry key="1488"><![CDATA[Ligue para pessoas externas via VoIP/SIP]]></entry>
 	<entry key="1489"><![CDATA[Envie um email com um link direto para esta sala]]></entry>
+	<entry key="1491"><![CDATA[Tamanho máximo de upload]]></entry>
 	<entry key="1492"><![CDATA[Pergunte ao moderador para compartilhar sua lousa]]></entry>
 	<entry key="1493"><![CDATA[Começar bate-papo particular / privado]]></entry>
 	<entry key="1494"><![CDATA[Todos / tudo]]></entry>
 	<entry key="1500"><![CDATA[Nome do servidor]]></entry>
 	<entry key="1504"><![CDATA[Publicando...usuário]]></entry>
+	<entry key="1505"><![CDATA[Para ganhar tempo e economizar tráfego na internet você pode usar "command line admin" para backupear / restaurar / atualizar / upgrade:\n 1) Vá ao diretório instalador TVQWEB (por ex. /opt/om) \n 2) pare o TVQWEB (por ex. ./bin/shutdown.sh)\n 3) ./admin.sh -b -file ~/today_om_backup.zip (create backup of current OM)\n 4) download archive with new OM\n 5) mv /opt/om /opt/om.bak (move working version of OM just in case :))\n 6) extract downloaded OM to the /opt/om\n 7) ./admin.sh -i -file ~/today_om_backup.zip (or './admin.sh -i -file ~/today_om_backup.zip --db-type mysql --db-user om_user --db-pass om_user_pass' in case of you are using non-default DB )\n 8) start OM\n]]></entry>
 	<entry key="1506"><![CDATA[Salas comuns a todos os usuários]]></entry>
 	<entry key="1507"><![CDATA[Salas comuns ao atual grupo de usuários]]></entry>
 	<entry key="1508"><![CDATA[Salas do atual usuário]]></entry>
@@ -484,6 +489,8 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="1516"><![CDATA[Painel de arquivos aberto por definição]]></entry>
 	<entry key="1526"><![CDATA[Gerar convite]]></entry>
 	<entry key="1527"><![CDATA[Teste de conexão]]></entry>
+	<entry key="1536"><![CDATA[Importação de sistema]]></entry>
+	<entry key="1537"><![CDATA[Incluir arquivos armazenados e gravações no backup]]></entry>
 	<entry key="1538"><![CDATA[Permitir "SIP transport" na sala]]></entry>
 	<entry key="1546"><![CDATA[Welcome]]></entry>
 	<entry key="1547"><![CDATA[Widget displaying basic user info and support links]]></entry>
@@ -531,16 +538,11 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="activities.request.right.audio"><![CDATA[requests permission to turn on micropone]]></entry>
 	<entry key="activities.request.right.moderator"><![CDATA[requests permission to be moderator]]></entry>
 	<entry key="activities.request.right.muteothers"><![CDATA[Perdir permissão para silenciar os outros]]></entry>
-	<entry key="activities.request.right.presenter"><![CDATA[pede permissão para ser apresentador]]></entry>
+	<entry key="activities.request.right.presenter"><![CDATA[requests permission to be presenter]]></entry>
 	<entry key="activities.request.right.remote"><![CDATA[requests permission to control screen during screen sharing]]></entry>
 	<entry key="activities.request.right.share"><![CDATA[solicita permissão para compartilhar/gravar tela]]></entry>
 	<entry key="activities.request.right.video"><![CDATA[requests permission to turn on camera]]></entry>
 	<entry key="activities.request.right.wb"><![CDATA[requests permission to draw on the whiteboard]]></entry>
-	<entry key="admin.backup.add.files"><![CDATA[Incluir arquivos armazenados e gravações no backup]]></entry>
-	<entry key="admin.backup.cmd.line.desc"><![CDATA[Para ganhar tempo e economizar tráfego na internet você pode usar "command line admin" para backupear / restaurar / atualizar / upgrade:\n 1) Vá ao diretório instalador TVQWEB (por ex. /opt/om) \n 2) pare o TVQWEB (por ex. ./bin/shutdown.sh)\n 3) ./admin.sh -b -file ~/today_om_backup.zip (create backup of current OM)\n 4) download archive with new OM\n 5) mv /opt/om /opt/om.bak (move working version of OM just in case :))\n 6) extract downloaded OM to the /opt/om\n 7) ./admin.sh -i -file ~/today_om_backup.zip (or './admin.sh -i -file ~/today_om_backup.zip --db-type mysql --db-user om_user --db-pass om_user_pass' in case of you are using non-default DB )\n 8) start OM\n]]></entry>
-	<entry key="admin.backup.import.lbl"><![CDATA[Importação de sistema]]></entry>
-	<entry key="admin.backup.lbl"><![CDATA[Backup do sistema]]></entry>
-	<entry key="admin.backup.steps"><![CDATA[Faça o backup do sistema. O backup inclui todos os dados de usuários. A configuração não está incluído, bem como as etiquetas de idiomas. Porque esses valores são importados com o instalador de sistema. Para atualizar seu sistema, exportar seu antigo sistema (1) re-instalar em um novo banco de dados um novo pacote (2) e importar o arquivo de backup novamente (3). O backup deve ser importado antes de gerar os dados no sistema recém-instalado.]]></entry>
 	<entry key="admin.email.body"><![CDATA[Body]]></entry>
 	<entry key="admin.email.errorCount"><![CDATA[Contagem de erros]]></entry>
 	<entry key="admin.email.group.label"><![CDATA[Mensagem de e-mail]]></entry>
@@ -551,8 +553,6 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="admin.email.status.ERROR"><![CDATA[Error]]></entry>
 	<entry key="admin.email.status.NONE"><![CDATA[None]]></entry>
 	<entry key="admin.email.status.SENDING"><![CDATA[Sending]]></entry>
-	<entry key="admin.extra.group.label"><![CDATA[URL details]]></entry>
-	<entry key="admin.extra.link"><![CDATA[URL]]></entry>
 	<entry key="admin.group.form.days"><![CDATA[dias]]></entry>
 	<entry key="admin.group.form.limited"><![CDATA[Limits enabled]]></entry>
 	<entry key="admin.group.form.logo"><![CDATA[Logo]]></entry>
@@ -570,7 +570,7 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="admin.oauth.req.token.method"><![CDATA[Request token method]]></entry>
 	<entry key="admin.oauth.user.mapping"><![CDATA[User mapping]]></entry>
 	<entry key="admin.purge"><![CDATA[Purge]]></entry>
-	<entry key="admin.purge.desc"><![CDATA[Tem certeza de que deseja limpar este item? Isso não pode ser desfeito!]]></entry>
+	<entry key="admin.purge.desc"><![CDATA[Do you really want to purge this item? This can't be undone!]]></entry>
 	<entry key="admin.restore"><![CDATA[Restore]]></entry>
 	<entry key="admin.room.hidden.elements"><![CDATA[Hidden room elements]]></entry>
 	<entry key="admin.room.wait-moderator.info"><![CDATA[No one can use the room until moderator has joined]]></entry>
@@ -651,7 +651,6 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="files.root.group"><![CDATA[Group files]]></entry>
 	<entry key="find.user"><![CDATA[Find user]]></entry>
 	<entry key="fixed.video.pod.size"><![CDATA[Fixed video pod size]]></entry>
-	<entry key="form.max.upload.size"><![CDATA[Tamanho máximo de upload]]></entry>
 	<entry key="goto.first"><![CDATA[ir para o primeiro]]></entry>
 	<entry key="goto.last"><![CDATA[ir para o último]]></entry>
 	<entry key="goto.next"><![CDATA[ir para o próximo]]></entry>
@@ -673,7 +672,7 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="install.wizard.db.step.dbname"><![CDATA[Specify the name of the database]]></entry>
 	<entry key="install.wizard.db.step.dbtype"><![CDATA[Choose DB type]]></entry>
 	<entry key="install.wizard.db.step.error.patch"><![CDATA[Unexpected error while patching persistence file: {0}]]></entry>
-	<entry key="install.wizard.db.step.errorprops"><![CDATA[Incapaz de obter as propriedades]]></entry>
+	<entry key="install.wizard.db.step.errorprops"><![CDATA[Unable to get the properties]]></entry>
 	<entry key="install.wizard.db.step.field.title"><![CDATA[DB configuration]]></entry>
 	<entry key="install.wizard.db.step.h2.name"><![CDATA[H2]]></entry>
 	<entry key="install.wizard.db.step.host"><![CDATA[Specify DB host]]></entry>
@@ -829,7 +828,6 @@ please check <tt>openmeetings.log</tt> and contact OpenMeetings developers]]></e
 	<entry key="label.start"><![CDATA[Inicio]]></entry>
 	<entry key="label.undock.panel"><![CDATA[Click to undock panel]]></entry>
 	<entry key="lbl.cancel"><![CDATA[Cancelar]]></entry>
-	<entry key="lbl.description"><![CDATA[Descrição]]></entry>
 	<entry key="lbl.email"><![CDATA[Email:]]></entry>
 	<entry key="lbl.enter"><![CDATA[entrar]]></entry>
 	<entry key="lbl.general"><![CDATA[General]]></entry>
@@ -841,9 +839,6 @@ please check <tt>openmeetings.log</tt> and contact OpenMeetings developers]]></e
 	<entry key="lbl.video"><![CDATA[Video]]></entry>
 	<entry key="main.menu.admin.email"><![CDATA[Email management]]></entry>
 	<entry key="main.menu.admin.email.desc"><![CDATA[Check e-mails processing by the system]]></entry>
-	<entry key="main.menu.admin.extra"><![CDATA[Extra Menu]]></entry>
-	<entry key="main.menu.admin.extra.desc"><![CDATA[Custom links to room menu]]></entry>
-	<entry key="menu.extras"><![CDATA[Extras]]></entry>
 	<entry key="menu.polls"><![CDATA[Votação]]></entry>
 	<entry key="menu.polls.quick.descr"><![CDATA[Gather feedback without creating a poll]]></entry>
 	<entry key="menu.polls.quick.title"><![CDATA[Criar Pesquisa Rápida]]></entry>
@@ -966,9 +961,6 @@ Please visit {3} OM server and check them under Admin -> Groups]]></entry>
 	<entry key="wait-moderator.title"><![CDATA[Please be patient ...]]></entry>
 	<entry key="warn.nogroup"><![CDATA[Usuário adicionado mas você precisa associar esse usuário a uma organização, se não ele não estará apto a se associar.]]></entry>
 	<entry key="warn.notverified"><![CDATA[Cadastro efetuado com sucesso. Enviaremos um e-mail com um código de verificação. Por favor, verifique seu e-mail.]]></entry>
-	<entry key="wb.add.whiteboard"><![CDATA[Add new whiteboard to conference room]]></entry>
-	<entry key="wb.next.whiteboard"><![CDATA[Scroll whiteboard tabbar left]]></entry>
-	<entry key="wb.pre.whiteboard"><![CDATA[Scroll whiteboard tabbar right]]></entry>
 	<entry key="wb.tool.math.formula"><![CDATA[Math formula]]></entry>
 	<entry key="wb.tool.math.guide.lbl"><![CDATA[Guide to LaTeX Syntax]]></entry>
 	<entry key="wb.tool.math.guide.url"><![CDATA[https://en.wikibooks.org/wiki/LaTeX/Mathematics]]></entry>

@@ -27,12 +27,10 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.time.FastDateFormat;
 import org.apache.openmeetings.IApplication;
 import org.apache.openmeetings.core.util.WebSocketHelper;
-import org.apache.openmeetings.db.dao.record.RecordingDao;
+import org.apache.openmeetings.db.dao.record.RecordingChunkDao;
 import org.apache.openmeetings.db.entity.basic.Client;
 import org.apache.openmeetings.db.entity.basic.Client.Activity;
 import org.apache.openmeetings.db.entity.basic.Client.StreamDesc;
@@ -45,7 +43,6 @@ import org.apache.openmeetings.db.manager.IClientManager;
 import org.apache.openmeetings.db.util.FormatHelper;
 import org.apache.openmeetings.db.util.ws.RoomMessage;
 import org.apache.openmeetings.db.util.ws.TextRoomMessage;
-import org.apache.wicket.injection.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,15 +55,8 @@ import com.github.openjson.JSONObject;
 public class KRoom {
 	private static final Logger log = LoggerFactory.getLogger(KRoom.class);
 
-	@Inject
-	private KurentoHandler kHandler;
-	@Inject
-	private StreamProcessor processor;
-	@Inject
-	private RecordingDao recDao;
-	@Inject
-	private IClientManager cm;
-
+	private final StreamProcessor processor;
+	private final RecordingChunkDao chunkDao;
 	private final Room room;
 	private final AtomicBoolean recordingStarted = new AtomicBoolean(false);
 	private final AtomicBoolean sharingStarted = new AtomicBoolean(false);
@@ -75,9 +65,10 @@ public class KRoom {
 	private JSONObject recordingUser = new JSONObject();
 	private JSONObject sharingUser = new JSONObject();
 
-	public KRoom(Room r) {
+	public KRoom(KurentoHandler handler, Room r) {
+		this.processor = handler.getStreamProcessor();
+		this.chunkDao = handler.getChunkDao();
 		this.room = r;
-		Injector.get().inject(this);
 		log.info("ROOM {} has been created", room.getId());
 	}
 
@@ -89,9 +80,13 @@ public class KRoom {
 		return recordingId;
 	}
 
-	public KStream join(final StreamDesc sd) {
+	public RecordingChunkDao getChunkDao() {
+		return chunkDao;
+	}
+
+	public KStream join(final StreamDesc sd, KurentoHandler kHandler) {
 		log.info("ROOM {}: join client {}, stream: {}", room.getId(), sd.getClient(), sd.getUid());
-		final KStream stream = new KStream(sd, this);
+		final KStream stream = new KStream(sd, this, kHandler);
 		processor.addStream(stream);
 		return stream;
 	}
@@ -149,11 +144,11 @@ public class KRoom {
 			Optional<StreamDesc> osd = c.getScreenStream();
 			if (osd.isPresent()) {
 				osd.get().addActivity(Activity.RECORD);
-				cm.update(c);
+				processor.getClientManager().update(c);
 				rec.setWidth(osd.get().getWidth());
 				rec.setHeight(osd.get().getHeight());
 			}
-			rec = recDao.update(rec);
+			rec = processor.getRecordingDao().update(rec);
 			// Receive recordingId
 			recordingId = rec.getId();
 			processor.getByRoom(room.getId()).forEach(KStream::startRecord);
@@ -168,9 +163,9 @@ public class KRoom {
 		if (recordingStarted.compareAndSet(true, false)) {
 			log.debug("##REC:: recording in room {} is stopping {} ::", room.getId(), recordingId);
 			processor.getByRoom(room.getId()).forEach(KStream::stopRecord);
-			Recording rec = recDao.get(recordingId);
+			Recording rec = processor.getRecordingDao().get(recordingId);
 			rec.setRecordEnd(new Date());
-			rec = recDao.update(rec);
+			rec = processor.getRecordingDao().update(rec);
 			recordingUser = new JSONObject();
 			recordingId = null;
 
@@ -183,8 +178,8 @@ public class KRoom {
 				Optional<StreamDesc> osd = c.getScreenStream();
 				if (osd.isPresent()) {
 					osd.get().removeActivity(Activity.RECORD);
-					cm.update(c);
-					kHandler.sendShareUpdated(osd.get());
+					processor.getClientManager().update(c);
+					processor.getHandler().sendShareUpdated(osd.get());
 				}
 			}
 			// Send notification to all users that the recording has been started
@@ -208,28 +203,29 @@ public class KRoom {
 		return new JSONObject(sharingUser.toString());
 	}
 
-	public void startSharing(Client c, Optional<StreamDesc> osd, JSONObject msg, Activity a) {
+	public void startSharing(StreamProcessor processor, IClientManager cm, Client c, Optional<StreamDesc> osd, JSONObject msg, Activity a) {
 		StreamDesc sd;
+		KurentoHandler h = processor.getHandler();
 		if (sharingStarted.compareAndSet(false, true)) {
 			sharingUser.put("sid", c.getSid());
 			sd = c.addStream(StreamType.SCREEN, a);
 			cm.update(c);
 			log.debug("Stream.UID {}: sharing has been started, activity: {}", sd.getUid(), a);
-			kHandler.sendClient(sd.getSid(), newKurentoMsg()
+			h.sendClient(sd.getSid(), newKurentoMsg()
 					.put("id", "broadcast")
 					.put("stream", sd.toJson()
 							.put("shareType", msg.getString("shareType"))
 							.put("fps", msg.getString("fps")))
-					.put(PARAM_ICE, kHandler.getTurnServers(c)));
+					.put(PARAM_ICE, h.getTurnServers(c)));
 		} else if (osd.isPresent() && !osd.get().hasActivity(a)) {
 			sd = osd.get();
 			sd.addActivity(a);
 			cm.update(c);
-			kHandler.sendShareUpdated(sd);
+			h.sendShareUpdated(sd);
 			WebSocketHelper.sendRoom(new TextRoomMessage(c.getRoomId(), c, RoomMessage.Type.RIGHT_UPDATED, c.getUid()));
 			WebSocketHelper.sendRoomOthers(room.getId(), c.getUid(), newKurentoMsg()
 					.put("id", "newStream")
-					.put(PARAM_ICE, kHandler.getTurnServers(c))
+					.put(PARAM_ICE, processor.getHandler().getTurnServers(c))
 					.put("stream", sd.toJson()));
 		}
 	}
@@ -249,16 +245,17 @@ public class KRoom {
 		if (count != sipCount) {
 			processor.getByRoom(room.getId()).forEach(stream -> stream.addSipProcessor(count));
 			if (sipCount == 0) {
-				cm.streamByRoom(room.getId())
+				processor.getClientManager()
+					.streamByRoom(room.getId())
 					.filter(Client::isSip)
 					.findAny()
 					.ifPresent(c -> {
 						StreamDesc sd = c.addStream(StreamType.WEBCAM, Activity.AUDIO);
 						sd.setWidth(120).setHeight(90);
 						c.restoreActivities(sd);
-						KStream stream = join(sd);
+						KStream stream = join(sd, processor.getHandler());
 						stream.startBroadcast(sd, "", () -> {});
-						cm.update(c);
+						processor.getClientManager().update(c);
 					});
 			}
 			sipCount = count;

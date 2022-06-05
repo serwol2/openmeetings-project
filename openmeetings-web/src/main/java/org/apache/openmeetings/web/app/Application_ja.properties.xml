@@ -322,6 +322,8 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="1003"><![CDATA[SIP番号]]></entry>
 	<entry key="1004"><![CDATA[PIN]]></entry>
 	<entry key="1005"><![CDATA[現在表示中のスライド内のオブジェクトだけを消去!]]></entry>
+	<entry key="1065"><![CDATA[システムをバックアップします。バックアップには、ユーザーが生成した、あらゆるデータが含まれます。サーバ設定、および各言語ラベルはバックアップされません。システムをより新しいバージョンにアップデートする場合は、<br>(1)まずバックアップ・ファイルにエクスポートし、<br>(2)新規に作成したデータベース上にアプリケーションを再インストールし、<br>(3)バックアップ・ファイルをインポート、してください。バックアップ・ファイルのインポートは、新システム上で最初に行う必要があります。]]></entry>
+	<entry key="1066"><![CDATA[システム･バックアップ]]></entry>
 	<entry key="1076"><![CDATA[音声のみの会議室]]></entry>
 	<entry key="1077"><![CDATA[このフラッグをオンにすると、ユーザーは会議室で音声のみ使用できるようになります(ビデオ無し)。これにより、ネットワーク帯域を節約することができます。]]></entry>
 	<entry key="1089"><![CDATA[画面共有の品質:]]></entry>
@@ -350,6 +352,7 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="1137"><![CDATA[会議への参加を依頼されています。依頼者＝]]></entry>
 	<entry key="1138"><![CDATA[参加依頼メッセージ]]></entry>
 	<entry key="1143"><![CDATA[タイムゾーン]]></entry>
+	<entry key="1146"><![CDATA[概要]]></entry>
 	<entry key="1147"><![CDATA[作成者]]></entry>
 	<entry key="1151"><![CDATA[{0}会議が設定されました:]]></entry>
 	<entry key="1152"><![CDATA[詳細:]]></entry>
@@ -470,11 +473,13 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="1485"><![CDATA[この会議室に投票にあれば投票する]]></entry>
 	<entry key="1488"><![CDATA[外部参加者をVoIP/SIP経由で招待する]]></entry>
 	<entry key="1489"><![CDATA[この会議室へのリンクを電子メールで送信する]]></entry>
+	<entry key="1491"><![CDATA[最大アップロード・サイズ]]></entry>
 	<entry key="1492"><![CDATA[ホワイトボードの共有をモデレータ（司会者）に要求する]]></entry>
 	<entry key="1493"><![CDATA[プライベート・チャットを開始する]]></entry>
 	<entry key="1494"><![CDATA[すべて]]></entry>
 	<entry key="1500"><![CDATA[サーバー名]]></entry>
 	<entry key="1504"><![CDATA[公開中。ユーザー：]]></entry>
+	<entry key="1505"><![CDATA[バックアップ／リストア／アップグレードを行なう際にコマンドライン・ツールを利用すると、時間とインターネット・トラフィックを節約することができます: <ol> <li>オープンミーティングスのインストール・ディレクトリに移動する (例：/opt/om)</li> <li>オープン・ミーティングスを停止する(例： ./bin/shutdown.sh)</li> <li>./admin.sh -b -file ~/today_om_backup.zip (オープン・ミーティングスの現状バックアップを作成する)</li> <li>オープン・ミーティングスの最新アーカイブをダウンロードする</li> <li>mv /opt/om /opt/om.bak (必要に応じて、現環境を移動しておく)</li> <li>/opt/om にダウンロードしたアーカイブを展開する</li> <li>./admin.sh -i -file ~/today_om_backup.zip<br/> (既定のデータベースを使用していない場合は './admin.sh -i -file ~/today_om_backup.zip --db-type mysql --db-user om_user --db-pass om_user_pass')</li> <li>オープン・ミーティングスを起動する</li> </ol>]]></entry>
 	<entry key="1506"><![CDATA[全ユーザーに供用される会議室]]></entry>
 	<entry key="1507"><![CDATA[現ユーザー・グループに供用される会議室]]></entry>
 	<entry key="1508"><![CDATA[現ユーザーの会議室]]></entry>
@@ -484,6 +489,8 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="1516"><![CDATA[ファイル画面を既定で表示]]></entry>
 	<entry key="1526"><![CDATA[URLを生成]]></entry>
 	<entry key="1527"><![CDATA[ネットワーク・テスト]]></entry>
+	<entry key="1536"><![CDATA[システム・インポート]]></entry>
+	<entry key="1537"><![CDATA[バックアップにアップロード済みファイルと録音・録画を含める]]></entry>
 	<entry key="1538"><![CDATA[会議室のSIPトランスポートを有効にする]]></entry>
 	<entry key="1546"><![CDATA[ようこそ]]></entry>
 	<entry key="1547"><![CDATA[ユーザー基本情報／サポート・リンク ウィジェット]]></entry>
@@ -536,11 +543,6 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="activities.request.right.share"><![CDATA[requests permission to share/record screen]]></entry>
 	<entry key="activities.request.right.video"><![CDATA[requests permission to turn on camera]]></entry>
 	<entry key="activities.request.right.wb"><![CDATA[requests permission to draw on the whiteboard]]></entry>
-	<entry key="admin.backup.add.files"><![CDATA[バックアップにアップロード済みファイルと録音・録画を含める]]></entry>
-	<entry key="admin.backup.cmd.line.desc"><![CDATA[バックアップ／リストア／アップグレードを行なう際にコマンドライン・ツールを利用すると、時間とインターネット・トラフィックを節約することができます: <ol> <li>オープンミーティングスのインストール・ディレクトリに移動する (例：/opt/om)</li> <li>オープン・ミーティングスを停止する(例： ./bin/shutdown.sh)</li> <li>./admin.sh -b -file ~/today_om_backup.zip (オープン・ミーティングスの現状バックアップを作成する)</li> <li>オープン・ミーティングスの最新アーカイブをダウンロードする</li> <li>mv /opt/om /opt/om.bak (必要に応じて、現環境を移動しておく)</li> <li>/opt/om にダウンロードしたアーカイブを展開する</li> <li>./admin.sh -i -file ~/today_om_backup.zip<br/> (既定のデータベースを使用していない場合は './admin.sh -i -file ~/today_om_backup.zip --db-type mysql --db-user om_user --db-pass om_user_pass')</li> <li>オープン・ミーティングスを起動する</li> </ol>]]></entry>
-	<entry key="admin.backup.import.lbl"><![CDATA[システム・インポート]]></entry>
-	<entry key="admin.backup.lbl"><![CDATA[システム･バックアップ]]></entry>
-	<entry key="admin.backup.steps"><![CDATA[システムをバックアップします。バックアップには、ユーザーが生成した、あらゆるデータが含まれます。サーバ設定、および各言語ラベルはバックアップされません。システムをより新しいバージョンにアップデートする場合は、<br>(1)まずバックアップ・ファイルにエクスポートし、<br>(2)新規に作成したデータベース上にアプリケーションを再インストールし、<br>(3)バックアップ・ファイルをインポート、してください。バックアップ・ファイルのインポートは、新システム上で最初に行う必要があります。]]></entry>
 	<entry key="admin.email.body"><![CDATA[本文]]></entry>
 	<entry key="admin.email.errorCount"><![CDATA[エラー数]]></entry>
 	<entry key="admin.email.group.label"><![CDATA[電子メール・メッセージ]]></entry>
@@ -551,8 +553,6 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="admin.email.status.ERROR"><![CDATA[エラー]]></entry>
 	<entry key="admin.email.status.NONE"><![CDATA[無し]]></entry>
 	<entry key="admin.email.status.SENDING"><![CDATA[送信中]]></entry>
-	<entry key="admin.extra.group.label"><![CDATA[URL details]]></entry>
-	<entry key="admin.extra.link"><![CDATA[URL]]></entry>
 	<entry key="admin.group.form.days"><![CDATA[日]]></entry>
 	<entry key="admin.group.form.limited"><![CDATA[制限を有効化]]></entry>
 	<entry key="admin.group.form.logo"><![CDATA[ロゴ]]></entry>
@@ -651,7 +651,6 @@ see https://openmeetings.apache.org/LanguageEditor.html for Details
 	<entry key="files.root.group"><![CDATA[グループのファイル]]></entry>
 	<entry key="find.user"><![CDATA[ユーザーを検索]]></entry>
 	<entry key="fixed.video.pod.size"><![CDATA[Fixed video pod size]]></entry>
-	<entry key="form.max.upload.size"><![CDATA[最大アップロード・サイズ]]></entry>
 	<entry key="goto.first"><![CDATA[最初へ]]></entry>
 	<entry key="goto.last"><![CDATA[最後へ]]></entry>
 	<entry key="goto.next"><![CDATA[次へ]]></entry>
@@ -830,7 +829,6 @@ please check <tt>openmeetings.log</tt> and contact OpenMeetings developers]]></e
 	<entry key="label.start"><![CDATA[開始]]></entry>
 	<entry key="label.undock.panel"><![CDATA[クリックしてパネルを切り離す]]></entry>
 	<entry key="lbl.cancel"><![CDATA[キャンセル]]></entry>
-	<entry key="lbl.description"><![CDATA[概要]]></entry>
 	<entry key="lbl.email"><![CDATA[メールアドレス:]]></entry>
 	<entry key="lbl.enter"><![CDATA[入室]]></entry>
 	<entry key="lbl.general"><![CDATA[一般]]></entry>
@@ -842,9 +840,6 @@ please check <tt>openmeetings.log</tt> and contact OpenMeetings developers]]></e
 	<entry key="lbl.video"><![CDATA[Video]]></entry>
 	<entry key="main.menu.admin.email"><![CDATA[電子メール管理]]></entry>
 	<entry key="main.menu.admin.email.desc"><![CDATA[システムで使用する電子メールのチェックを実行]]></entry>
-	<entry key="main.menu.admin.extra"><![CDATA[Extra Menu]]></entry>
-	<entry key="main.menu.admin.extra.desc"><![CDATA[Custom links to room menu]]></entry>
-	<entry key="menu.extras"><![CDATA[Extras]]></entry>
 	<entry key="menu.polls"><![CDATA[投票]]></entry>
 	<entry key="menu.polls.quick.descr"><![CDATA[投票を作成せずにフィードバックを収集]]></entry>
 	<entry key="menu.polls.quick.title"><![CDATA[クイック投票を作成]]></entry>
@@ -966,9 +961,6 @@ Please visit {3} OM server and check them under Admin -> Groups]]></entry>
 	<entry key="wait-moderator.title"><![CDATA[Please be patient ...]]></entry>
 	<entry key="warn.nogroup"><![CDATA[ユーザーは追加されました。このユーザーは少なくとも一つの組織に所属させる必要があります。]]></entry>
 	<entry key="warn.notverified"><![CDATA[サインアップが完了しました。登録メールアドレスに対して確認コードを送付しましたので、メール受信箱をご確認ください。]]></entry>
-	<entry key="wb.add.whiteboard"><![CDATA[Add new whiteboard to conference room]]></entry>
-	<entry key="wb.next.whiteboard"><![CDATA[Scroll whiteboard tabbar left]]></entry>
-	<entry key="wb.pre.whiteboard"><![CDATA[Scroll whiteboard tabbar right]]></entry>
 	<entry key="wb.tool.math.formula"><![CDATA[数式]]></entry>
 	<entry key="wb.tool.math.guide.lbl"><![CDATA[Guide to LaTeX Syntax]]></entry>
 	<entry key="wb.tool.math.guide.url"><![CDATA[https://en.wikibooks.org/wiki/LaTeX/Mathematics]]></entry>

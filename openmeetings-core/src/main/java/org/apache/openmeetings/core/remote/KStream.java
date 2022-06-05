@@ -43,13 +43,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import javax.inject.Inject;
-
 import org.apache.openmeetings.core.sip.ISipCallbacks;
-import org.apache.openmeetings.core.sip.SipManager;
 import org.apache.openmeetings.core.sip.SipStackProcessor;
 import org.apache.openmeetings.core.util.WebSocketHelper;
-import org.apache.openmeetings.db.dao.record.RecordingChunkDao;
 import org.apache.openmeetings.db.entity.basic.Client;
 import org.apache.openmeetings.db.entity.basic.Client.Activity;
 import org.apache.openmeetings.db.entity.basic.Client.StreamDesc;
@@ -58,7 +54,6 @@ import org.apache.openmeetings.db.entity.record.RecordingChunk.Type;
 import org.apache.openmeetings.db.util.ws.RoomMessage;
 import org.apache.openmeetings.db.util.ws.TextRoomMessage;
 import org.apache.openmeetings.util.OmFileHelper;
-import org.apache.wicket.injection.Injector;
 import org.kurento.client.BaseRtpEndpoint;
 import org.kurento.client.Continuation;
 import org.kurento.client.IceCandidate;
@@ -80,15 +75,7 @@ import com.github.openjson.JSONObject;
 public class KStream extends AbstractStream implements ISipCallbacks {
 	private static final Logger log = LoggerFactory.getLogger(KStream.class);
 
-	@Inject
-	private KurentoHandler kHandler;
-	@Inject
-	private StreamProcessor processor;
-	@Inject
-	private RecordingChunkDao chunkDao;
-	@Inject
-	private SipManager sipManager;
-
+	private final KurentoHandler kHandler;
 	private final KRoom kRoom;
 	private final Date connectedSince;
 	private final StreamType streamType;
@@ -109,12 +96,12 @@ public class KStream extends AbstractStream implements ISipCallbacks {
 	private boolean hasScreen;
 	private boolean sipClient;
 
-	public KStream(final StreamDesc sd, KRoom kRoom) {
+	public KStream(final StreamDesc sd, KRoom kRoom, KurentoHandler kHandler) {
 		super(sd.getSid(), sd.getUid());
 		this.kRoom = kRoom;
 		streamType = sd.getType();
 		this.connectedSince = new Date();
-		Injector.get().inject(this);
+		this.kHandler = kHandler;
 		//TODO Min/MaxVideoSendBandwidth
 		//TODO Min/Max Audio/Video RecvBandwidth
 	}
@@ -202,7 +189,7 @@ public class KStream extends AbstractStream implements ISipCallbacks {
 				flowoutFuture = Optional.of(new CompletableFuture<>().completeAsync(() -> {
 					log.warn("KStream will be dropped {}, sid {}, uid {}", sd, sid, uid);
 					if (StreamType.SCREEN == streamType) {
-						processor.doStopSharing(sid, uid);
+						kHandler.getStreamProcessor().doStopSharing(sid, uid);
 					}
 					stopBroadcast();
 					return null;
@@ -288,7 +275,7 @@ public class KStream extends AbstractStream implements ISipCallbacks {
 		listeners.put(uid, listener);
 
 		log.debug("PARTICIPANT {}: obtained endpoint for {}", uid, this.uid);
-		Client cur = processor.getBySid(this.sid);
+		Client cur = kHandler.getStreamProcessor().getBySid(this.sid);
 		if (cur == null) {
 			log.warn("Client for endpoint dooesn't exists");
 		} else {
@@ -319,7 +306,7 @@ public class KStream extends AbstractStream implements ISipCallbacks {
 	}
 
 	private WebRtcEndpoint createEndpoint(String sid, String uid, boolean recv) {
-		WebRtcEndpoint endpoint = createWebRtcEndpoint(pipeline, recv, kHandler.getCertificateType());
+		WebRtcEndpoint endpoint = createWebRtcEndpoint(pipeline, recv);
 		setTags(endpoint, uid);
 		reApplyIceCandiates(endpoint, recv);
 
@@ -351,11 +338,8 @@ public class KStream extends AbstractStream implements ISipCallbacks {
 		recorder = createRecorderEndpoint(pipeline, getRecUri(getRecordingChunk(getRoomId(), chunkUid)), profile);
 		setTags(recorder, uid);
 
-		recorder.addRecordingListener(evt -> chunkId = chunkDao.start(kRoom.getRecordingId(), type, chunkUid, sid));
-		recorder.addStoppedListener(evt -> {
-			chunkDao.stop(chunkId);
-			chunkId = null;
-		});
+		recorder.addRecordingListener(evt -> chunkId = kRoom.getChunkDao().start(kRoom.getRecordingId(), type, chunkUid, sid));
+		recorder.addStoppedListener(evt -> kRoom.getChunkDao().stop(chunkId));
 		switch (profile) {
 			case WEBM:
 				outgoingMedia.connect(recorder, MediaType.AUDIO);
@@ -383,7 +367,8 @@ public class KStream extends AbstractStream implements ISipCallbacks {
 	}
 
 	public void stopRecord() {
-		stopRecorder(true, () -> {});
+		releaseRecorder(true);
+		chunkId = null;
 	}
 
 	public void remove(final Client c) {
@@ -438,93 +423,77 @@ public class KStream extends AbstractStream implements ISipCallbacks {
 	public void release(boolean remove) {
 		if (outgoingMedia != null) {
 			releaseListeners();
-			stopRecorder(false, () -> {
-				releaseRtp();
-				outgoingMedia.release(new Continuation<Void>() {
-					@Override
-					public void onSuccess(Void result) throws Exception {
-						log.trace("PARTICIPANT {}: Released successfully", KStream.this.uid);
-					}
-
-					@Override
-					public void onError(Throwable cause) throws Exception {
-						log.warn("PARTICIPANT {}: Could not release", KStream.this.uid, cause);
-					}
-				});
-				pipeline.release(new Continuation<Void>() {
-					@Override
-					public void onSuccess(Void result) throws Exception {
-						log.trace("PARTICIPANT {}: Released Pipeline", KStream.this.uid);
-					}
-
-					@Override
-					public void onError(Throwable cause) throws Exception {
-						log.warn("PARTICIPANT {}: Could not release Pipeline", KStream.this.uid, cause);
-					}
-				});
-				outgoingMedia = null;
-				doRemove(remove);
-			});
-		} else {
-			doRemove(remove);
-		}
-	}
-
-	private void doRemove(boolean remove) {
-		if (remove) {
-			processor.release(this, false);
-		}
-	}
-
-	private void releaseRecorder(Runnable then) {
-		outgoingMedia.disconnect(recorder, new Continuation<Void>() {
-			@Override
-			public void onSuccess(Void result) throws Exception {
-				log.trace("PARTICIPANT {}: Recorder disconnected successfully", KStream.this.uid);
-			}
-
-			@Override
-			public void onError(Throwable cause) throws Exception {
-				log.warn("PARTICIPANT {}: Could not disconnect recorder", KStream.this.uid, cause);
-			}
-		});
-		recorder.release(new Continuation<Void>() {
-			@Override
-			public void onSuccess(Void result) throws Exception {
-				log.trace("PARTICIPANT {}: Recorder released successfully", KStream.this.uid);
-			}
-
-			@Override
-			public void onError(Throwable cause) throws Exception {
-				log.warn("PARTICIPANT {}: Could not release recorder", KStream.this.uid, cause);
-			}
-		});
-		recorder = null;
-		then.run();
-	}
-
-	private void stopRecorder(boolean wait, Runnable then) {
-		if (recorder != null) {
-			final Continuation<Void> stop = new Continuation<>() {
+			releaseRecorder(false);
+			releaseRtp();
+			outgoingMedia.release(new Continuation<Void>() {
 				@Override
 				public void onSuccess(Void result) throws Exception {
-					log.trace("PARTICIPANT {}: Recording stopped", KStream.this.uid);
-					releaseRecorder(then);
+					log.trace("PARTICIPANT {}: Released successfully", KStream.this.uid);
 				}
 
 				@Override
 				public void onError(Throwable cause) throws Exception {
-					log.warn("PARTICIPANT {}: Could not stop recording", KStream.this.uid, cause);
-					releaseRecorder(then);
+					log.warn("PARTICIPANT {}: Could not release", KStream.this.uid, cause);
 				}
-			};
+			});
+			pipeline.release(new Continuation<Void>() {
+				@Override
+				public void onSuccess(Void result) throws Exception {
+					log.trace("PARTICIPANT {}: Released Pipeline", KStream.this.uid);
+				}
+
+				@Override
+				public void onError(Throwable cause) throws Exception {
+					log.warn("PARTICIPANT {}: Could not release Pipeline", KStream.this.uid, cause);
+				}
+			});
+			outgoingMedia = null;
+		}
+		if (remove) {
+			kHandler.getStreamProcessor().release(this, false);
+		}
+	}
+
+	private void releaseRecorder(boolean wait) {
+		if (recorder != null) {
 			if (wait) {
-				recorder.stopAndWait(stop);
+				recorder.stopAndWait();
 			} else {
-				recorder.stop(stop);
+				recorder.stop(new Continuation<Void>() {
+					@Override
+					public void onSuccess(Void result) throws Exception {
+						log.trace("PARTICIPANT {}: Recording stopped", KStream.this.uid);
+					}
+
+					@Override
+					public void onError(Throwable cause) throws Exception {
+						log.warn("PARTICIPANT {}: Could not stop recording", KStream.this.uid, cause);
+					}
+				});
 			}
-		} else {
-			then.run();
+			outgoingMedia.disconnect(recorder, new Continuation<Void>() {
+				@Override
+				public void onSuccess(Void result) throws Exception {
+					log.trace("PARTICIPANT {}: Recorder disconnected successfully", KStream.this.uid);
+				}
+
+				@Override
+				public void onError(Throwable cause) throws Exception {
+					log.warn("PARTICIPANT {}: Could not disconnect recorder", KStream.this.uid, cause);
+				}
+			});
+			recorder.release(new Continuation<Void>() {
+				@Override
+				public void onSuccess(Void result) throws Exception {
+					log.trace("PARTICIPANT {}: Recorder released successfully", KStream.this.uid);
+				}
+
+				@Override
+				public void onError(Throwable cause) throws Exception {
+					log.warn("PARTICIPANT {}: Could not release recorder", KStream.this.uid, cause);
+				}
+			});
+			recorder = null;
 		}
 	}
 
@@ -619,7 +588,7 @@ public class KStream extends AbstractStream implements ISipCallbacks {
 		if (count > 0) {
 			if (sipProcessor.isEmpty()) {
 				try {
-					sipProcessor = sipManager.createSipStackProcessor(
+					sipProcessor = kHandler.getSipManager().createSipStackProcessor(
 							randomUUID().toString()
 							, kRoom.getRoom()
 							, this);
@@ -657,7 +626,7 @@ public class KStream extends AbstractStream implements ISipCallbacks {
 		answerConsumer.accept(answer);
 		log.debug(answer);
 		if (sipClient) {
-			StreamDesc sd = processor.getBySid(sid).getStream(uid);
+			StreamDesc sd = kHandler.getStreamProcessor().getBySid(sid).getStream(uid);
 			try {
 				outgoingMedia = rtpEndpoint;
 				internalStartBroadcast(sd, sdp);

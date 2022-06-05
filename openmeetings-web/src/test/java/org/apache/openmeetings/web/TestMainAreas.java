@@ -24,7 +24,6 @@ import static org.apache.openmeetings.web.util.OmUrlFragment.TYPE_CONFIG;
 import static org.apache.openmeetings.web.util.OmUrlFragment.TYPE_CONNECTION;
 import static org.apache.openmeetings.web.util.OmUrlFragment.TYPE_EDIT;
 import static org.apache.openmeetings.web.util.OmUrlFragment.TYPE_EMAIL;
-import static org.apache.openmeetings.web.util.OmUrlFragment.TYPE_EXTRA;
 import static org.apache.openmeetings.web.util.OmUrlFragment.TYPE_GROUP;
 import static org.apache.openmeetings.web.util.OmUrlFragment.TYPE_LANG;
 import static org.apache.openmeetings.web.util.OmUrlFragment.TYPE_LDAP;
@@ -40,13 +39,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.function.Consumer;
 
-import org.apache.openmeetings.AbstractWicketTesterTest;
+import org.apache.openmeetings.AbstractWicketTester;
 import org.apache.openmeetings.util.OmException;
 import org.apache.openmeetings.web.admin.backup.BackupPanel;
 import org.apache.openmeetings.web.admin.configurations.ConfigsPanel;
 import org.apache.openmeetings.web.admin.connection.ConnectionsPanel;
 import org.apache.openmeetings.web.admin.email.EmailPanel;
-import org.apache.openmeetings.web.admin.extra.ExtraPanel;
 import org.apache.openmeetings.web.admin.groups.GroupsPanel;
 import org.apache.openmeetings.web.admin.labels.LangPanel;
 import org.apache.openmeetings.web.admin.ldaps.LdapsPanel;
@@ -73,7 +71,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class TestMainAreas extends AbstractWicketTesterTest {
+class TestMainAreas extends AbstractWicketTester {
 	private static final Logger log = LoggerFactory.getLogger(TestMainAreas.class);
 
 	@Test
@@ -254,16 +252,6 @@ class TestMainAreas extends AbstractWicketTesterTest {
 	@Test
 	void testAdminEmail1() throws OmException {
 		checkUnauthArea(AreaKeys.admin, TYPE_EMAIL, groupAdminUsername, regularUsername);
-	}
-
-	@Test
-	void testAdminExtras() throws OmException {
-		checkArea(AreaKeys.admin, TYPE_EXTRA, ExtraPanel.class, adminUsername, groupAdminUsername);
-	}
-
-	@Test
-	void testAdminExtras1() throws OmException {
-		checkUnauthArea(AreaKeys.admin, TYPE_EXTRA, regularUsername);
 	}
 
 	@Test

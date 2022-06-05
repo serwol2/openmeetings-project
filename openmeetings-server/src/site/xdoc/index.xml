@@ -21,38 +21,38 @@
 
 	<body>
 		<section name="Audio/Video Conferencing">
-			<img src="images/screenshots/screenshot_OM6-2.jpg" alt="Conference Room" />
-			<p>HTML5 Audio/Video conferencing with OpenMeetings in web and mobile.</p>
+			<img src="images/cut_conference_room_om5.png" alt="Conference Room" />
+			<p>OpenMeetings enables you to make Audio/Video conferencing.</p>
 		</section>
 		<section name="Calendar">
-			<img src="images/screenshots/calendar-screenshot.png" alt="Calendar" />
+			<img src="images/cut_integrated_calendar.png" alt="Calendar" />
 			<p>You can create meetings with the integrated calendar, conference rooms and invitations are
 					automatically send to everybody</p>
 		</section>
 		<section name="File Explorer">
-			<img src="images/screenshots/file-explorer.png" alt="File Explorer" />
+			<img src="images/cut_file_explorer.png" alt="File Explorer" />
 			<p>Each room has its own File-Explorer. Each user has his own private drive and additionally there
 					is a public drive to share files with other participants</p>
 		</section>
 		<section name="Integration API">
-			<img src="images/screenshots/integration-api.png" alt="Integration API" />
-			<p>There is a REST (and SOAP) API to integrate into your website or intranet, as well
+			<img src="images/cut_integration_api.png" alt="Integration API" />
+			<p>There is a SOAP/REST API to integrate into your website or intranet, as well
 					as LDAP/ADS connectors and VoIP/Asterisk integration modules</p>
 		</section>
 		<section name="Private messages and contacts">
-			<img src="images/screenshots/private-messages.png" alt="Private messages" />
+			<img src="images/cut_private_messages.png" alt="Private messages" />
 			<p>From the private message center you can send invitations by email
 					and attach meeting invitations to every email</p>
 		</section>
 		<section name="Administration and Configuration">
-			<img src="images/screenshots/administration-configuration.png" alt="Administration" />
+			<img src="images/cut_administration_configuration.png" alt="Administration" />
 			<p>You can configure users, rooms, usergroups, config settings or
 					edit labels with a Web-Frontend integrated in the application</p>
 		</section>
 		<section name="Screen sharing and Recording">
-			<img src="images/screenshots/recordings-playback.png" alt="Share and Record" />
+			<img src="images/cut_recordings_playback.png" alt="Share and Record" />
 			<p>You can do screen sharing as well as recording of whole sessions including audio/video.
-					Recordings can be downloaded as MP4 or watched online in the integrated player.</p>
+					Recordings can be downloaded as AVI/FLV or watched online in the integrated player.</p>
 		</section>
 		<hr/>
 		<section name="Apache OpenMeetings - Features and overview">
@@ -62,22 +62,34 @@
 				and Streaming Kurento.
 			</p>
 			<p>
-				OpenMeetings is a project of The Apache Software Foundation, the old project
+				OpenMeetings is a project of the Apache, the old project
 				website at <a href="http://code.google.com/p/openmeetings/" target="_blank">GoogleCode</a>
 				will receive no updates anymore. The website at Apache is the only place that receives updates.
 			</p>
 		</section>
 		<section name="News">
 			<div class="bd-callout bd-callout-danger">
-				<div class="h4">Version 6.3.0 released!</div>
-				<div>Release 6.3.0, provides following improvements:<br/>
+				<h4>Version 6.0.0 released!</h4>
+				<div>Release 6.0.0, provides following improvements:<br/>
+					This release provides WebRTC audio/video/screen-sharing in the Room<br/>
 
-					Stability and UI:
+					Security:
 					<ul>
-						<li>Multiple WB fixes</li>
-						<li>Confirm popups are unified</li>
-						<li>Multiple fixes for latest Safari</li>
-						<li>Libraries are updated with most recent versions</li>
+						<li>TLS1.2. is used for OAuth</li>
+						<li>NetTest client count can be limited</li>
+						<li>Captcha is now configurable</li>
+						<li>Recordings can be globally disabled</li>
+					</ul>
+					Stability:
+					<ul>
+						<li>Audio/video in room is more stable</li>
+					</ul>
+					UI:
+					<ul>
+						<li>Translations are improved</li>
+						<li>Invitation form displayes time in client time zone</li>
+						<li>Notifications are displayed using JS Notification API</li>
+						<li>Video pods size can be fixed and configurable per-user</li>
 					</ul>
 					<br/>
 					Other fixes and improvements
@@ -85,12 +97,12 @@
 				<br/>
 
 				<span>
-					26 issues are fixed please check <br/>
-					<a href="https://www.apache.org/dist/openmeetings/6.3.0/CHANGELOG.md">CHANGELOG</a> and
-					<a href="https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12312720&amp;version=12351702">Detailed list</a>
+					40 issues are fixed please check <br/>
+					<a href="https://www.apache.org/dist/openmeetings/6.0.0/CHANGELOG.md">CHANGELOG</a> and
+					<a href="https://issues.apache.org/jira/secure/ReleaseNote.jspa?projectId=12312720&amp;version=12348297">Detailed list</a>
 				</span>
 				<span> See <a href="downloads.html">Downloads page</a>.</span>
-				<span class="date">(2022-05-17)</span>
+				<span class="date">(2021-03-09)</span>
 			</div>
 			<div class="bd-callout bd-callout-info">
 				<span class="date"><a href="NewsArchive.html">You can find older news here</a></span>
@@ -102,7 +114,9 @@
 				<div class="row">
 					<div class="col-md-1"></div>
 					<div class="col-md-8">
-						<a href="#" class="acevent" data-format="wide" data-width="250"></a>
+						<a href="https://www.apache.org/events/current-event">
+							<img alt="ASF Current Events" src="https://www.apache.org/events/current-event-234x60.png"/>
+						</a>
 					</div>
 				</div>
 			</div>
@@ -133,10 +147,10 @@
 			<subsection name="Audio and Video Conferencing">
 				<div class="row">
 					<div class="col-md-5">
-						<a href="images/screenshots/conference-room-av-settings.jpg" class="example-image-link"
-								title="OpenMeetings Conference Room" style="float:none; display: block; width:250px;height:163px;border:0;">
-							<img src="images/screenshots/conference-room-av-settings.jpg" title="OpenMeetings Conference Room"
-									style="width: 250px; height: 163px;"  alt="" />
+						<a href="images/Features_Screen_Conference_Room_Thumb.png" class="example-image-link"
+								title="OpenMeetings Conference Room" style="float:none; display: block; width:250px;height:175px;border:0;">
+							<img src="images/Features_Screen_Conference_Room_Thumb.png" title="OpenMeetings Conference Room"
+									style="width: 250px; height: 175px;"  alt="" />
 						</a>
 					</div>
 					<div class="col-md-5">
@@ -158,13 +172,13 @@
 			<subsection name="Meeting recording and Screen sharing">
 				<div class="row">
 					<div class="col-md-5">
-						<a href="images/screenshots/share-screen.jpg" class="example-image-link"
-								title="Screensharing-recording" style="float:none; display: block; width: 200px; height: 221px">
-							<img src="images/screenshots/share-screen.jpg" title="Screensharing-recording" style="float:none; display: block; width: 200px; height: 221px" alt="" />
+						<a href="images/desktopsharing.png" class="example-image-link"
+								title="Screensharing-recording" style="float:none; display: block; width: 140px; height: 150px">
+							<img src="images/desktopsharing.png" title="Screensharing-recording" style="float:none; display: block; width: 140px; height: 150px" alt="" />
 						</a>
-						<a href="images/screenshots/recordings-playback.png" class="example-image-link"
-								title="Device" style="float:none; display: block; width: 250px; height: 156px">
-							<img src="images/screenshots/recordings-playback.png" title="Device" style="float:none; display: block; width: 250px; height: 156px" alt="" />
+						<a href="images/recordings_timeleine.png" class="example-image-link"
+								title="Device" style="float:none; display: block; width: 200px; height: 115px">
+							<img src="images/recordings_timeleine.png" title="Device" style="float:none; display: block; width: 200px; height: 115px" alt="" />
 						</a>
 					</div>
 					<div class="col-md-5">
@@ -172,8 +186,8 @@
 							<li>Recorded sessions contain everything including sound recorded
 								from all audio streams in exactly the way you've seen it in the conference.
 							</li>
-							<li>Recorded sessions can be downloaded as MP4 files.</li>
-							<li>Possibility to select the desktop or one of your windows for sharing.</li>
+							<li>Recorded sessions can be downloaded as AVI/FLV files.</li>
+							<li>Possibility to select a screen area for sharing.</li>
 							<li>Different quality steps for Screensharing.</li>
 							<li>Watch and organize recordings in an integrated Drag and Drop File-Explorer</li>
 						</ul>
@@ -287,7 +301,7 @@
 							<br />
 							White board with drawing, writing, Drag n' Drop, Resizing, Images
 							(Drag n' Drop from File-Explorer),
-							Symbol(s)/Cliparts.
+							Symbol(s)/Cliparts .
 							<br />
 							<br />
 							Full-fit does rescale the document on the screen to be 100% visible
@@ -407,7 +421,6 @@
 					</div>
 				</div>
 			</subsection>
-			<!-- HACK to make whimsy sutisfied: https://www.apache.org/events/current-event-234x60.png -->
 		</section>
 	</body>
 </document>

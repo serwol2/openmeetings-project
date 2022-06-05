@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.apache.openmeetings.util.OmVersion;
+import org.apache.openmeetings.util.Version;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -35,9 +35,9 @@ public class Info implements Serializable {
 	private final String buildDate;
 
 	public Info() {
-		version = OmVersion.getVersion();
-		revision = OmVersion.getRevision();
-		buildDate = OmVersion.getBuildDate();
+		version = Version.getVersion();
+		revision = Version.getRevision();
+		buildDate = Version.getBuildDate();
 	}
 
 	public String getVersion() {

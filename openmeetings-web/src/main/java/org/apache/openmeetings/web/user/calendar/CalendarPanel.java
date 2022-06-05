@@ -123,7 +123,7 @@ public class CalendarPanel extends UserBasePanel {
 		final Form<Date> form = new Form<>("form");
 		add(form);
 
-		dialog = new AppointmentDialog("calendarAppointment", this, new CompoundPropertyModel<>(getDefault()));
+		dialog = new AppointmentDialog("appointment", this, new CompoundPropertyModel<>(getDefault()));
 		add(dialog);
 
 		boolean isRtl = isRtl();
@@ -282,10 +282,15 @@ public class CalendarPanel extends UserBasePanel {
 				final OmCalendar cal = item.getModelObject();
 				item.add(new WebMarkupContainer("item")
 						.add(new Label("name", cal.getTitle())));
-				item.add(AjaxEventBehavior.onEvent(EVT_CLICK, target -> {
-					calendarDialog.show(target, CalendarDialog.DIALOG_TYPE.UPDATE_CALENDAR, cal);
-					target.add(calendarDialog);
-				}));
+				item.add(new AjaxEventBehavior(EVT_CLICK) {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					protected void onEvent(AjaxRequestTarget target) {
+						calendarDialog.show(target, CalendarDialog.DIALOG_TYPE.UPDATE_CALENDAR, cal);
+						target.add(calendarDialog);
+					}
+				});
 			}
 		});
 

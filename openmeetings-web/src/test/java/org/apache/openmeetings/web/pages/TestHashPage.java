@@ -25,12 +25,12 @@ import static org.apache.openmeetings.web.pages.HashPage.INVITATION_HASH;
 import static org.apache.openmeetings.web.pages.HashPage.PANEL_MAIN;
 import static org.apache.openmeetings.web.pages.HashPage.PANEL_RECORDING;
 import static org.apache.openmeetings.web.util.OmUrlFragment.CHILD_ID;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.UUID;
 
-import org.apache.openmeetings.AbstractWicketTesterTest;
+import org.apache.openmeetings.AbstractWicketTester;
 import org.apache.openmeetings.db.dao.record.RecordingDao;
 import org.apache.openmeetings.db.dao.room.InvitationDao;
 import org.apache.openmeetings.db.dao.room.RoomDao;
@@ -54,7 +54,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.dialog.Modal;
 
-class TestHashPage extends AbstractWicketTesterTest {
+class TestHashPage extends AbstractWicketTester {
 	private static final Logger log = LoggerFactory.getLogger(TestHashPage.class);
 
 	@Autowired
@@ -67,7 +67,7 @@ class TestHashPage extends AbstractWicketTesterTest {
 	private void checkAccessDenied(boolean visible) {
 		@SuppressWarnings("unchecked")
 		Modal<String> dlg = (Modal<String>)tester.getComponentFromLastRenderedPage("access-denied");
-		assertEquals(visible, tester.getLastResponseAsString().contains("new bootstrap.Modal(document.getElementById('" + dlg.getMarkupId() + "')).show();"));
+		assertTrue(tester.getLastResponseAsString().contains("$('#" + dlg.getMarkupId() + "').modal({keyboard:true, show:" + visible + "});"));
 	}
 
 	private void checkAccessDenied(PageParameters pp) {

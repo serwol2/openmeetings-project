@@ -19,12 +19,14 @@
 
 -->
 <!DOCTYPE html>
-<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-9.xsd">
+<html xmlns:wicket="http://wicket.apache.org">
 <wicket:panel>
 	<form wicket:id="pagingForm" class="pagedEntityListPanel">
 		<div class="input-group input-group-sm">
 			<select wicket:id="entitiesPerPage" class="form-control"></select>
-			<span wicket:id="navigator" class="mt-1 pagination pagination-sm">[dataview navigator]</span>
+			<div class="input-group-append">
+				<span wicket:id="navigator" class="mt-1 pagination pagination-sm">[dataview navigator]</span>
+			</div>
 		</div>
 	</form>
 </wicket:panel>

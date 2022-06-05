@@ -105,7 +105,6 @@ public class RoomMenuPanel extends Panel {
 	};
 	private final PollsSubMenu pollsSubMenu;
 	private final ActionsSubMenu actionsSubMenu;
-	private final ExtrasSubMenu extrasSubMenu;
 	@SpringBean
 	private ClientManager cm;
 	@SpringBean
@@ -130,7 +129,6 @@ public class RoomMenuPanel extends Panel {
 		shareBtn.setOutputMarkupId(true).setOutputMarkupPlaceholderTag(true);
 		pollsSubMenu = new PollsSubMenu(room, this);
 		actionsSubMenu = new ActionsSubMenu(room, this);
-		extrasSubMenu = new ExtrasSubMenu(room);
 	}
 
 	private Group getGroup() {
@@ -153,7 +151,6 @@ public class RoomMenuPanel extends Panel {
 		};
 		actionsSubMenu.init();
 		pollsSubMenu.init();
-		extrasSubMenu.init();
 		add((menuPanel = new MenuPanel("menu", getMenu())).setVisible(isVisible()));
 
 		add(askBtn.add(AttributeModifier.replace(ATTR_TITLE, getString("84"))));
@@ -194,7 +191,6 @@ public class RoomMenuPanel extends Panel {
 		if (pollsSubMenu.isVisible()) {
 			menu.add(pollsSubMenu.getMenu());
 		}
-		menu.add(extrasSubMenu.getMenu());
 		return menu;
 	}
 
