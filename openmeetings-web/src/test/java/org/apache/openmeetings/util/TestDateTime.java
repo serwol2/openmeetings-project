@@ -18,8 +18,8 @@
  */
 package org.apache.openmeetings.util;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -29,9 +29,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import org.apache.openmeetings.RegularTest;
 import org.apache.openmeetings.web.common.datetime.AbstractOmDateTimePicker;
 import org.junit.jupiter.api.Test;
 
+@RegularTest
 class TestDateTime {
 
 	@Test
@@ -81,8 +83,11 @@ class TestDateTime {
 				.setLanguage("fr")
 				.setRegion("CA")
 				.build();
+		final String result = Runtime.version().feature() < 17
+				? "yy-MM-dd HH [h] mm" // java 11
+				: "y-MM-dd HH [h] mm"; // java 17
 		String format = AbstractOmDateTimePicker.getDateTimeFormat(loc);
-		assertEquals("yy-MM-dd HH [h] mm", AbstractOmDateTimePicker.patch(format));
+		assertEquals(result, AbstractOmDateTimePicker.patch(format));
 		format = AbstractOmDateTimePicker.getDateTimeFormat(Locale.ENGLISH);
 		assertEquals(format, AbstractOmDateTimePicker.patch(format));
 	}

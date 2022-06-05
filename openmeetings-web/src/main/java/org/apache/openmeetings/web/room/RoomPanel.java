@@ -192,6 +192,15 @@ public class RoomPanel extends BasePanel {
 			wb.update(target);
 		}
 
+		private CharSequence sendClientsOnInit() {
+			Client c = getClient();
+			StringBuilder res = new StringBuilder();
+			if (c.hasRight(Room.Right.MODERATOR) || !r.isHidden(RoomElement.USER_COUNT)) {
+				res.append(createAddClientJs(c));
+			}
+			return res;
+		}
+
 		private void initVideos(AjaxRequestTarget target) {
 			StringBuilder sb = new StringBuilder();
 			JSONArray streams = new JSONArray();
@@ -518,6 +527,9 @@ public class RoomPanel extends BasePanel {
 					case WB_PUT_FILE:
 						onWbPutFile((TextRoomMessage)m);
 						break;
+					case FILE_TREE_UPDATE:
+						onFileTreeUpdate(handler);
+						break;
 				}
 			}
 		}
@@ -602,6 +614,10 @@ public class RoomPanel extends BasePanel {
 	private void onWbPutFile(TextRoomMessage m) {
 		JSONObject obj = new JSONObject(m.getText());
 		getWb().sendFileToWb(fileDao.getAny(obj.getLong("fileId")), obj.getBoolean("clean"));
+	}
+
+	private void onFileTreeUpdate(IPartialPageRequestHandler handler) {
+		sidebar.getFilesPanel().update(handler);
 	}
 
 	private String getQuickPollJs() {
@@ -877,15 +893,6 @@ public class RoomPanel extends BasePanel {
 				.append("Room.addClient(")
 				.append(arr.toString(new NullStringer()))
 				.append(");");
-	}
-
-	private CharSequence sendClientsOnInit() {
-		Client c = getClient();
-		StringBuilder res = new StringBuilder();
-		if (c.hasRight(Room.Right.MODERATOR) || !r.isHidden(RoomElement.USER_COUNT)) {
-			res.append(createAddClientJs(c));
-		}
-		return res;
 	}
 
 	private CharSequence sendClientsOnUpdate() {

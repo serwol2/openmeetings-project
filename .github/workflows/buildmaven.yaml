@@ -31,7 +31,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: Package
-          path: /home/runner/work/openmeetings-project/openmeetings-project/openmeetings-service/target/openmeetings-service-6.2.0-SNAPSHOT.jar
+          path: /home/runner/work/openmeetings-project/openmeetings-project/openmeetings-service/target/openmeetings-service-6.3.0-SNAPSHOT.jar
 
       - uses: actions/upload-artifact@v3
         with:

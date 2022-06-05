@@ -22,7 +22,7 @@
 	<parent>
 		<groupId>org.apache.openmeetings</groupId>
 		<artifactId>openmeetings-parent</artifactId>
-		<version>6.2.0</version>
+		<version>6.3.0</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>openmeetings-webservice</artifactId>
@@ -47,7 +47,7 @@
 									<packages>org.apache.openmeetings.webservice</packages>
 								</group>
 							</groups>
-							<skip>${om.quick.build}</skip>
+							<skip>${site.skip}</skip>
 						</configuration>
 						<goals>
 							<goal>javadoc-no-fork</goal>
@@ -147,6 +147,7 @@
 							</server>
 						</servers>
 					</swaggerConfig>
+					<skip>${site.skip}</skip>
 				</configuration>
 				<executions>
 					<execution>

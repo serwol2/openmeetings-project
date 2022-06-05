@@ -70,8 +70,9 @@ import org.apache.openmeetings.db.util.ApplicationHelper;
 import org.apache.openmeetings.db.util.ws.RoomMessage;
 import org.apache.openmeetings.db.util.ws.TextRoomMessage;
 import org.apache.openmeetings.util.OmFileHelper;
-import org.apache.openmeetings.util.Version;
+import org.apache.openmeetings.util.OmVersion;
 import org.apache.openmeetings.util.ws.IClusterWsMessage;
+import org.apache.openmeetings.web.admin.backup.BackupUploadResourceReference;
 import org.apache.openmeetings.web.common.PingResourceReference;
 import org.apache.openmeetings.web.pages.AccessDeniedPage;
 import org.apache.openmeetings.web.pages.ActivatePage;
@@ -234,8 +235,8 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 			@Override
 			public void memberRemoved(MembershipEvent evt) {
 				//server down, need to remove all online clients, process persistent addresses
-				String serverId = evt.getMember().getAttribute(NAME_ATTR_KEY);
-				cm.serverRemoved(serverId);
+				String downId = evt.getMember().getAttribute(NAME_ATTR_KEY);
+				cm.serverRemoved(downId);
 				updateJpaAddresses();
 			}
 
@@ -250,8 +251,8 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 					if (evt.getMember().getUuid().equals(m.getUuid())) {
 						continue;
 					}
-					String serverId = m.getAttribute(NAME_ATTR_KEY);
-					names.add(serverId);
+					String duplicateId = m.getAttribute(NAME_ATTR_KEY);
+					names.add(duplicateId);
 				}
 				String newServerId = evt.getMember().getAttribute(NAME_ATTR_KEY);
 				log.warn("Name added: {}", newServerId);
@@ -336,6 +337,7 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 		mountResource("/room/file/${id}", new RoomResourceReference());
 		mountResource("/room/preview/${id}", new RoomPreviewResourceReference());
 		mountResource("/room/file/upload", new RoomFileUploadResourceReference());
+		mountResource("/admin/backup/upload", new BackupUploadResourceReference());
 		mountResource("/profile/${id}", new ProfileImageResourceReference());
 		mountResource("/group/${id}", new GroupLogoResourceReference());
 		mountResource("/group/customcss/${id}", new GroupCustomCssResourceReference());
@@ -358,7 +360,7 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 			// Init properties
 			updateJpaAddresses();
 			setExtProcessTtl(cfgDao.getInt(CONFIG_EXT_PROCESS_TTL, getExtProcessTtl()));
-			Version.logOMStarted();
+			OmVersion.logOMStarted();
 			recordingDao.resetProcessingStatus(); //we are starting so all processing recordings are now errors
 			userManager.initHttpClient();
 			setInitComplete(true);
@@ -658,7 +660,7 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 		IBootstrapSettings settings = Bootstrap.getSettings(this);
 		settings.setThemeProvider(theme == null ? new NoopThemeProvider()
 				: new BootswatchThemeProvider(theme));
-		if (WebSession.exists()) {
+		if (Session.exists()) {
 			settings.getActiveThemeProvider().setActiveTheme(theme == null
 					? settings.getThemeProvider().defaultTheme()
 					: settings.getThemeProvider().byName(theme.name()));

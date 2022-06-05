@@ -64,6 +64,7 @@ import org.apache.openmeetings.util.OmFileHelper;
 @NamedQuery(name = "getFileById", query = "SELECT f FROM BaseFileItem f WHERE f.deleted = false AND f.id = :id")
 @NamedQuery(name = "getAnyFileById", query = "SELECT f FROM BaseFileItem f WHERE f.id = :id")
 @NamedQuery(name = "getFileByHash", query = "SELECT f FROM BaseFileItem f WHERE f.deleted = false AND f.hash = :hash")
+@NamedQuery(name = "getAnyFileByHash", query = "SELECT f FROM BaseFileItem f WHERE f.hash = :hash")
 @NamedQuery(name = "getAllFileItemsForRoom", query = "SELECT f FROM BaseFileItem f"
 		+ " WHERE f.deleted = false AND f.type <> :folder"
 		+ " AND (f.roomId IS NULL OR f.roomId = :roomId)"
@@ -396,10 +397,7 @@ public abstract class BaseFileItem extends HistoricalEntity {
 		} else if (!hash.equals(other.hash)) {
 			return false;
 		}
-		if (type != other.type) {
-			return false;
-		}
-		return true;
+		return type == other.type;
 	}
 
 	private class OriginalFilter implements FileFilter {

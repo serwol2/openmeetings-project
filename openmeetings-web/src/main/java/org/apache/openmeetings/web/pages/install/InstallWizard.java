@@ -125,7 +125,7 @@ public class InstallWizard extends BootstrapWizard {
 	private ImportInitvalues initvalues;
 
 	//onInit, applyState
-	public InstallWizard(String id, String title) {
+	public InstallWizard(String id) {
 		super(id);
 		setOutputMarkupPlaceholderTag(true);
 		setOutputMarkupId(true);
@@ -770,8 +770,6 @@ public class InstallWizard extends BootstrapWizard {
 					target.add(container.replace(new ErrorMessagePanel("status", getString("install.wizard.install.failed"), th))
 						, desc.setVisible(false)
 						);
-				} else {
-					//onComplete(target);
 				}
 				super.onPostProcessTarget(target);
 			}
