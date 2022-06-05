@@ -40,7 +40,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.cxf.feature.Features;
 import org.apache.openmeetings.core.util.WebSocketHelper;
 import org.apache.openmeetings.db.dao.room.InvitationDao;
-import org.apache.openmeetings.db.dao.user.GroupDao;
 import org.apache.openmeetings.db.dao.user.IUserManager;
 import org.apache.openmeetings.db.dto.basic.ServiceResult;
 import org.apache.openmeetings.db.dto.basic.ServiceResult.Type;
@@ -54,15 +53,27 @@ import org.apache.openmeetings.db.entity.room.RoomFile;
 import org.apache.openmeetings.db.entity.user.User;
 import org.apache.openmeetings.db.manager.IClientManager;
 import org.apache.openmeetings.db.manager.IWhiteboardManager;
+import org.apache.openmeetings.db.mapper.RoomMapper;
 import org.apache.openmeetings.db.util.ws.RoomMessage;
 import org.apache.openmeetings.service.room.InvitationManager;
 import org.apache.openmeetings.webservice.error.InternalServiceException;
 import org.apache.openmeetings.webservice.error.ServiceException;
+import org.apache.openmeetings.webservice.schema.RoomDTOListWrapper;
+import org.apache.openmeetings.webservice.schema.RoomDTOWrapper;
+import org.apache.openmeetings.webservice.schema.ServiceResultWrapper;
+import org.apache.openmeetings.webservice.schema.UserDTOListWrapper;
 import org.apache.wicket.util.string.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 /**
  * RoomService contains methods to manipulate rooms and create invitation hash
@@ -74,6 +85,7 @@ import org.springframework.stereotype.Service;
 @WebService(serviceName="org.apache.openmeetings.webservice.RoomWebService", targetNamespace = TNS)
 @Features(features = "org.apache.cxf.ext.logging.LoggingFeature")
 @Produces({MediaType.APPLICATION_JSON})
+@Tag(name = "RoomService")
 @Path("/room")
 public class RoomWebService extends BaseWebService {
 	private static final Logger log = LoggerFactory.getLogger(RoomWebService.class);
@@ -89,7 +101,7 @@ public class RoomWebService extends BaseWebService {
 	@Autowired
 	private InvitationManager inviteManager;
 	@Autowired
-	private GroupDao groupDao;
+	private RoomMapper rMapper;
 
 	/**
 	 * Returns an Object of Type RoomsList which contains a list of
@@ -107,8 +119,20 @@ public class RoomWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/public/{type}")
-	public List<RoomDTO> getPublic(@QueryParam("sid") @WebParam(name="sid") String sid
-			, @PathParam("type") @WebParam(name="type") String type
+	@Operation(
+		description = "Returns an Object of Type RoomsList which contains a list of\n"
+				+ " ROOM-Objects. Every ROOM-Object contains a Roomtype and all informations\n"
+				+ "	about that ROOM. The List of current-users in the room is Null if you get\n"
+				+ "	them via SOAP. The Roomtype can be 'conference', 'presentation' or 'interview'.",
+		responses = {
+				@ApiResponse(responseCode = "200", description = "list of public rooms",
+						content = @Content(schema = @Schema(implementation = RoomDTOListWrapper.class))),
+				@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+		}
+	)
+	public List<RoomDTO> getPublic(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @QueryParam("sid") @WebParam(name="sid") String sid
+			, @Parameter(required = true, description = "Type of public rooms need to be retrieved") @PathParam("type") @WebParam(name="type") String type
 			) throws ServiceException
 	{
 		Room.Type t = Strings.isEmpty(type) ? null : Room.Type.valueOf(type);
@@ -126,8 +150,17 @@ public class RoomWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/{id}")
-	public RoomDTO getRoomById(@QueryParam("sid") @WebParam(name="sid") String sid
-			, @PathParam("id") @WebParam(name="id") Long id
+	@Operation(
+		description = "Returns a conference room object",
+		responses = {
+				@ApiResponse(responseCode = "200", description = "room with the id given",
+						content = @Content(schema = @Schema(implementation = RoomDTOWrapper.class))),
+				@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+		}
+	)
+	public RoomDTO getRoomById(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @QueryParam("sid") @WebParam(name="sid") String sid
+			, @Parameter(required = true, description = "the room id") @PathParam("id") @WebParam(name="id") Long id
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> new RoomDTO(roomDao.get(id)));
@@ -175,11 +208,22 @@ public class RoomWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/{type}/{externaltype}/{externalid}")
-	public RoomDTO getExternal(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @PathParam("type") @WebParam(name="type") String type
-			, @PathParam("externaltype") @WebParam(name="externaltype") String externalType
-			, @PathParam("externalid") @WebParam(name="externalid") String externalId
-			, @WebParam(name="room") @QueryParam("room") RoomDTO room
+	@Operation(
+		description = "Checks if a room with this exteralId + externalType does exist,\n"
+				+ "	if yes it returns the room id if not, it will create the room and then\n"
+				+ "	return the room id of the newly created room",
+		responses = {
+				@ApiResponse(responseCode = "200", description = "id of the room or error code",
+						content = @Content(schema = @Schema(implementation = RoomDTOWrapper.class))),
+				@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+		}
+	)
+	public RoomDTO getExternal(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "type of the room") @PathParam("type") @WebParam(name="type") String type
+			, @Parameter(required = true, description = "you can specify your system-name or type of room here, for example \"moodle\"") @PathParam("externaltype") @WebParam(name="externaltype") String externalType
+			, @Parameter(required = true, description = "your external room id may set here") @PathParam("externalid") @WebParam(name="externalid") String externalId
+			, @Parameter(required = true, description = "details of the room to be created if not found") @WebParam(name="room") @QueryParam("room") RoomDTO room
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> {
@@ -190,7 +234,7 @@ public class RoomWebService extends BaseWebService {
 				} else {
 					room.setExternalType(externalType);
 					room.setExternalId(externalId);
-					r = room.get(roomDao, groupDao, fileDao);
+					r = rMapper.get(room);
 					r = updateRtoRoom(r, sd.getUserId());
 					return new RoomDTO(r);
 				}
@@ -208,18 +252,27 @@ public class RoomWebService extends BaseWebService {
 	 * @param room
 	 *            room object
 	 *
-	 * @return - id of the USER added or error code
+	 * @return - Room object or throw error
 	 * @throws {@link ServiceException} in case of any errors
 	 */
 	@WebMethod
 	@POST
 	@Path("/")
-	public RoomDTO add(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="room") @FormParam("room") RoomDTO room
+	@Operation(
+			description = "Adds a new ROOM like through the Frontend",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "Room object or throw error",
+							content = @Content(schema = @Schema(implementation = RoomDTOWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public RoomDTO add(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "room object") @WebParam(name="room") @FormParam("room") RoomDTO room
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> {
-			Room r = room.get(roomDao, groupDao, fileDao);
+			Room r = rMapper.get(room);
 			r = updateRtoRoom(r, sd.getUserId());
 			return new RoomDTO(r);
 		});
@@ -237,8 +290,17 @@ public class RoomWebService extends BaseWebService {
 	@WebMethod
 	@DELETE
 	@Path("/{id}")
-	public ServiceResult delete(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="id") @PathParam("id") long id
+	@Operation(
+			description = "Delete a room by its room id",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "id of the room deleted",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public ServiceResult delete(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "The id of the room") @WebParam(name="id") @PathParam("id") long id
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> {
@@ -270,8 +332,19 @@ public class RoomWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/close/{id}")
-	public ServiceResult close(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="id") @PathParam("id") long id
+	@Operation(
+			description = "Method to remotely close rooms. If a room is closed all users\n"
+					+ " inside the room and all users that try to enter it will be redirected to\n"
+					+ " the redirectURL that is defined in the ROOM-Object.",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "1 in case of success, -2 otherwise",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public ServiceResult close(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "the room id") @WebParam(name="id") @PathParam("id") long id
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> {
@@ -305,8 +378,19 @@ public class RoomWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/open/{id}")
-	public ServiceResult open(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="id") @PathParam("id") long id
+	@Operation(
+			description = "Method to remotely open rooms. If a room is closed all users\n"
+					+ " inside the room and all users that try to enter it will be redirected to\n"
+					+ " the redirectURL that is defined in the ROOM-Object.",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "1 in case of success, -2 otherwise",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public ServiceResult open(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "the room id") @WebParam(name="id") @PathParam("id") long id
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> {
@@ -332,8 +416,17 @@ public class RoomWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/kick/{id}")
-	public ServiceResult kickAll(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="id") @PathParam("id") long id
+	@Operation(
+			description = "Kick all uses of a certain room",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "true if USER was kicked, false otherwise",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public ServiceResult kickAll(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "the room id") @WebParam(name="id") @PathParam("id") long id
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> {
@@ -354,16 +447,25 @@ public class RoomWebService extends BaseWebService {
 	 * @param externalId
 	 *            external id of USER to kick
 	 *
-	 * @return - true if USER was kicked, false otherwise
+	 * @return - 'Kicked' if USER was 'Not kicked' otherwise
 	 * @throws {@link ServiceException} in case of any errors
 	 */
 	@WebMethod
 	@GET
 	@Path("/kick/{id}/{externalType}/{externalId}")
-	public ServiceResult kick(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="id") @PathParam("id") long id
-			, @WebParam(name="externalType") @PathParam("externalType") String externalType
-			, @WebParam(name="externalId") @PathParam("externalId") String externalId
+	@Operation(
+			description = "kick external USER from given room",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "'Kicked' if USER was 'Not kicked' otherwise",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public ServiceResult kick(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "the room id") @WebParam(name="id") @PathParam("id") long id
+			, @Parameter(required = true, description = "external type of USER to kick") @WebParam(name="externalType") @PathParam("externalType") String externalType
+			, @Parameter(required = true, description = "external id of USER to kick") @WebParam(name="externalId") @PathParam("externalId") String externalId
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> {
@@ -382,8 +484,17 @@ public class RoomWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/count/{roomid}")
-	public ServiceResult count(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="roomid") @PathParam("roomid") Long roomId
+	@Operation(
+			description = "Returns the count of users currently in the ROOM with given id",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "number of users as int",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public ServiceResult count(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "roomId id of the room to get users") @WebParam(name="roomid") @PathParam("roomid") Long roomId
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> new ServiceResult(String.valueOf(clientManager.streamByRoom(roomId).count()), Type.SUCCESS));
@@ -400,8 +511,17 @@ public class RoomWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/users/{roomid}")
-	public List<UserDTO> users(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="roomid") @PathParam("roomid") Long roomId
+	@Operation(
+			description = "Returns list of users currently in the ROOM with given id",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "List of users in the room",
+							content = @Content(schema = @Schema(implementation = UserDTOListWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public List<UserDTO> users(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "roomId id of the room to get users") @WebParam(name="roomid") @PathParam("roomid") Long roomId
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> {
@@ -423,14 +543,23 @@ public class RoomWebService extends BaseWebService {
 	@WebMethod
 	@POST
 	@Path("/hash")
-	public ServiceResult hash(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="invite") @QueryParam("invite") InvitationDTO invite
-			, @WebParam(name="sendmail") @QueryParam("sendmail") boolean sendmail
+	@Operation(
+			description = "Method to get invitation hash with given parameters",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "serviceResult object with the result",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public ServiceResult hash(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "parameters of the invitation") @WebParam(name="invite") @QueryParam("invite") InvitationDTO invite
+			, @Parameter(required = true, description = "flag to determine if email should be sent or not") @WebParam(name="sendmail") @QueryParam("sendmail") boolean sendmail
 			) throws ServiceException
 	{
 		log.debug("[hash] invite {}", invite);
 		return performCall(sid, User.Right.SOAP, sd -> {
-			Invitation i = invite.get(sd.getUserId(), userDao, roomDao);
+			Invitation i = rMapper.get(invite, sd.getUserId());
 			i = inviteDao.update(i);
 
 			if (i != null) {
@@ -462,6 +591,15 @@ public class RoomWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/cleanwb/{id}")
+	@Operation(
+			deprecated = true,
+			description = "Method to clean room white board (all objects will be purged) - Deprecated use WbService#resetWb method instead",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "serviceResult object with the result",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
 	public ServiceResult cleanWb(@WebParam(name="sid") @QueryParam("sid") String sid
 			, @WebParam(name="id") @PathParam("id") long id
 			) throws ServiceException

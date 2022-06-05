@@ -26,7 +26,7 @@ import static org.apache.openmeetings.web.app.WebSession.getDateFormat;
 import static org.apache.openmeetings.web.app.WebSession.getRights;
 import static org.apache.openmeetings.web.app.WebSession.getUserId;
 import static org.apache.openmeetings.web.common.BasePanel.EVT_CLICK;
-import static org.apache.openmeetings.web.common.confirmation.ConfirmationBehavior.newOkCancelDangerConfirm;
+import static org.apache.openmeetings.web.common.confirmation.ConfirmationHelper.newOkCancelDangerConfirm;
 import static org.apache.openmeetings.web.room.RoomPanel.isModerator;
 
 import java.util.List;
@@ -173,7 +173,7 @@ public class ChatToolbar extends Panel implements IWysiwygToolbar {
 
 	@Override
 	public void attachToEditor(Component editor) {
-		toolbar.add(AttributeModifier.replace("data-target", JQueryWidget.getSelector(editor)));
+		toolbar.add(AttributeModifier.replace("data-bs-target", JQueryWidget.getSelector(editor)));
 	}
 
 	@Override
@@ -213,14 +213,7 @@ public class ChatToolbar extends Panel implements IWysiwygToolbar {
 		toolbar.add(delBtn.setVisible(hasAdminLevel(getRights())).setOutputMarkupId(true)
 				.setOutputMarkupPlaceholderTag(true));
 		toolbar.add(save.setVisible(hasAdminLevel(getRights())).setOutputMarkupId(true)
-				.setOutputMarkupPlaceholderTag(true).add(new AjaxEventBehavior(EVT_CLICK) {
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					protected void onEvent(AjaxRequestTarget target) {
-						download.initiate(target);
-					}
-				}));
+				.setOutputMarkupPlaceholderTag(true).add(AjaxEventBehavior.onEvent(EVT_CLICK, download::initiate)));
 	}
 
 	private static JSONObject cleanMsg(String scope) {

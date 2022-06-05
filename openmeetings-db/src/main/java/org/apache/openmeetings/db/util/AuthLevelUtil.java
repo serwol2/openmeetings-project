@@ -27,6 +27,7 @@ import org.apache.openmeetings.db.entity.room.RoomGroup;
 import org.apache.openmeetings.db.entity.room.RoomModerator;
 import org.apache.openmeetings.db.entity.user.GroupUser;
 import org.apache.openmeetings.db.entity.user.User;
+import org.apache.wicket.util.lang.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +53,8 @@ public class AuthLevelUtil {
 		}
 		if (//admin user get superModerator level, no-one can kick him/her
 			hasAdminLevel(u.getRights())
+			// user personal room
+			|| Objects.equal(u.getId(), r.getOwnerId())
 			// appointment owner is super moderator
 			|| (r.isAppointment() && a != null && u.getId().equals(a.getOwner().getId())))
 		{

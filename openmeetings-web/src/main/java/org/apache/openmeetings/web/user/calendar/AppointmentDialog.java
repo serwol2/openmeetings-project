@@ -21,7 +21,8 @@ package org.apache.openmeetings.web.user.calendar;
 import static org.apache.openmeetings.util.OpenmeetingsVariables.isMyRoomsEnabled;
 import static org.apache.openmeetings.web.app.WebSession.getRights;
 import static org.apache.openmeetings.web.app.WebSession.getUserId;
-import static org.apache.openmeetings.web.common.confirmation.ConfirmationBehavior.newOkCancelDangerConfirm;
+import static org.apache.openmeetings.web.common.BasePanel.EVT_CHANGE;
+import static org.apache.openmeetings.web.common.confirmation.ConfirmationHelper.newOkCancelDangerConfirm;
 import static org.apache.openmeetings.web.util.CalendarWebHelper.getDate;
 import static org.apache.openmeetings.web.util.CalendarWebHelper.getDateTime;
 
@@ -51,8 +52,8 @@ import org.apache.openmeetings.db.util.FormatHelper;
 import org.apache.openmeetings.service.calendar.caldav.AppointmentManager;
 import org.apache.openmeetings.web.app.WebSession;
 import org.apache.openmeetings.web.common.GroupChoiceProvider;
-import org.apache.openmeetings.web.common.OmDateTimePicker;
 import org.apache.openmeetings.web.common.OmModalCloseButton;
+import org.apache.openmeetings.web.common.datetime.OmDateTimePicker;
 import org.apache.openmeetings.web.pages.MainPage;
 import org.apache.openmeetings.web.user.OmWysiwygToolbar;
 import org.apache.openmeetings.web.user.rooms.RoomEnterBehavior;
@@ -131,6 +132,7 @@ public class AppointmentDialog extends Modal<Appointment> {
 
 	public AppointmentDialog(String id, CalendarPanel calendarPanel, CompoundPropertyModel<Appointment> model) {
 		super(id, model);
+		setMarkupId(id);
 		log.debug(" -- AppointmentDialog -- Current model {}", getModel().getObject());
 		this.calendarPanel = calendarPanel;
 		setOutputMarkupId(true);
@@ -221,7 +223,7 @@ public class AppointmentDialog extends Modal<Appointment> {
 			}
 		});
 		enterRoom.setOutputMarkupId(true).setOutputMarkupPlaceholderTag(true);
-		enterRoom.add(AttributeModifier.append("data-dismiss", "modal"));
+		enterRoom.add(AttributeModifier.append("data-bs-dismiss", "modal"));
 		delete = new BootstrapAjaxLink<>(BUTTON_MARKUP_ID, null, Buttons.Type.Outline_Danger, new ResourceModel("80")) {
 			private static final long serialVersionUID = 1L;
 
@@ -369,6 +371,7 @@ public class AppointmentDialog extends Modal<Appointment> {
 			//General
 			add(ownerPanel.add(owner));
 			boolean showGroups = AuthLevelUtil.hasAdminLevel(getRights());
+			groups.getSettings().setDropdownParent(AppointmentDialog.this.getMarkupId());
 			add(rdi.add(new AjaxFormChoiceComponentUpdatingBehavior() {
 				private static final long serialVersionUID = 1L;
 
@@ -383,23 +386,14 @@ public class AppointmentDialog extends Modal<Appointment> {
 				, new Radio<>("group", Model.of(InviteeType.group))
 			);
 			if (showGroups) {
-				groups.add(new AjaxFormComponentUpdatingBehavior("change") {
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-						// added to update model
-					}
-				}).setEnabled(false);
+				groups.add(AjaxFormComponentUpdatingBehavior.onUpdate(EVT_CHANGE, target -> {
+					// added to update model
+				})).setEnabled(false);
 			}
-			rdi.add(attendees.add(new AjaxFormComponentUpdatingBehavior("change") {
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-						// added to update model
-					}
-				})
+			attendees.getSettings().setDropdownParent(AppointmentDialog.this.getMarkupId());
+			rdi.add(attendees.add(AjaxFormComponentUpdatingBehavior.onUpdate(EVT_CHANGE, target -> {
+					// added to update model
+				}))
 				, groupContainer.setVisible(showGroups)
 			);
 			rdi.add(new Radio<>("user", Model.of(InviteeType.user)));

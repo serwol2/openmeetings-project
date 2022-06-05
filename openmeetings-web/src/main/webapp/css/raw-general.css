@@ -1,7 +1,12 @@
 /* Licensed under the Apache License, Version 2.0 (the "License") http://www.apache.org/licenses/LICENSE-2.0 */
+:root {
+	--app-height: 100%;
+}
 html, body {
-	height: 100%;
+	width: 100vw;
+	height: var(--app-height);
 	margin: 0;
+	padding: 0;
 	font-family: Arial, Helvetica, sans-serif;
 	overflow-y: hidden;
 }
@@ -215,7 +220,7 @@ html, body {
 .om-icon::before {
 	font-family: 'Font Awesome 5 Free';
 	font-weight: 900;
-	color: var(--secondary);
+	color: var(--bs-secondary);
 	font-size: 1.2em;
 	vertical-align: text-bottom;
 	line-height: 1em;
@@ -228,11 +233,11 @@ html, body {
 	content: '\f055';
 }
 .online.om-icon::before {
-	color: var(--success);
+	color: var(--bs-success);
 	content: '\f111';
 }
 .offline.om-icon::before {
-	color: var(--danger);
+	color: var(--bs-danger);
 	content: '\f111';
 }
 .message {
@@ -294,7 +299,7 @@ table.messages td.from, table.messages td.subject {
 }
 .email.selected {
 	border: 1px solid #cccccc;
-	background-color:var(--light);
+	background-color:var(--bs-light);
 }
 .email.folder {
 	font-weight: normal;
@@ -608,7 +613,7 @@ select.messages.selector {
 }
 .dragbox .dragbox-header .dragbox-actions .icon.delete::before {
 	content: "\f00d";
-	color: var(--danger);
+	color: var(--bs-danger);
 }
 .dragbox-content .tableWrapper {
 	/* room users on dashboard */
@@ -620,6 +625,7 @@ select.messages.selector {
 }
 .sort-icon a {
 	vertical-align: middle;
+	text-decoration: none;
 }
 .sort-icon.none a::before {
 	content: '\f0dc';

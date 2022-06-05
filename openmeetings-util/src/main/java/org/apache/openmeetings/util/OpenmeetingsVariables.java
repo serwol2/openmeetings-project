@@ -21,9 +21,15 @@ package org.apache.openmeetings.util;
 import static org.apache.wicket.csp.CSPDirectiveSrcValue.SELF;
 import static org.apache.wicket.csp.CSPDirectiveSrcValue.STRICT_DYNAMIC;
 
+import java.net.URI;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.openjson.JSONObject;
 
 public class OpenmeetingsVariables {
+	private static final Logger log = LoggerFactory.getLogger(OpenmeetingsVariables.class);
 	public static final String ATTR_CLASS = "class";
 	public static final String ATTR_TITLE = "title";
 	public static final String ATTR_DISABLED = "disabled";
@@ -113,6 +119,7 @@ public class OpenmeetingsVariables {
 	public static final String CONFIG_CSP_STYLE = "header.csp.style";
 	public static final String CONFIG_CSP_ENABLED = "header.csp.enabled";
 	public static final String CONFIG_RECORDING_ENABLED = "recording.enabled";
+	public static final String CONFIG_THEME = "ui.theme";
 
 	public static final int RECENT_ROOMS_COUNT = 5;
 	public static final int USER_LOGIN_MINIMUM_LENGTH = 4;
@@ -179,6 +186,7 @@ public class OpenmeetingsVariables {
 	private static int appointmentReminderMinutes = 15;
 	private static int appointmentPreStartMinutes = 5;
 	private static boolean recordingsEnabled = true;
+	private static String theme = "Sandstone";
 
 	private OpenmeetingsVariables() {}
 
@@ -244,6 +252,19 @@ public class OpenmeetingsVariables {
 
 	public static String getBaseUrl() {
 		return baseUrl;
+	}
+
+	private static URI getWebappPath(String url) {
+		return URI.create(URI.create(url + "/").normalize().getPath());
+	}
+
+	public static URI getWebappPath() {
+		try {
+			return getWebappPath(baseUrl);
+		} catch (Exception e) {
+			log.warn("Error getting baseURL");
+			return getWebappPath(DEFAULT_BASE_URL);
+		}
 	}
 
 	public static void setBaseUrl(String url) {
@@ -609,5 +630,13 @@ public class OpenmeetingsVariables {
 
 	public static void setRecordingsEnabled(boolean enabled) {
 		recordingsEnabled = enabled;
+	}
+
+	public static String getTheme() {
+		return theme;
+	}
+
+	public static void setTheme(String inTheme) {
+		theme = inTheme;
 	}
 }

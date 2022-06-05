@@ -19,15 +19,13 @@
 
 -->
 <!DOCTYPE html>
-<html xmlns:wicket="http://wicket.apache.org">
+<html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-9.xsd">
 <wicket:panel>
 	<div wicket:id="pagedPanel" class="pagedEntityListPanel"></div>
 	<form wicket:id="searchForm" class="searchForm">
 		<div class="input-group input-group-sm">
 			<input type="text" wicket:id="searchText" wicket:message="title:714" class="form-control"/>
-			<div class="input-group-append">
-				<button wicket:id="search"></button>
-			</div>
+			<button wicket:id="search"></button>
 		</div>
 	</form>
 </wicket:panel>

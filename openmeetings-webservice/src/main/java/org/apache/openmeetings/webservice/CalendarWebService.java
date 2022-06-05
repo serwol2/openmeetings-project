@@ -40,20 +40,30 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.cxf.feature.Features;
 import org.apache.openmeetings.db.dao.calendar.AppointmentDao;
-import org.apache.openmeetings.db.dao.user.GroupDao;
 import org.apache.openmeetings.db.dto.basic.ServiceResult;
 import org.apache.openmeetings.db.dto.basic.ServiceResult.Type;
 import org.apache.openmeetings.db.dto.calendar.AppointmentDTO;
 import org.apache.openmeetings.db.entity.calendar.Appointment;
 import org.apache.openmeetings.db.entity.user.User;
 import org.apache.openmeetings.db.entity.user.User.Right;
+import org.apache.openmeetings.db.mapper.CalendarMapper;
 import org.apache.openmeetings.db.util.AuthLevelUtil;
 import org.apache.openmeetings.webservice.error.InternalServiceException;
 import org.apache.openmeetings.webservice.error.ServiceException;
+import org.apache.openmeetings.webservice.schema.AppointmentDTOListWrapper;
+import org.apache.openmeetings.webservice.schema.AppointmentDTOWrapper;
+import org.apache.openmeetings.webservice.schema.ServiceResultWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * CalendarService contains methods to create, edit delete calendar meetings
@@ -65,6 +75,7 @@ import org.springframework.stereotype.Service;
 @WebService(serviceName="org.apache.openmeetings.webservice.CalendarWebService", targetNamespace = TNS)
 @Features(features = "org.apache.cxf.ext.logging.LoggingFeature")
 @Produces({MediaType.APPLICATION_JSON})
+@Tag(name = "CalendarService")
 @Path("/calendar")
 public class CalendarWebService extends BaseWebService {
 	private static final Logger log = LoggerFactory.getLogger(CalendarWebService.class);
@@ -72,7 +83,7 @@ public class CalendarWebService extends BaseWebService {
 	@Autowired
 	private AppointmentDao dao;
 	@Autowired
-	private GroupDao groupDao;
+	private CalendarMapper calMapper;
 
 	/**
 	 * Load appointments by a start / end range for the current SID
@@ -89,9 +100,18 @@ public class CalendarWebService extends BaseWebService {
 	 */
 	@GET
 	@Path("/{start}/{end}")
-	public List<AppointmentDTO> range(@QueryParam("sid") @WebParam(name="sid") String sid
-			, @PathParam("start") @WebParam(name="start") Calendar start
-			, @PathParam("end") @WebParam(name="end") Calendar end
+	@Operation(
+			description = "Load appointments by a start / end range for the current SID",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "list of appointments in range",
+						content = @Content(schema = @Schema(implementation = AppointmentDTOListWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public List<AppointmentDTO> range(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @QueryParam("sid") @WebParam(name="sid") String sid
+			, @Parameter(required = true, description = "start time") @PathParam("start") @WebParam(name="start") Calendar start
+			, @Parameter(required = true, description = "end time") @PathParam("end") @WebParam(name="end") Calendar end
 			) throws ServiceException
 	{
 		log.debug("range : startdate - {} , enddate - {}"
@@ -118,11 +138,19 @@ public class CalendarWebService extends BaseWebService {
 	 */
 	@GET
 	@Path("/{userid}/{start}/{end}")
+	@Operation(
+			description = "Load appointments by a start / end range for the userId",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "list of appointments in range",
+							content = @Content(schema = @Schema(implementation = AppointmentDTOListWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
 	public List<AppointmentDTO> rangeForUser(
-			@QueryParam("sid") @WebParam(name="sid") String sid
-			, @PathParam("userid") @WebParam(name="userid") long userid
-			, @PathParam("start") @WebParam(name="start") Calendar start
-			, @PathParam("end") @WebParam(name="end") Calendar end
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @QueryParam("sid") @WebParam(name="sid") String sid
+			, @Parameter(required = true, description = "the userId the calendar events should be loaded") @PathParam("userid") @WebParam(name="userid") long userid
+			, @Parameter(required = true, description = "start time") @PathParam("start") @WebParam(name="start") Calendar start
+			, @Parameter(required = true, description = "end time") @PathParam("end") @WebParam(name="end") Calendar end
 			) throws ServiceException
 	{
 		log.debug("rangeForUser : startdate - {} , enddate - {}"
@@ -142,7 +170,17 @@ public class CalendarWebService extends BaseWebService {
 	 */
 	@GET
 	@Path("/next")
-	public AppointmentDTO next(@QueryParam("sid") @WebParam(name="sid") String sid) throws ServiceException {
+	@Operation(
+			description = "Get the next Calendar event for the current USER of the SID",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "next Calendar event",
+						content = @Content(schema = @Schema(implementation = AppointmentDTOWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public AppointmentDTO next(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @QueryParam("sid") @WebParam(name="sid") String sid
+			) throws ServiceException {
 		return performCall(sid, User.Right.ROOM, sd -> {
 			Appointment a = dao.getNext(sd.getUserId(), new Date());
 			return a == null ? null : new AppointmentDTO(a);
@@ -162,8 +200,17 @@ public class CalendarWebService extends BaseWebService {
 	 */
 	@GET
 	@Path("/next/{userid}")
-	public AppointmentDTO nextForUser(@QueryParam("sid") @WebParam(name="sid") String sid
-			, @PathParam("userid") @WebParam(name="userid") long userid
+	@Operation(
+			description = "Get the next Calendar event for userId",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "next Calendar event",
+						content = @Content(schema = @Schema(implementation = AppointmentDTOWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public AppointmentDTO nextForUser(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @QueryParam("sid") @WebParam(name="sid") String sid
+			, @Parameter(required = true, description = "the userId the calendar events should be loaded") @PathParam("userid") @WebParam(name="userid") long userid
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> {
@@ -185,8 +232,17 @@ public class CalendarWebService extends BaseWebService {
 	 */
 	@GET
 	@Path("/room/{roomid}")
-	public AppointmentDTO getByRoom(@QueryParam("sid") @WebParam(name="sid") String sid
-			, @PathParam("roomid") @WebParam(name="roomid") long roomid
+	@Operation(
+			description = "Load a calendar event by its room id",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "calendar event by its room id",
+						content = @Content(schema = @Schema(implementation = AppointmentDTOWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public AppointmentDTO getByRoom(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @QueryParam("sid") @WebParam(name="sid") String sid
+			, @Parameter(required = true, description = "id of appointment special room") @PathParam("roomid") @WebParam(name="roomid") long roomid
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.ROOM, sd -> {
@@ -208,15 +264,24 @@ public class CalendarWebService extends BaseWebService {
 	 */
 	@GET
 	@Path("/title/{title}")
-	public List<AppointmentDTO> getByTitle(@QueryParam("sid") @WebParam(name="sid") String sid
-			, @PathParam("title") @WebParam(name="title") String title
+	@Operation(
+			description = "Search a calendar event for the current SID",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "calendar event list",
+							content = @Content(schema = @Schema(implementation = AppointmentDTOListWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public List<AppointmentDTO> getByTitle(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @QueryParam("sid") @WebParam(name="sid") String sid
+			, @Parameter(required = true, description = "the search string") @PathParam("title") @WebParam(name="title") String title
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.ROOM, sd -> AppointmentDTO.list(dao.searchByTitle(sd.getUserId(), title)));
 	}
 
 	/**
-	 * Save an appointment
+	 * Create an appointment
 	 *
 	 * @param sid
 	 *            The SID of the User. This SID must be marked as Loggedin
@@ -229,8 +294,17 @@ public class CalendarWebService extends BaseWebService {
 	@WebMethod
 	@POST
 	@Path("/")
-	public AppointmentDTO save(@QueryParam("sid") @WebParam(name="sid") String sid
-			, @FormParam("appointment") @WebParam(name="appointment") AppointmentDTO appointment
+	@Operation(
+			description = "Create an appointment",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "appointment saved",
+						content = @Content(schema = @Schema(implementation = AppointmentDTOWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public AppointmentDTO save(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @QueryParam("sid") @WebParam(name="sid") String sid
+			, @Parameter(required = true, description = "calendar event") @FormParam("appointment") @WebParam(name="appointment") AppointmentDTO appointment
 			) throws ServiceException
 	{
 		//Seems to be create
@@ -247,7 +321,7 @@ public class CalendarWebService extends BaseWebService {
 						|| appointment.getOwner().getId().equals(u.getId());
 			}, sd -> {
 				User u = userDao.get(sd.getUserId());
-				Appointment a = appointment.get(userDao, groupDao, roomDao, fileDao, dao, u);
+				Appointment a = calMapper.get(appointment, u);
 				if (a.getRoom().getId() != null) {
 					if (a.getRoom().isAppointment()) {
 						a.getRoom().setIspublic(false);
@@ -277,8 +351,22 @@ public class CalendarWebService extends BaseWebService {
 	 */
 	@DELETE
 	@Path("/{id}")
-	public ServiceResult delete(@QueryParam("sid") @WebParam(name="sid") String sid
-			, @PathParam("id") @WebParam(name="id") Long id
+	@Operation(
+			description = "Delete a calendar event\n"
+					+ "\n"
+					+ " If the given sid is from an Administrator or Web-Service USER, the USER\n"
+					+ " can delete any appointment.\n"
+					+ " If the sid is assigned to a regular USER, he can only delete appointments\n"
+					+ " where he is also the owner/creator of the appointment",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "ServiceResult with result type",
+						content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public ServiceResult delete(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @QueryParam("sid") @WebParam(name="sid") String sid
+			, @Parameter(required = true, description = "the id to delete") @PathParam("id") @WebParam(name="id") Long id
 			) throws ServiceException
 	{
 		Appointment a = dao.get(id);
@@ -288,7 +376,7 @@ public class CalendarWebService extends BaseWebService {
 					return true;
 					// fine
 				}
-				if (AuthLevelUtil.hasUserLevel(rights) && a.getOwner().getId().equals(sd.getUserId())) {
+				if (AuthLevelUtil.hasUserLevel(rights) && a.isOwner(sd.getUserId())) {
 					return true;
 				}
 				return false;

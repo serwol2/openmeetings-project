@@ -35,6 +35,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.openmeetings.core.remote.KurentoHandler;
@@ -45,20 +46,18 @@ import org.apache.openmeetings.db.dao.file.FileItemDao;
 import org.apache.openmeetings.db.dao.user.UserDao;
 import org.apache.openmeetings.db.entity.basic.Client;
 import org.apache.openmeetings.db.entity.calendar.Appointment;
-import org.apache.openmeetings.db.entity.calendar.MeetingMember;
 import org.apache.openmeetings.db.entity.file.BaseFileItem;
 import org.apache.openmeetings.db.entity.room.Room;
 import org.apache.openmeetings.db.entity.room.Room.Right;
 import org.apache.openmeetings.db.entity.room.Room.RoomElement;
 import org.apache.openmeetings.db.entity.room.RoomGroup;
 import org.apache.openmeetings.db.entity.server.SOAPLogin;
-import org.apache.openmeetings.db.entity.user.GroupUser;
-import org.apache.openmeetings.db.entity.user.User;
 import org.apache.openmeetings.db.util.AuthLevelUtil;
 import org.apache.openmeetings.db.util.ws.RoomMessage;
 import org.apache.openmeetings.db.util.ws.RoomMessage.Type;
 import org.apache.openmeetings.db.util.ws.TextRoomMessage;
 import org.apache.openmeetings.util.NullStringer;
+import org.apache.openmeetings.web.app.Application;
 import org.apache.openmeetings.web.app.ClientManager;
 import org.apache.openmeetings.web.app.QuickPollManager;
 import org.apache.openmeetings.web.app.TimerService;
@@ -126,10 +125,23 @@ public class RoomPanel extends BasePanel {
 	private static final String ACCESS_DENIED_ID = "access-denied";
 	private static final String EVENT_DETAILS_ID = "event-details";
 	public enum Action {
-		kick
-		, muteOthers
-		, mute
-		, toggleRight
+		KICK("kick")
+		, MUTE_OTHERS("muteOthers")
+		, MUTE("mute")
+		, TOGGLE_RIGHT("toggleRight");
+
+		private final String jsName;
+
+		private Action(String jsName) {
+			this.jsName = jsName;
+		}
+
+		public static Action of(String jsName) {
+			return Stream.of(Action.values())
+					.filter(a -> a.jsName.equals(jsName))
+					.findAny()
+					.orElse(null);
+		}
 	}
 	private final Room r;
 	private final boolean interview;
@@ -318,47 +330,17 @@ public class RoomPanel extends BasePanel {
 		} else if (r.getId().equals(WebSession.get().getRoomId())) {
 			// secureHash/invitationHash, already checked
 		} else {
-			boolean allowed = false;
+			boolean allowed = Application.get().isRoomAllowedToUser(r, c.getUser());
 			String deniedMessage = null;
 			if (r.isAppointment()) {
 				Appointment a = apptDao.getByRoom(r.getId());
-				if (a != null && !a.isDeleted()) {
-					boolean isOwner = a.getOwner().getId().equals(getUserId());
-					allowed = isOwner;
-					log.debug("appointed room, isOwner ? {}", isOwner);
-					if (!allowed) {
-						for (MeetingMember mm : a.getMeetingMembers()) {
-							if (getUserId().equals(mm.getUser().getId())) {
-								allowed = true;
-								break;
-							}
-						}
-					}
-					if (allowed) {
-						Calendar cal = WebSession.getCalendar();
-						if (isOwner || cal.getTime().after(allowedStart(a.getStart())) && cal.getTime().before(a.getEnd())) {
-							eventDetail = new EventDetailDialog(EVENT_DETAILS_ID, a);
-						} else {
-							allowed = false;
-							deniedMessage = String.format("%s %s - %s", getString("error.hash.period"), getDateFormat().format(a.getStart()), getDateFormat().format(a.getEnd()));
-						}
-					}
-				}
-			} else {
-				allowed = r.getIspublic() || (r.getOwnerId() != null && r.getOwnerId().equals(getUserId()));
-				log.debug("public ? {}, ownedId ? {} {}", r.getIspublic(), r.getOwnerId(), allowed);
-				if (!allowed) {
-					User u = c.getUser();
-					for (RoomGroup ro : r.getGroups()) {
-						for (GroupUser ou : u.getGroupUsers()) {
-							if (ro.getGroup().getId().equals(ou.getGroup().getId())) {
-								allowed = true;
-								break;
-							}
-						}
-						if (allowed) {
-							break;
-						}
+				if (allowed) {
+					Calendar cal = WebSession.getCalendar();
+					if (a.isOwner(getUserId()) || cal.getTime().after(allowedStart(a.getStart())) && cal.getTime().before(a.getEnd())) {
+						eventDetail = new EventDetailDialog(EVENT_DETAILS_ID, a);
+					} else {
+						allowed = false;
+						deniedMessage = String.format("%s %s - %s", getString("error.hash.period"), getDateFormat().format(a.getStart()), getDateFormat().format(a.getEnd()));
 					}
 				}
 			}
@@ -450,50 +432,13 @@ public class RoomPanel extends BasePanel {
 						menu.update(handler);
 						break;
 					case RIGHT_UPDATED:
-						{
-							String uid = ((TextRoomMessage)m).getText();
-							Client c = cm.get(uid);
-							if (c == null) {
-								log.error("Not existing user in rightUpdated {} !!!!", uid);
-								return;
-							}
-							boolean self = curClient.getUid().equals(c.getUid());
-							StringBuilder sb = new StringBuilder("Room.updateClient(")
-									.append(c.toJson(self).toString(new NullStringer()))
-									.append(");")
-									.append(sendClientsOnUpdate());
-							handler.appendJavaScript(sb);
-							sidebar.update(handler);
-							menu.update(handler);
-							wb.update(handler);
-							updateInterviewRecordingButtons(handler);
-						}
+						onRightUpdated(curClient, (TextRoomMessage)m, handler);
 						break;
 					case ROOM_ENTER:
-						{
-							sidebar.update(handler);
-							menu.update(handler);
-							String uid = ((TextRoomMessage)m).getText();
-							Client c = cm.get(uid);
-							if (c == null) {
-								log.error("Not existing user in rightUpdated {} !!!!", uid);
-								return;
-							}
-							boolean self = curClient.getUid().equals(c.getUid());
-							if (self || curClient.hasRight(Room.Right.MODERATOR) || !r.isHidden(RoomElement.USER_COUNT)) {
-								handler.appendJavaScript(String.format("Room.addClient([%s]);"
-										, c.toJson(self).toString(new NullStringer())));
-							}
-							sidebar.addActivity(new Activity(m, Activity.Type.roomEnter), handler);
-						}
+						onRoomEnter(curClient, (TextRoomMessage)m, handler);
 						break;
 					case ROOM_EXIT:
-						{
-							String uid = ((TextRoomMessage)m).getText();
-							sidebar.update(handler);
-							sidebar.addActivity(new Activity(m, Activity.Type.roomExit), handler);
-							handler.appendJavaScript("Room.removeClient('" + uid + "'); Chat.removeTab('" + ID_USER_PREFIX + m.getUserId() + "');");
-						}
+						onRoomExit((TextRoomMessage)m, handler);
 						break;
 					case ROOM_CLOSED:
 						handler.add(room.setVisible(false));
@@ -532,45 +477,17 @@ public class RoomPanel extends BasePanel {
 						}
 						break;
 					case KICK:
-						{
-							String uid = ((TextRoomMessage)m).getText();
-							if (curClient.getUid().equals(uid)) {
-								handler.add(room.setVisible(false));
-								getMainPanel().getChat().toggle(handler, false);
-								clientKicked.show(handler);
-								cm.exitRoom(curClient);
-							}
-						}
+						onKick(curClient, (TextRoomMessage)m, handler);
 						break;
 					case MUTE:
-					{
-						JSONObject obj = new JSONObject(((TextRoomMessage)m).getText());
-						Client c = cm.getBySid(obj.getString("sid"));
-						if (c == null) {
-							log.error("Not existing user in mute {} !!!!", obj);
-							return;
-						}
-						if (!curClient.getUid().equals(c.getUid())) {
-							handler.appendJavaScript(String.format("if (typeof(VideoManager) !== 'undefined') {VideoManager.mute('%s', %s);}", obj.getString("uid"), obj.getBoolean("mute")));
-						}
-					}
+						onMute(curClient, (TextRoomMessage)m, handler);
 						break;
 					case MUTE_OTHERS:
-					{
-						String uid = ((TextRoomMessage)m).getText();
-						Client c = cm.get(uid);
-						if (c == null) {
-							// no luck
-							return;
-						}
-						handler.appendJavaScript(String.format("if (typeof(VideoManager) !== 'undefined') {VideoManager.muteOthers('%s');}", uid));
-					}
+						onMuteOthers((TextRoomMessage)m, handler);
 						break;
 					case QUICK_POLL_UPDATED:
-					{
 						menu.update(handler);
 						handler.appendJavaScript(getQuickPollJs());
-					}
 						break;
 					case KURENTO_STATUS:
 						menu.update(handler);
@@ -580,7 +497,7 @@ public class RoomPanel extends BasePanel {
 							wb.reloadWb(handler);
 						}
 						break;
-					case MODERATOR_IN_ROOM: {
+					case MODERATOR_IN_ROOM:
 						if (!r.isModerated() || !r.isWaitModerator()) {
 							log.warn("Something weird: `moderatorInRoom` in wrong room {}", r);
 						} else if (!curClient.hasRight(Room.Right.MODERATOR)) {
@@ -597,17 +514,94 @@ public class RoomPanel extends BasePanel {
 								}
 							}
 						}
-					}
 						break;
-					case WB_PUT_FILE: {
-						JSONObject obj = new JSONObject(((TextRoomMessage)m).getText());
-						getWb().sendFileToWb(fileDao.getAny(obj.getLong("fileId")), obj.getBoolean("clean"));
-					}
+					case WB_PUT_FILE:
+						onWbPutFile((TextRoomMessage)m);
 						break;
 				}
 			}
 		}
 		super.onEvent(event);
+	}
+
+	private void onRightUpdated(Client curClient, TextRoomMessage m, IPartialPageRequestHandler handler) {
+		String uid = m.getText();
+		Client c = cm.get(uid);
+		if (c == null) {
+			log.error("Not existing user in rightUpdated {} !!!!", uid);
+			return;
+		}
+		boolean self = curClient.getUid().equals(c.getUid());
+		StringBuilder sb = new StringBuilder("Room.updateClient(")
+				.append(c.toJson(self).toString(new NullStringer()))
+				.append(");")
+				.append(sendClientsOnUpdate());
+		handler.appendJavaScript(sb);
+		sidebar.update(handler);
+		menu.update(handler);
+		wb.update(handler);
+		updateInterviewRecordingButtons(handler);
+	}
+
+	private void onRoomEnter(Client curClient, TextRoomMessage m, IPartialPageRequestHandler handler) {
+		sidebar.update(handler);
+		menu.update(handler);
+		String uid = m.getText();
+		Client c = cm.get(uid);
+		if (c == null) {
+			log.error("Not existing user in rightUpdated {} !!!!", uid);
+			return;
+		}
+		boolean self = curClient.getUid().equals(c.getUid());
+		if (self || curClient.hasRight(Room.Right.MODERATOR) || !r.isHidden(RoomElement.USER_COUNT)) {
+			handler.appendJavaScript("Room.addClient(["
+					+ c.toJson(self).toString(new NullStringer()) + "]);");
+		}
+		sidebar.addActivity(new Activity(m, Activity.Type.roomEnter), handler);
+	}
+
+	private void onRoomExit(TextRoomMessage m, IPartialPageRequestHandler handler) {
+		String uid = m.getText();
+		sidebar.update(handler);
+		sidebar.addActivity(new Activity(m, Activity.Type.roomExit), handler);
+		handler.appendJavaScript("Room.removeClient('" + uid + "'); Chat.removeTab('" + ID_USER_PREFIX + m.getUserId() + "');");
+	}
+
+	private void onKick(Client curClient, TextRoomMessage m, IPartialPageRequestHandler handler) {
+		String uid = m.getText();
+		if (curClient.getUid().equals(uid)) {
+			handler.add(room.setVisible(false));
+			getMainPanel().getChat().toggle(handler, false);
+			clientKicked.show(handler);
+			cm.exitRoom(curClient);
+		}
+	}
+
+	private void onMute(Client curClient, TextRoomMessage m, IPartialPageRequestHandler handler) {
+		JSONObject obj = new JSONObject(m.getText());
+		Client c = cm.getBySid(obj.getString("sid"));
+		if (c == null) {
+			log.error("Not existing user in mute {} !!!!", obj);
+			return;
+		}
+		if (!curClient.getUid().equals(c.getUid())) {
+			handler.appendJavaScript(String.format("if (typeof(VideoManager) !== 'undefined') {VideoManager.mute('%s', %s);}", obj.getString("uid"), obj.getBoolean("mute")));
+		}
+	}
+
+	private void onMuteOthers(TextRoomMessage m, IPartialPageRequestHandler handler) {
+		String uid = m.getText();
+		Client c = cm.get(uid);
+		if (c == null) {
+			// no luck
+			return;
+		}
+		handler.appendJavaScript(String.format("if (typeof(VideoManager) !== 'undefined') {VideoManager.muteOthers('%s');}", uid));
+	}
+
+	private void onWbPutFile(TextRoomMessage m) {
+		JSONObject obj = new JSONObject(m.getText());
+		getWb().sendFileToWb(fileDao.getAny(obj.getLong("fileId")), obj.getBoolean("clean"));
 	}
 
 	private String getQuickPollJs() {
@@ -772,7 +766,7 @@ public class RoomPanel extends BasePanel {
 		if (room.isVisible() && "room".equals(o.optString("area"))) {
 			final String type = o.optString("type");
 			if ("wb".equals(type)) {
-				WbAction a = WbAction.valueOf(o.getString(PARAM_ACTION));
+				WbAction a = WbAction.of(o.getString(PARAM_ACTION));
 				wb.processWbAction(a, o.optJSONObject("data"), handler);
 			} else if ("room".equals(type)) {
 				sidebar.roomAction(handler, o);

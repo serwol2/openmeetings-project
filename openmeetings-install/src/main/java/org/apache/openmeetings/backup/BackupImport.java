@@ -30,6 +30,8 @@ import static org.apache.openmeetings.db.bind.Constants.CHAT_LIST_NODE;
 import static org.apache.openmeetings.db.bind.Constants.CHAT_NODE;
 import static org.apache.openmeetings.db.bind.Constants.CONTACT_LIST_NODE;
 import static org.apache.openmeetings.db.bind.Constants.CONTACT_NODE;
+import static org.apache.openmeetings.db.bind.Constants.EXTRA_MENU_LIST_NODE;
+import static org.apache.openmeetings.db.bind.Constants.EXTRA_MENU_NODE;
 import static org.apache.openmeetings.db.bind.Constants.FILE_LIST_NODE;
 import static org.apache.openmeetings.db.bind.Constants.FILE_NODE;
 import static org.apache.openmeetings.db.bind.Constants.GROUP_LIST_NODE;
@@ -149,7 +151,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -191,6 +192,7 @@ import org.apache.openmeetings.db.dao.calendar.OmCalendarDao;
 import org.apache.openmeetings.db.dao.file.BaseFileItemDao;
 import org.apache.openmeetings.db.dao.file.FileItemDao;
 import org.apache.openmeetings.db.dao.record.RecordingDao;
+import org.apache.openmeetings.db.dao.room.ExtraMenuDao;
 import org.apache.openmeetings.db.dao.room.PollDao;
 import org.apache.openmeetings.db.dao.room.RoomDao;
 import org.apache.openmeetings.db.dao.server.LdapConfigDao;
@@ -210,6 +212,7 @@ import org.apache.openmeetings.db.entity.file.BaseFileItem;
 import org.apache.openmeetings.db.entity.file.FileItem;
 import org.apache.openmeetings.db.entity.record.Recording;
 import org.apache.openmeetings.db.entity.record.RecordingChunk;
+import org.apache.openmeetings.db.entity.room.ExtraMenu;
 import org.apache.openmeetings.db.entity.room.Room;
 import org.apache.openmeetings.db.entity.room.RoomFile;
 import org.apache.openmeetings.db.entity.room.RoomGroup;
@@ -226,7 +229,6 @@ import org.apache.openmeetings.db.entity.user.User;
 import org.apache.openmeetings.db.entity.user.UserContact;
 import org.apache.openmeetings.db.util.AuthLevelUtil;
 import org.apache.openmeetings.db.util.XmlHelper;
-import org.apache.openmeetings.util.CalendarPatterns;
 import org.apache.openmeetings.util.OmFileHelper;
 import org.apache.openmeetings.util.StoredFile;
 import org.apache.openmeetings.util.crypt.SCryptImplementation;
@@ -347,6 +349,8 @@ public class BackupImport {
 	@Autowired
 	private GroupDao groupDao;
 	@Autowired
+	private ExtraMenuDao menuDao;
+	@Autowired
 	private DocumentConverter docConverter;
 
 	private final Map<Long, Long> ldapMap = new HashMap<>();
@@ -376,7 +380,7 @@ public class BackupImport {
 	}
 
 	private static File unzip(InputStream is) throws IOException  {
-		File f = OmFileHelper.getNewDir(OmFileHelper.getUploadImportDir(), "import_" + CalendarPatterns.getTimeForStreamId(new Date()));
+		File f = OmFileHelper.getNewDir(OmFileHelper.getUploadImportDir(), randomUUID().toString());
 		log.debug("##### EXTRACTING BACKUP TO: {}", f);
 
 		try (ZipInputStream zis = new ZipInputStream(is)) {
@@ -400,84 +404,98 @@ public class BackupImport {
 	}
 
 	public void performImport(InputStream is, ProgressHolder progressHolder) throws Exception {
-		progressHolder.setProgress(0);
-		cleanup();
-		messageFolderMap.put(INBOX_FOLDER_ID, INBOX_FOLDER_ID);
-		messageFolderMap.put(SENT_FOLDER_ID, SENT_FOLDER_ID);
-		messageFolderMap.put(TRASH_FOLDER_ID, TRASH_FOLDER_ID);
+		File f = null;
+		boolean success = false;
+		try {
+			progressHolder.setProgress(0);
+			cleanup();
+			messageFolderMap.put(INBOX_FOLDER_ID, INBOX_FOLDER_ID);
+			messageFolderMap.put(SENT_FOLDER_ID, SENT_FOLDER_ID);
+			messageFolderMap.put(TRASH_FOLDER_ID, TRASH_FOLDER_ID);
 
-		File f = unzip(is);
+			f = unzip(is);
 
-		BackupVersion ver = getVersion(f);
-		progressHolder.setProgress(2);
-		importConfigs(f);
-		progressHolder.setProgress(7);
-		importGroups(f);
-		progressHolder.setProgress(12);
-		importLdap(f);
-		progressHolder.setProgress(17);
-		importOauth(f);
-		progressHolder.setProgress(22);
-		importUsers(f);
-		progressHolder.setProgress(27);
-		importRooms(f);
-		progressHolder.setProgress(32);
-		importRoomGroups(f);
-		progressHolder.setProgress(37);
-		importChat(f);
-		progressHolder.setProgress(42);
-		importCalendars(f);
-		progressHolder.setProgress(47);
-		importAppointments(f);
-		progressHolder.setProgress(52);
-		importMeetingMembers(f);
-		progressHolder.setProgress(57);
-		importRecordings(f);
-		progressHolder.setProgress(62);
-		importPrivateMsgFolders(f);
-		progressHolder.setProgress(67);
-		importContacts(f);
-		progressHolder.setProgress(72);
-		importPrivateMsgs(f);
-		progressHolder.setProgress(77);
-		List<FileItem> files = importFiles(f);
-		progressHolder.setProgress(82);
-		importPolls(f);
-		progressHolder.setProgress(87);
-		importRoomFiles(f);
-		progressHolder.setProgress(92);
+			BackupVersion ver = getVersion(f);
+			progressHolder.setProgress(2);
+			importConfigs(f);
+			progressHolder.setProgress(7);
+			importGroups(f);
+			progressHolder.setProgress(12);
+			importLdap(f);
+			progressHolder.setProgress(17);
+			importOauth(f);
+			progressHolder.setProgress(22);
+			importUsers(f);
+			progressHolder.setProgress(27);
+			importRooms(f);
+			progressHolder.setProgress(32);
+			importRoomGroups(f);
+			progressHolder.setProgress(37);
+			importChat(f);
+			progressHolder.setProgress(42);
+			importCalendars(f);
+			progressHolder.setProgress(47);
+			importAppointments(f);
+			progressHolder.setProgress(52);
+			importMeetingMembers(f);
+			progressHolder.setProgress(57);
+			importRecordings(f);
+			progressHolder.setProgress(62);
+			importPrivateMsgFolders(f);
+			progressHolder.setProgress(67);
+			importContacts(f);
+			progressHolder.setProgress(72);
+			importPrivateMsgs(f);
+			progressHolder.setProgress(77);
+			List<FileItem> files = importFiles(f);
+			progressHolder.setProgress(82);
+			importPolls(f);
+			progressHolder.setProgress(87);
+			importRoomFiles(f);
+			progressHolder.setProgress(92);
+			importExtraMenus(f);
+			progressHolder.setProgress(95);
 
-		log.info("Room files import complete, starting copy of files and folders");
-		/*
-		 * ##################### Import real files and folders
-		 */
-		importFolders(f);
-		progressHolder.setProgress(97);
+			log.info("Extra menus import complete, starting copy of files and folders");
+			/*
+			 * ##################### Import real files and folders
+			 */
+			importFolders(f);
+			progressHolder.setProgress(97);
 
-		if (ver.compareTo(BackupVersion.get("4.0.0")) < 0) {
-			for (FileItem bfi : files) {
-				if (bfi.isDeleted()) {
-					continue;
-				}
-				if (BaseFileItem.Type.PRESENTATION == bfi.getType()) {
-					convertOldPresentation(bfi);
-					fileItemDao.updateBase(bfi);
-				}
-				if (BaseFileItem.Type.WML_FILE == bfi.getType()) {
-					try {
-						Whiteboard wb = WbConverter.convert(bfi);
-						wb.save(bfi.getFile().toPath());
-					} catch (Exception e) {
-						log.error("Unexpected error while converting WB", e);
+			if (ver.compareTo(BackupVersion.get("4.0.0")) < 0) {
+				for (FileItem bfi : files) {
+					if (bfi.isDeleted()) {
+						continue;
+					}
+					if (BaseFileItem.Type.PRESENTATION == bfi.getType()) {
+						convertOldPresentation(bfi);
+						fileItemDao.updateBase(bfi);
+					}
+					if (BaseFileItem.Type.WML_FILE == bfi.getType()) {
+						try {
+							Whiteboard wb = WbConverter.convert(bfi);
+							wb.save(bfi.getFile().toPath());
+						} catch (Exception e) {
+							log.error("Unexpected error while converting WB", e);
+						}
 					}
 				}
 			}
+			log.info("File explorer item import complete");
+			success = true;
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			if (f != null) {
+				log.info("Clearing temp files ...");
+				FileUtils.deleteDirectory(f);
+			}
+			cleanup();
+			if (success) {
+				progressHolder.setProgress(100);
+			}
 		}
-		log.info("File explorer item import complete, clearing temp files");
-
-		FileUtils.deleteDirectory(f);
-		cleanup();
-		progressHolder.setProgress(100);
 	}
 
 	void cleanup() {
@@ -1130,6 +1148,22 @@ public class BackupImport {
 			rf.setRoomId(r.getId());
 			r.getFiles().add(rf);
 			roomDao.update(r, null);
+		}, true);
+	}
+
+	void importExtraMenus(File base) throws Exception {
+		log.info("Room files complete, starting extra menus import");
+		Class<ExtraMenu> eClazz = ExtraMenu.class;
+		JAXBContext jc = JAXBContext.newInstance(eClazz);
+		Unmarshaller unmarshaller = jc.createUnmarshaller();
+		unmarshaller.setAdapter(new GroupAdapter(groupDao, groupMap));
+
+		readList(unmarshaller, base, "extraMenus.xml", EXTRA_MENU_LIST_NODE, EXTRA_MENU_NODE, eClazz, m -> {
+			if (Strings.isEmpty(m.getName()) || Strings.isEmpty(m.getLink())) {
+				return;
+			}
+			m.setId(null);
+			menuDao.update(m, null);
 		}, true);
 	}
 

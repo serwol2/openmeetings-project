@@ -7,7 +7,8 @@ function onOmGotoClick() {
 	}
 	gotoSpan = gotoBtn.parent().find('.goto-span');
 	gotoSpan.datetimepicker({
-		format: 'L'
+		locale: $('#calendar').fullCalendar('option', 'locale')
+		, format: 'L'
 		, icons: {
 			time: 'fas fa-clock'
 			, date: 'fas fa-calendar'
@@ -28,7 +29,7 @@ function onOmGotoClick() {
 	gotoSpan
 		.off()
 		.on('hide.datetimepicker', function(e){
-			$('#calendar').fullCalendar('gotoDate', e.date.format('YYYY-MM-DD'));
+			$('#calendar').fullCalendar('gotoDate', e.date.startOf('day'));
 		})
 		.datetimepicker('show');
 }

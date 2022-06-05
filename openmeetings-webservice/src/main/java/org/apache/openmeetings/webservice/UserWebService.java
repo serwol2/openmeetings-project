@@ -26,6 +26,13 @@ import static org.apache.openmeetings.webservice.Constants.TNS;
 import static org.apache.openmeetings.webservice.Constants.USER_SERVICE_NAME;
 import static org.apache.openmeetings.webservice.Constants.USER_SERVICE_PORT_NAME;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Locale;
@@ -58,9 +65,13 @@ import org.apache.openmeetings.db.entity.server.Sessiondata;
 import org.apache.openmeetings.db.entity.user.Address;
 import org.apache.openmeetings.db.entity.user.User;
 import org.apache.openmeetings.db.entity.user.User.Right;
+import org.apache.openmeetings.db.mapper.UserMapper;
 import org.apache.openmeetings.util.OmException;
 import org.apache.openmeetings.webservice.error.InternalServiceException;
 import org.apache.openmeetings.webservice.error.ServiceException;
+import org.apache.openmeetings.webservice.schema.ServiceResultWrapper;
+import org.apache.openmeetings.webservice.schema.UserDTOListWrapper;
+import org.apache.openmeetings.webservice.schema.UserDTOWrapper;
 import org.apache.wicket.util.string.Strings;
 import org.apache.wicket.validation.IValidationError;
 import org.apache.wicket.validation.IValidator;
@@ -83,6 +94,7 @@ import org.springframework.stereotype.Service;
 @WebService(serviceName = USER_SERVICE_NAME, targetNamespace = TNS, portName = USER_SERVICE_PORT_NAME)
 @Features(features = "org.apache.cxf.ext.logging.LoggingFeature")
 @Produces({MediaType.APPLICATION_JSON})
+@Tag(name = "UserService")
 @Path("/user")
 public class UserWebService extends BaseWebService {
 	private static final Logger log = LoggerFactory.getLogger(UserWebService.class);
@@ -93,6 +105,8 @@ public class UserWebService extends BaseWebService {
 	private SOAPLoginDao soapDao;
 	@Autowired
 	private GroupDao groupDao;
+	@Autowired
+	private UserMapper uMapper;
 
 	/**
 	 * @param user - login or email of Openmeetings user with admin or SOAP-rights
@@ -103,7 +117,17 @@ public class UserWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/login")
-	public ServiceResult login(@WebParam(name="user") @QueryParam("user") String user, @WebParam(name="pass") @QueryParam("pass") String pass) {
+	@Operation(
+			description = "Login and create sessionId required for sub-sequent calls",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "ServiceResult with error code or SID and userId",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error of server error")
+			}
+		)
+	public ServiceResult login(
+			@Parameter(required = true, description = "login or email of Openmeetings user with admin or SOAP-rights") @WebParam(name="user") @QueryParam("user") String user
+			, @Parameter(required = true, description = "password") @WebParam(name="pass") @QueryParam("pass") String pass) {
 		try {
 			log.debug("Login user");
 			User u = userDao.login(user, pass);
@@ -134,7 +158,17 @@ public class UserWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/")
-	public List<UserDTO> get(@WebParam(name="sid") @QueryParam("sid") String sid) throws ServiceException {
+	@Operation(
+			description = "Lists all users in the system!",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "list of users",
+							content = @Content(schema = @Schema(implementation = UserDTOListWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public List<UserDTO> get(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			) throws ServiceException {
 		return performCall(sid, User.Right.SOAP, sd -> UserDTO.list(userDao.getAllUsers()));
 	}
 
@@ -155,10 +189,19 @@ public class UserWebService extends BaseWebService {
 	@WebMethod
 	@POST
 	@Path("/")
+	@Operation(
+			description = "Adds a new User like through the Frontend, but also does activates the\n"
+					+ " Account To do SSO see the methods to create a hash and use those ones!",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "list of users",
+						content = @Content(schema = @Schema(implementation = UserDTOWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
 	public UserDTO add(
-			@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="user") @FormParam("user") UserDTO user
-			, @WebParam(name="confirm") @FormParam("confirm") Boolean confirm
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "user object") @WebParam(name="user") @FormParam("user") UserDTO user
+			, @Parameter(required = true, description = "whatever or not to send email, leave empty for auto-send") @WebParam(name="confirm") @FormParam("confirm") Boolean confirm
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> {
@@ -182,7 +225,7 @@ public class UserWebService extends BaseWebService {
 			if (user.getLanguageId() == null) {
 				user.setLanguageId(1L);
 			}
-			User jsonUser = user.get(userDao, groupDao);
+			User jsonUser = uMapper.get(user);
 			IValidator<String> passValidator = new StrongPasswordValidator(false, jsonUser);
 			Validatable<String> passVal = new Validatable<>(user.getPassword());
 			passValidator.validate(passVal);
@@ -238,8 +281,17 @@ public class UserWebService extends BaseWebService {
 	@WebMethod
 	@DELETE
 	@Path("/{id}")
-	public ServiceResult delete(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="id") @PathParam("id") long id
+	@Operation(
+			description = "Delete a certain user by its id",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "id of the user deleted, error code otherwise",
+						content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public ServiceResult delete(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "the openmeetings user id") @WebParam(name="id") @PathParam("id") long id
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.ADMIN, sd -> {
@@ -258,17 +310,25 @@ public class UserWebService extends BaseWebService {
 	 * @param externalId
 	 *            externalUserId
 	 * @param externalType
-	 *            externalUserId
+	 *            externalType
 	 *
 	 * @return - id of user deleted, or error code
 	 * @throws {@link ServiceException} in case of any errors
 	 */
 	@DELETE
 	@Path("/{externaltype}/{externalid}")
+	@Operation(
+			description = "Delete a certain user by its external user id",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "id of user deleted, or error code",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
 	public ServiceResult deleteExternal(
-			@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="externaltype") @PathParam("externaltype") String externalType
-			, @WebParam(name="externalid") @PathParam("externalid") String externalId
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "externalUserId") @WebParam(name="externaltype") @PathParam("externaltype") String externalType
+			, @Parameter(required = true, description = "externalType") @WebParam(name="externalid") @PathParam("externalid") String externalId
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.ADMIN, sd -> {
@@ -282,7 +342,7 @@ public class UserWebService extends BaseWebService {
 	}
 
 	/**
-	 * Description: sets the SessionObject for a certain SID, after setting this
+	 * Sets the SessionObject for a certain SID, after setting this
 	 * Session-Object you can use the SID + a RoomId to enter any Room. ...
 	 * Session-Hashs are deleted 15 minutes after the creation if not used.
 	 *
@@ -299,10 +359,20 @@ public class UserWebService extends BaseWebService {
 	@WebMethod
 	@POST
 	@Path("/hash")
+	@Operation(
+			description = "Sets the SessionObject for a certain SID, after setting this\n"
+					+ " Session-Object you can use the SID + a RoomId to enter any Room. ...\n"
+					+ " Session-Hashs are deleted 15 minutes after the creation if not used.",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "secure hash or error code",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
 	public ServiceResult getRoomHash(
-			@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="user") @FormParam("user") ExternalUserDTO user
-			, @WebParam(name="options") @FormParam("options") RoomOptionsDTO options
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "user details to set") @WebParam(name="user") @FormParam("user") ExternalUserDTO user
+			, @Parameter(required = true, description = "room options to set") @WebParam(name="options") @FormParam("options") RoomOptionsDTO options
 			) throws ServiceException
 	{
 		return performCall(sid, User.Right.SOAP, sd -> {

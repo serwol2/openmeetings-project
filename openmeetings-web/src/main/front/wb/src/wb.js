@@ -65,11 +65,7 @@ module.exports = class Wb {
 					}
 					zoomBar.update(role, canvases.length);
 					if (ccount !== canvases.length) {
-						const b = _getBtn();
-						if (__validBtn(b)) {
-							b.data().deactivate();
-							b.data().activate();
-						}
+						tools.reactivateBtn();
 						self._showCurrentSlide();
 					}
 				}
@@ -278,12 +274,14 @@ module.exports = class Wb {
 				.setHeight(zoomBar.getZoom() * self.height)
 				.setZoom(zoomBar.getZoom());
 		}
-		function _setSize() {
+		function _setSize(skipSendWsMsg) {
 			zoomBar.setSize();
 			self.eachCanvas(function(canvas) {
 				__setSize(canvas);
 			});
-			self._doSetSlide(self.slide);
+			if (!skipSendWsMsg) {
+				self._doSetSlide(self.slide);
+			}
 		}
 		function _videoStatus(json) {
 			const g = self._findObject(json);
@@ -352,7 +350,7 @@ module.exports = class Wb {
 		this.doSetSize = _setSize;
 		this.resize = () => {
 			if (zoomBar.getMode() !== 'ZOOM') {
-				_setSize();
+				_setSize(true);
 			}
 		};
 		this._showCurrentSlide = () => {
@@ -398,7 +396,7 @@ module.exports = class Wb {
 				}
 				switch(o.omType) {
 					case 'pointer':
-						new APointer(wb).create(canvases[o.slide], o);
+						new APointer(this).create(canvases[o.slide], o);
 						break;
 					case 'Video':
 						Player.create(canvases[o.slide], o, self);
@@ -431,7 +429,7 @@ module.exports = class Wb {
 				const o = _arr[i];
 				switch(o.omType) {
 					case 'pointer':
-						_modifyHandler(new APointer(wb).create(canvases[o.slide], o));
+						_modifyHandler(new APointer(this).create(canvases[o.slide], o));
 						break;
 					case 'Video':
 					{

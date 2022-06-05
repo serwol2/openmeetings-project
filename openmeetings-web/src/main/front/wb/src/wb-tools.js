@@ -346,7 +346,7 @@ module.exports = class WbTools {
 						.confirmation({
 							confirmationEvent: 'om-clear-slide'
 							, onConfirm: function() {
-								OmUtil.wbAction({action: 'clearSlide', data: {wbId: wb.getId(), slide: slide}});
+								OmUtil.wbAction({action: 'clearSlide', data: {wbId: wb.getId(), slide: wb.slide}});
 							}
 						});
 					tools.find('.om-icon.save').click(function() {
@@ -361,6 +361,13 @@ module.exports = class WbTools {
 					_initToolBtn('apointer', _firstToolItem, new APointer(wb, settings, sBtn));
 				default:
 					//no-op
+			}
+		};
+		this.reactivateBtn = () => {
+			const b = _getBtn();
+			if (__validBtn(b)) {
+				b.data().deactivate();
+				b.data().activate();
 			}
 		};
 		this.updateCoordinates = (o) => {

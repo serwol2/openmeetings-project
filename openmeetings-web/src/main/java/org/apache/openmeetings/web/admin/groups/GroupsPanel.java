@@ -20,6 +20,7 @@ package org.apache.openmeetings.web.admin.groups;
 
 import static org.apache.openmeetings.db.util.AuthLevelUtil.hasGroupAdminLevel;
 import static org.apache.openmeetings.util.OpenmeetingsVariables.ATTR_CLASS;
+import static org.apache.openmeetings.util.OpenmeetingsVariables.getDefaultGroup;
 import static org.apache.openmeetings.web.app.WebSession.getRights;
 
 import java.util.Iterator;
@@ -70,22 +71,18 @@ public class GroupsPanel extends AdminBasePanel {
 			protected void populateItem(Item<Group> item) {
 				final Group g = item.getModelObject();
 				item.add(new Label("id"));
+				item.add(new WebMarkupContainer("default").setVisible(g.getId().equals(getDefaultGroup())));
 				Label name = new Label("name");
 				if (g.isExternal()) {
 					name.add(AttributeModifier.append("class", "external"));
 				}
 				item.add(name);
-				item.add(new AjaxEventBehavior(EVT_CLICK) {
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					protected void onEvent(AjaxRequestTarget target) {
-						form.setNewRecordVisible(false);
-						form.setModelObject(g);
-						form.updateView(target);
-						target.add(listContainer);
-					}
-				});
+				item.add(AjaxEventBehavior.onEvent(EVT_CLICK, target -> {
+					form.setNewRecordVisible(false);
+					form.setModelObject(g);
+					form.updateView(target);
+					target.add(listContainer);
+				}));
 				item.add(AttributeModifier.append(ATTR_CLASS, getRowClass(g.getId(), form.getModelObject().getId())));
 			}
 		};

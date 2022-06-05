@@ -23,7 +23,7 @@
 	font-weight: bold;
 }
 .room-block .menu .details .room.name.screen {
-	color: var(--danger);
+	color: var(--bs-danger);
 }
 .room-block .menu .details .icon {
 	width: 30px;
@@ -40,7 +40,7 @@
 	position: relative;
 }
 .room-block .menu .details .detail-btn i::before {
-	font-size: 2.0em;
+	font-size: 1.4em;
 	line-height: 1.2em;
 }
 .room-block .menu .details .detail-btn.shared {
@@ -49,7 +49,7 @@
 .room-block .menu .details .detail-btn i.add-on {
 	position: absolute;
 	left: 5px;
-	color: var(--warning);
+	color: var(--bs-warning);
 	bottom:  0;
 }
 .room-block .menu .details .icon .profile {
@@ -58,7 +58,7 @@
 .room-block .menu .details .icon .profile img {
 	width: 28px;
 }
-html[dir="rtl"] .dropdown-menu {
+html[dir="rtl"] .navbar .dropdown-menu {
 	left: initial;
 	right: 0;
 }

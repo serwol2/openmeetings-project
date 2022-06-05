@@ -214,7 +214,7 @@ function _addTab(id, label) {
 	if (!label) {
 		label = id === "chatTab-all" ? allPrefix : roomPrefix + id.substr(9);
 	}
-	const link = $('<a class="nav-link" data-toggle="tab" role="tab">')
+	const link = $('<a class="nav-link" data-bs-toggle="tab" role="tab">')
 		.attr('aria-controls', id)
 		.attr('href', '#' + id).text(label)
 		, li = $('<li class="nav-item">').append(link);
@@ -376,6 +376,9 @@ function _open(handler) {
 			ctrlBlk.attr('title', ctrlBlk.data('ttl-undock'));
 			if (roomMode) {
 				_setOpened();
+				if (typeof(window.WbArea) === 'object') {
+					window.WbArea.resize();
+				}
 			} else {
 				__setCssHeight(openedHeight);
 			}
@@ -397,6 +400,9 @@ function _close(handler) {
 			if (roomMode) {
 				__setCssWidth(closedSizePx);
 				_removeResize();
+				if (typeof(window.WbArea) === 'object') {
+					window.WbArea.resize();
+				}
 			} else {
 				__setCssHeight(closedSizePx);
 			}

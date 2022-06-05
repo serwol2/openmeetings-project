@@ -22,6 +22,7 @@ import static org.apache.openmeetings.util.OpenmeetingsVariables.CONFIG_EXT_PROC
 import static org.apache.openmeetings.util.OpenmeetingsVariables.getApplicationName;
 import static org.apache.openmeetings.util.OpenmeetingsVariables.getBaseUrl;
 import static org.apache.openmeetings.util.OpenmeetingsVariables.getExtProcessTtl;
+import static org.apache.openmeetings.util.OpenmeetingsVariables.getTheme;
 import static org.apache.openmeetings.util.OpenmeetingsVariables.getWicketApplicationName;
 import static org.apache.openmeetings.util.OpenmeetingsVariables.isInitComplete;
 import static org.apache.openmeetings.util.OpenmeetingsVariables.setExtProcessTtl;
@@ -40,6 +41,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.websocket.WebSocketContainer;
 
@@ -59,6 +62,7 @@ import org.apache.openmeetings.db.entity.record.Recording;
 import org.apache.openmeetings.db.entity.room.Invitation;
 import org.apache.openmeetings.db.entity.room.Room;
 import org.apache.openmeetings.db.entity.room.RoomGroup;
+import org.apache.openmeetings.db.entity.user.Group;
 import org.apache.openmeetings.db.entity.user.GroupUser;
 import org.apache.openmeetings.db.entity.user.User;
 import org.apache.openmeetings.db.entity.user.User.Type;
@@ -68,6 +72,7 @@ import org.apache.openmeetings.db.util.ws.TextRoomMessage;
 import org.apache.openmeetings.util.OmFileHelper;
 import org.apache.openmeetings.util.Version;
 import org.apache.openmeetings.util.ws.IClusterWsMessage;
+import org.apache.openmeetings.web.common.PingResourceReference;
 import org.apache.openmeetings.web.pages.AccessDeniedPage;
 import org.apache.openmeetings.web.pages.ActivatePage;
 import org.apache.openmeetings.web.pages.HashPage;
@@ -110,7 +115,7 @@ import org.apache.wicket.markup.head.filter.FilteringHeaderResponse;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.pageStore.IPageStore;
 import org.apache.wicket.pageStore.SerializingPageStore;
-import org.apache.wicket.protocol.ws.WebSocketAwareCsrfPreventionRequestCycleListener;
+import org.apache.wicket.protocol.ws.WebSocketAwareResourceIsolationRequestCycleListener;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Response;
 import org.apache.wicket.request.Url;
@@ -128,6 +133,7 @@ import org.apache.wicket.validation.validator.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.wicketstuff.dashboard.WidgetRegistry;
@@ -148,6 +154,7 @@ import com.hazelcast.topic.ITopic;
 import de.agilecoders.wicket.core.Bootstrap;
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
 import de.agilecoders.wicket.core.settings.IBootstrapSettings;
+import de.agilecoders.wicket.core.settings.NoopThemeProvider;
 import de.agilecoders.wicket.themes.markup.html.bootswatch.BootswatchTheme;
 import de.agilecoders.wicket.themes.markup.html.bootswatch.BootswatchThemeProvider;
 
@@ -189,11 +196,15 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 	private AppointmentDao appointmentDao;
 	@Autowired
 	private SipManager sipManager;
+	@Value("${remember.me.encryption.key}")
+	private String rememberMeKey;
+	@Value("${remember.me.encryption.salt}")
+	private String rememberMeSalt;
 
 	@Override
 	protected void init() {
 		setWicketApplicationName(super.getName());
-		getSecuritySettings().setAuthenticationStrategy(new OmAuthenticationStrategy());
+		getSecuritySettings().setAuthenticationStrategy(new OmAuthenticationStrategy(rememberMeKey, rememberMeSalt));
 		getApplicationSettings().setAccessDeniedPage(AccessDeniedPage.class);
 		getApplicationSettings().setInternalErrorPage(InternalErrorPage.class);
 		getExceptionSettings().setUnexpectedExceptionDisplay(ExceptionSettings.SHOW_INTERNAL_ERROR_PAGE);
@@ -262,7 +273,7 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 		//chain of Resource Loaders, if not found it will search in Wicket's internal
 		//Resource Loader for a the property key
 		getResourceSettings().getStringResourceLoaders().add(0, new LabelResourceLoader());
-		getRequestCycleListeners().add(new WebSocketAwareCsrfPreventionRequestCycleListener() {
+		getRequestCycleListeners().add(new WebSocketAwareResourceIsolationRequestCycleListener() {
 			@Override
 			public void onBeginRequest(RequestCycle cycle) {
 				String wsUrl = getWsUrl(cycle.getRequest().getUrl());
@@ -292,7 +303,6 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 		getHeaderResponseDecorators().add(FilteringHeaderResponse::new);
 		super.init();
 		final IBootstrapSettings settings = new BootstrapSettings();
-		settings.setThemeProvider(new BootswatchThemeProvider(BootswatchTheme.Sandstone));
 		Bootstrap.builder().withBootstrapSettings(settings).install(this);
 		WysiwygLibrarySettings.get().setBootstrapCssReference(null);
 		WysiwygLibrarySettings.get().setBootstrapDropDownJavaScriptReference(null);
@@ -329,6 +339,7 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 		mountResource("/profile/${id}", new ProfileImageResourceReference());
 		mountResource("/group/${id}", new GroupLogoResourceReference());
 		mountResource("/group/customcss/${id}", new GroupCustomCssResourceReference());
+		mountResource("/ping", new PingResourceReference());
 
 		log.debug("Application::init");
 		try {
@@ -512,23 +523,17 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 		Room r = i.getRoom();
 		User u = i.getInvitee();
 		if (r != null) {
-			if (r.isAppointment() && i.getInvitedBy().getId().equals(u.getId())) {
-				link = getRoomUrlFragment(r.getId()).getLink();
+			if ((i.isPasswordProtected() && !r.isOwner(u.getId())) // invitation is password-protected and invitee is not owner
+					|| Type.CONTACT == u.getType() || Type.EXTERNAL == u.getType() || !get().isRoomAllowedToUser(r, u)) // no-access
+			{
+				PageParameters pp = new PageParameters();
+				pp.add(INVITATION_HASH, i.getHash());
+				if (u.getLanguageId() > 0) {
+					pp.add("language", u.getLanguageId());
+				}
+				link = urlForPage(HashPage.class, pp, baseUrl);
 			} else {
-				boolean allowed = Type.CONTACT != u.getType() && Type.EXTERNAL != u.getType();
-				if (allowed) {
-					allowed = get().isRoomAllowedToUser(r, u);
-				}
-				if (allowed) {
-					link = getRoomUrlFragment(r.getId()).getLink();
-				} else {
-					PageParameters pp = new PageParameters();
-					pp.add(INVITATION_HASH, i.getHash());
-					if (u.getLanguageId() > 0) {
-						pp.add("language", u.getLanguageId());
-					}
-					link = urlForPage(HashPage.class, pp, baseUrl);
-				}
+				link = getRoomUrlFragment(r.getId()).getLink();
 			}
 		}
 		Recording rec = i.getRecording();
@@ -542,30 +547,28 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 		if (a == null || a.isDeleted()) {
 			return false;
 		}
-		if (a.getOwner().getId().equals(u.getId())) {
+		if (a.isOwner(u.getId())) {
 			log.debug("[isRoomAllowedToUser] appointed room, Owner entered");
 			return true;
 		}
-		for (MeetingMember mm : a.getMeetingMembers()) {
-			if (mm.getUser().getId().equals(u.getId())) {
-				return true;
-			}
-		}
-		return false;
+		return a.getMeetingMembers().stream()
+				.map(MeetingMember::getUser)
+				.map(User::getId)
+				.anyMatch(userId -> userId.equals(u.getId()));
 	}
 
 	private static boolean checkGroups(Room r, User u) {
 		if (null == r.getGroups()) { //u.getGroupUsers() can't be null due to user was able to login
 			return false;
 		}
-		for (RoomGroup ro : r.getGroups()) {
-			for (GroupUser ou : u.getGroupUsers()) {
-				if (ro.getGroup().getId().equals(ou.getGroup().getId())) {
-					return true;
-				}
-			}
-		}
-		return false;
+		Set<Long> roomGroups = r.getGroups().stream()
+				.map(RoomGroup::getGroup)
+				.map(Group::getId)
+				.collect(Collectors.toSet());
+		return u.getGroupUsers().stream()
+				.map(GroupUser::getGroup)
+				.map(Group::getId)
+				.anyMatch(roomGroups::contains);
 	}
 
 	public boolean isRoomAllowedToUser(Room r, User u) {
@@ -575,13 +578,12 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 		if (r.isAppointment()) {
 			Appointment a = appointmentDao.getByRoom(r.getId());
 			return checkAppointment(a, u);
-		} else {
-			if (r.getIspublic() || (r.getOwnerId() != null && r.getOwnerId().equals(u.getId()))) {
-				log.debug("[isRoomAllowedToUser] public ? {} , ownedId ? {} ALLOWED", r.getIspublic(), r.getOwnerId());
-				return true;
-			}
-			return checkGroups(r, u);
 		}
+		if (r.getIspublic() || r.isOwner(u.getId())) {
+			log.debug("[isRoomAllowedToUser] public ? {} , ownedId ? {} ALLOWED", r.getIspublic(), r.getOwnerId());
+			return true;
+		}
+		return checkGroups(r, u);
 	}
 
 	public static boolean isUrlValid(String url) {
@@ -645,6 +647,22 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 	@Override
 	public Set<String> getWsUrls() {
 		return Set.copyOf(wsUrls);
+	}
+
+	@Override
+	public void updateTheme() {
+		BootswatchTheme theme = Stream.of(BootswatchTheme.values())
+				.filter(v -> v.name().equalsIgnoreCase(getTheme()))
+				.findFirst()
+				.orElse(null);
+		IBootstrapSettings settings = Bootstrap.getSettings(this);
+		settings.setThemeProvider(theme == null ? new NoopThemeProvider()
+				: new BootswatchThemeProvider(theme));
+		if (WebSession.exists()) {
+			settings.getActiveThemeProvider().setActiveTheme(theme == null
+					? settings.getThemeProvider().defaultTheme()
+					: settings.getThemeProvider().byName(theme.name()));
+		}
 	}
 
 	// package private for testing

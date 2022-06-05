@@ -53,6 +53,7 @@ import org.apache.openmeetings.db.entity.user.User;
 import org.apache.openmeetings.db.manager.IClientManager;
 import org.apache.openmeetings.db.manager.IWhiteboardManager;
 import org.apache.openmeetings.webservice.error.ServiceException;
+import org.apache.openmeetings.webservice.schema.ServiceResultWrapper;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -67,6 +68,13 @@ import org.springframework.stereotype.Service;
 
 import com.github.openjson.JSONArray;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 /**
  * WbService contains methods to manipulate whiteboard contents
  *
@@ -75,6 +83,7 @@ import com.github.openjson.JSONArray;
 @WebService(serviceName="org.apache.openmeetings.webservice.WbWebService", targetNamespace = TNS)
 @Features(features = "org.apache.cxf.ext.logging.LoggingFeature")
 @Produces({MediaType.APPLICATION_JSON})
+@Tag(name = "WbService")
 @Path("/wb")
 public class WbWebService extends BaseWebService {
 	private static final Logger log = LoggerFactory.getLogger(WbWebService.class);
@@ -96,8 +105,18 @@ public class WbWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/resetwb/{id}")
-	public ServiceResult resetWb(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="id") @PathParam("id") long id
+	@Operation(
+			description = "This method will remove all whiteboards from given room\n"
+					+ " and create empty one(s) for room files specified",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "serviceResult object with the result",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public ServiceResult resetWb(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "id of the room to clean") @WebParam(name="id") @PathParam("id") long id
 			) throws ServiceException
 	{
 		log.debug("[resetWb] room id {}", id);
@@ -119,9 +138,18 @@ public class WbWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/cleanwb/{roomid}/{wbid}")
-	public ServiceResult cleanWb(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="roomid") @PathParam("roomid") long roomId
-			, @WebParam(name="wbid") @PathParam("wbid") long wbId
+	@Operation(
+			description = "This method will do the same as clean WB in the room (except for there will be no UNDO)",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "serviceResult object with the result",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public ServiceResult cleanWb(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "id of the room to clean") @WebParam(name="roomid") @PathParam("roomid") long roomId
+			, @Parameter(required = true, description = "id of the white board to clean") @WebParam(name="wbid") @PathParam("wbid") long wbId
 			) throws ServiceException
 	{
 		log.debug("[cleanWb] room id {}, wb id {}", roomId, wbId);
@@ -144,10 +172,19 @@ public class WbWebService extends BaseWebService {
 	@WebMethod
 	@GET
 	@Path("/cleanslide/{roomid}/{wbid}/{slide}")
-	public ServiceResult cleanSlide(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="roomid") @PathParam("roomid") long roomId
-			, @WebParam(name="wbid") @PathParam("wbid") long wbId
-			, @WebParam(name="slide") @PathParam("slide") int slide
+	@Operation(
+			description = "This method will do the same as clean slide in the room (except for there will be no UNDO)",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "serviceResult object with the result",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public ServiceResult cleanSlide(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "id of the room to clean") @WebParam(name="roomid") @PathParam("roomid") long roomId
+			, @Parameter(required = true, description = "id of the white board to clean") @WebParam(name="wbid") @PathParam("wbid") long wbId
+			, @Parameter(required = true, description = "slide number (zero based)") @WebParam(name="slide") @PathParam("slide") int slide
 			) throws ServiceException
 	{
 		log.debug("[cleanSlide] room id {}, wb id {}, slide {}", roomId, wbId, slide);
@@ -158,7 +195,7 @@ public class WbWebService extends BaseWebService {
 	}
 
 	/**
-	 * This method will recive WB as binary data (png) and store it to temporary PDF/PNG file
+	 * This method will receive WB as binary data (png) and store it to temporary PDF/PNG file
 	 *
 	 * unlike other web service methods this one uses internal client sid
 	 * NOT web service sid
@@ -172,9 +209,18 @@ public class WbWebService extends BaseWebService {
 	@WebMethod
 	@POST
 	@Path("/uploadwb/{type}")
-	public ServiceResult uploadWb(@WebParam(name="sid") @QueryParam("sid") String sid
-			, @WebParam(name="type") @PathParam("type") String type
-			, @WebParam(name="data") @FormParam("data") String data
+	@Operation(
+			description = "This method will receive WB as binary data (png) and store it to temporary PDF/PNG file",
+			responses = {
+					@ApiResponse(responseCode = "200", description = "serviceResult object with the result",
+							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),
+					@ApiResponse(responseCode = "500", description = "Error in case of invalid credentials or server error")
+			}
+		)
+	public ServiceResult uploadWb(
+			@Parameter(required = true, description = "The SID of the User. This SID must be marked as Loggedin") @WebParam(name="sid") @QueryParam("sid") String sid
+			, @Parameter(required = true, description = "the type of document being saved PNG/PDF") @WebParam(name="type") @PathParam("type") String type
+			, @Parameter(required = true, description = "binary data") @WebParam(name="data") @FormParam("data") String data
 			) throws ServiceException
 	{
 		log.debug("[uploadwb] type {}", type);
