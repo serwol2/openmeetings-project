@@ -104,7 +104,7 @@ public abstract class BasePage extends AsyncUrlFragmentAwarePage {
 
 	protected OmUrlFragment getUrlFragment(IRequestParameters params) {
 		for (AreaKeys key : AreaKeys.values()) {
-			StringValue type = params.getParameterValue(key.zone());
+			StringValue type = params.getParameterValue(key.name());
 			if (!type.isEmpty()) {
 				return new OmUrlFragment(key, type.toString());
 			}

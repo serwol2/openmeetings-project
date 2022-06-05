@@ -85,14 +85,25 @@ public class StreamProcessor implements IStreamProcessor {
 	@TimedApplication
 	void onMessage(Client c, final String cmdId, JSONObject msg) {
 		final String uid = msg.optString("uid");
+		StreamDesc sd;
 		Optional<StreamDesc> osd;
 		log.debug("Incoming message from user with ID '{}': {}", c.getUserId(), msg);
 		switch (cmdId) {
 			case "devicesAltered":
-				onDeviceAltered(c, uid, msg);
+				sd = c.getStream(uid);
+				if (sd != null) {
+					if (!msg.getBoolean("audio") && c.hasActivity(Activity.AUDIO)) {
+						c.remove(Activity.AUDIO);
+					}
+					if (!msg.getBoolean("video") && c.hasActivity(Activity.VIDEO)) {
+						c.remove(Activity.VIDEO);
+					}
+					sd.setActivities();
+					WebSocketHelper.sendRoom(new TextRoomMessage(c.getRoomId(), cm.update(c), RoomMessage.Type.RIGHT_UPDATED, c.getUid()));
+				}
 				break;
 			case "toggleActivity":
-				onToggleActivity(c, Activity.valueOf(msg.getString("activity")));
+				toggleActivity(c, Activity.valueOf(msg.getString("activity")));
 				break;
 			case "broadcastStarted":
 				streamProcessorActions.handleBroadcastStarted(c, uid, msg);
@@ -113,7 +124,19 @@ public class StreamProcessor implements IStreamProcessor {
 				}
 				break;
 			case "wannaRecord":
-				onWannaRecord(c, msg);
+				osd = c.getScreenStream();
+				if (recordingAllowed(c)) {
+					Room r = c.getRoom();
+					if (Room.Type.INTERVIEW == r.getType()) {
+						log.warn("This shouldn't be called for interview room");
+						break;
+					}
+					boolean sharing = isSharing(r.getId());
+					startSharing(c, osd, msg, Activity.RECORD);
+					if (sharing) {
+						startRecording(c);
+					}
+				}
 				break;
 			case "pauseSharing":
 				pauseSharing(c, uid);
@@ -127,36 +150,6 @@ public class StreamProcessor implements IStreamProcessor {
 			default:
 				// no-op
 				break;
-		}
-	}
-
-	private void onDeviceAltered(Client c, String uid, JSONObject msg) {
-		StreamDesc sd = c.getStream(uid);
-		if (sd != null) {
-			if (!msg.getBoolean("audio") && c.hasActivity(Activity.AUDIO)) {
-				c.remove(Activity.AUDIO);
-			}
-			if (!msg.getBoolean("video") && c.hasActivity(Activity.VIDEO)) {
-				c.remove(Activity.VIDEO);
-			}
-			sd.setActivities();
-			WebSocketHelper.sendRoom(new TextRoomMessage(c.getRoomId(), cm.update(c), RoomMessage.Type.RIGHT_UPDATED, c.getUid()));
-		}
-	}
-
-	private void onWannaRecord(Client c, JSONObject msg) {
-		Optional<StreamDesc> osd = c.getScreenStream();
-		if (recordingAllowed(c)) {
-			Room r = c.getRoom();
-			if (Room.Type.INTERVIEW == r.getType()) {
-				log.warn("This shouldn't be called for interview room");
-				return;
-			}
-			boolean sharing = isSharing(r.getId());
-			startSharing(c, osd, msg, Activity.RECORD);
-			if (sharing) {
-				startRecording(c);
-			}
 		}
 	}
 
@@ -194,7 +187,7 @@ public class StreamProcessor implements IStreamProcessor {
 	}
 
 	@TimedApplication
-	public void onToggleActivity(Client c, Activity a) {
+	public void toggleActivity(Client c, Activity a) {
 		log.info("PARTICIPANT {}: trying to toggle activity {}", c, a);
 		if (!kHandler.isConnected()) {
 			return;

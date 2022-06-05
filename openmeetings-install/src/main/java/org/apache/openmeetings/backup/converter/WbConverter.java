@@ -161,10 +161,10 @@ public class WbConverter {
 
 	private static int getInt(List<?> props, int idx) {
 		Object o = props.get(idx);
-		if (o instanceof Number num) {
-			return num.intValue();
-		} else if (o instanceof String str) {
-			return NumberUtils.toInt(str);
+		if (o instanceof Number) {
+			return ((Number) o).intValue();
+		} else if (o instanceof String) {
+			return NumberUtils.toInt((String)o);
 		}
 		return 0;
 	}
@@ -275,10 +275,12 @@ public class WbConverter {
 					case "paint":
 						processPath(wb, props);
 						break;
-					case "line", "uline":
+					case "line":
+					case "uline":
 						processLine(wb, props);
 						break;
-					case "rectangle", "drawarrow": // "drawarrow" will be replaced with rectangle
+					case "rectangle":
+					case "drawarrow": // will replace with rectangle
 						add(wb, processRect(wb, props));
 						break;
 					case "ellipse":
@@ -295,8 +297,6 @@ public class WbConverter {
 						break;
 					case "flv":
 						processVid(wb, props);
-						break;
-					default:
 						break;
 				}
 			}

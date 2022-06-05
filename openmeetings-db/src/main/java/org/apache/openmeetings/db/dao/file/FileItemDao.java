@@ -23,6 +23,7 @@ import static org.apache.openmeetings.db.util.DaoHelper.setLimits;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.TypedQuery;
 
@@ -97,7 +98,7 @@ public class FileItemDao extends BaseFileItemDao {
 	@Override
 	public FileItem get(Long id) {
 		BaseFileItem bf = super.get(id);
-		return bf instanceof FileItem fi ? fi : null;
+		return bf instanceof FileItem ? (FileItem)bf : null;
 	}
 
 	public FileItem get(String externalId, String externalType) {
@@ -202,14 +203,14 @@ public class FileItemDao extends BaseFileItemDao {
 		return setLimits(em.createNamedQuery("getAllFileItemsForRoom", BaseFileItem.class)
 					.setParameter("folder", Type.FOLDER)
 					.setParameter("roomId", roomId)
-					.setParameter("groups", groups.parallelStream().map(Group::getId).toList())
+					.setParameter("groups", groups.parallelStream().map(Group::getId).collect(Collectors.toList()))
 					.setParameter("name", String.format("%%%s%%", search == null ? "" : search))
 				, start, count).getResultList();
 	}
 
 	public List<BaseFileItem> get(Collection<String> ids) {
 		return em.createNamedQuery("getFileItemsByIds", BaseFileItem.class)
-				.setParameter("ids", ids.parallelStream().map(Long::valueOf).toList())
+				.setParameter("ids", ids.parallelStream().map(Long::valueOf).collect(Collectors.toList()))
 				.getResultList();
 	}
 
@@ -235,7 +236,9 @@ public class FileItemDao extends BaseFileItemDao {
 			if (f.exists()) {
 				File base = OmFileHelper.getUploadFilesDir();
 				switch (f.getType()) {
-					case IMAGE, PRESENTATION, VIDEO:
+					case IMAGE:
+					case PRESENTATION:
+					case VIDEO:
 						File tFolder = new File(base, f.getHash());
 
 						if (tFolder.exists()) {

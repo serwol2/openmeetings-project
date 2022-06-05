@@ -26,6 +26,13 @@ import static org.apache.openmeetings.webservice.Constants.TNS;
 import static org.apache.openmeetings.webservice.Constants.USER_SERVICE_NAME;
 import static org.apache.openmeetings.webservice.Constants.USER_SERVICE_PORT_NAME;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Locale;
@@ -74,13 +81,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  *
@@ -190,9 +190,8 @@ public class UserWebService extends BaseWebService {
 	@POST
 	@Path("/")
 	@Operation(
-			description = """
-					Adds a new User like through the Frontend, but also does activates the
-					 Account To do SSO see the methods to create a hash and use those ones!""",
+			description = "Adds a new User like through the Frontend, but also does activates the\n"
+					+ " Account To do SSO see the methods to create a hash and use those ones!",
 			responses = {
 					@ApiResponse(responseCode = "200", description = "list of users",
 						content = @Content(schema = @Schema(implementation = UserDTOWrapper.class))),
@@ -248,8 +247,8 @@ public class UserWebService extends BaseWebService {
 
 			if (ouser == null) {
 				throw new InternalServiceException(UNKNOWN.getMessage());
-			} else if (ouser instanceof String str) {
-				throw new InternalServiceException(str);
+			} else if (ouser instanceof String) {
+				throw new InternalServiceException((String)ouser);
 			}
 
 			User u = (User)ouser;
@@ -361,10 +360,9 @@ public class UserWebService extends BaseWebService {
 	@POST
 	@Path("/hash")
 	@Operation(
-			description = """
-					Sets the SessionObject for a certain SID, after setting this
-					 Session-Object you can use the SID + a RoomId to enter any Room. ...
-					  Session-Hashs are deleted 15 minutes after the creation if not used.""",
+			description = "Sets the SessionObject for a certain SID, after setting this\n"
+					+ " Session-Object you can use the SID + a RoomId to enter any Room. ...\n"
+					+ " Session-Hashs are deleted 15 minutes after the creation if not used.",
 			responses = {
 					@ApiResponse(responseCode = "200", description = "secure hash or error code",
 							content = @Content(schema = @Schema(implementation = ServiceResultWrapper.class))),

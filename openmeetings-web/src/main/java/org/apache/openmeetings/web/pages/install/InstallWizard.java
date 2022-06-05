@@ -106,7 +106,6 @@ import de.agilecoders.wicket.extensions.wizard.BootstrapWizard;
 public class InstallWizard extends BootstrapWizard {
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = LoggerFactory.getLogger(InstallWizard.class);
-	private static final String LBL_CHECK = "install.wizard.db.step.check";
 	private IDynamicWizardStep welcomeStep;
 	private IDynamicWizardStep dbStep;
 	private ParamsStep1 paramsStep1;
@@ -302,7 +301,7 @@ public class InstallWizard extends BootstrapWizard {
 					}
 				}));
 				add(host, port, dbname, user, pass);
-				add(new SpinnerAjaxButton("check", new ResourceModel(LBL_CHECK), Buttons.Type.Outline_Primary) {
+				add(new SpinnerAjaxButton("check", new ResourceModel("install.wizard.db.step.check"), Buttons.Type.Outline_Primary) {
 					private static final long serialVersionUID = 1L;
 
 					@Override
@@ -589,7 +588,7 @@ public class InstallWizard extends BootstrapWizard {
 			add(officePath.setLabel(new ResourceModel("install.wizard.params.step3.officePath")));
 			add(new TextField<Integer>("docDpi").setRequired(true).add(range(50, 600)));
 			add(new TextField<Integer>("docQuality").setRequired(true).add(range(1, 100)));
-			add(new BootstrapAjaxButton("validateImageMagic", new ResourceModel(LBL_CHECK), Buttons.Type.Outline_Primary) {
+			add(new BootstrapAjaxButton("validateImageMagic", new ResourceModel("install.wizard.db.step.check"), Buttons.Type.Outline_Primary) {
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -598,7 +597,7 @@ public class InstallWizard extends BootstrapWizard {
 					target.add(feedback);
 				}
 			});
-			add(new BootstrapAjaxButton("validateFfmpeg", new ResourceModel(LBL_CHECK), Buttons.Type.Outline_Primary) {
+			add(new BootstrapAjaxButton("validateFfmpeg", new ResourceModel("install.wizard.db.step.check"), Buttons.Type.Outline_Primary) {
 				private static final long serialVersionUID = 1L;
 				@Override
 				protected void onSubmit(AjaxRequestTarget target) {
@@ -606,7 +605,7 @@ public class InstallWizard extends BootstrapWizard {
 					target.add(feedback);
 				}
 			});
-			add(new BootstrapAjaxButton("validateSox", new ResourceModel(LBL_CHECK), Buttons.Type.Outline_Primary) {
+			add(new BootstrapAjaxButton("validateSox", new ResourceModel("install.wizard.db.step.check"), Buttons.Type.Outline_Primary) {
 				private static final long serialVersionUID = 1L;
 				@Override
 				protected void onSubmit(AjaxRequestTarget target) {
@@ -614,7 +613,7 @@ public class InstallWizard extends BootstrapWizard {
 					target.add(feedback);
 				}
 			});
-			add(new BootstrapAjaxButton("validateOffice", new ResourceModel(LBL_CHECK), Buttons.Type.Outline_Primary) {
+			add(new BootstrapAjaxButton("validateOffice", new ResourceModel("install.wizard.db.step.check"), Buttons.Type.Outline_Primary) {
 				private static final long serialVersionUID = 1L;
 				@Override
 				protected void onSubmit(AjaxRequestTarget target) {

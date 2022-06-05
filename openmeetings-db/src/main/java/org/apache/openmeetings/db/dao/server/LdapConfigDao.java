@@ -32,7 +32,6 @@ import org.apache.openmeetings.db.dao.IDataProviderDao;
 import org.apache.openmeetings.db.dao.user.UserDao;
 import org.apache.openmeetings.db.entity.server.LdapConfig;
 import org.apache.openmeetings.db.util.DaoHelper;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class LdapConfigDao implements IDataProviderDao<LdapConfig> {
 	private static final Logger log = LoggerFactory.getLogger(LdapConfigDao.class);
-	private static final List<String> searchFields = List.of("name", "configFileName", "domain", "comment");
+	private static final String[] searchFields = {"name", "configFileName", "domain", "comment"};
 
 	@PersistenceContext
 	private EntityManager em;
@@ -95,8 +94,9 @@ public class LdapConfigDao implements IDataProviderDao<LdapConfig> {
 	}
 
 	@Override
-	public List<LdapConfig> get(String search, long start, long count, SortParam<String> sort) {
-		return DaoHelper.get(em, LdapConfig.class, false, search, searchFields, true, null, sort, start, count);
+	public List<LdapConfig> get(String search, long start, long count, String sort) {
+		return setLimits(em.createQuery(DaoHelper.getSearchQuery("LdapConfig", "lc", search, true, false, sort, searchFields), LdapConfig.class)
+				, start, count).getResultList();
 	}
 
 	@Override
@@ -114,7 +114,8 @@ public class LdapConfigDao implements IDataProviderDao<LdapConfig> {
 
 	@Override
 	public long count(String search) {
-		return DaoHelper.count(em, LdapConfig.class, search, searchFields, true, null);
+		TypedQuery<Long> q = em.createQuery(DaoHelper.getSearchQuery("LdapConfig", "lc", search, true, true, null, searchFields), Long.class);
+		return q.getSingleResult();
 	}
 
 	@Override

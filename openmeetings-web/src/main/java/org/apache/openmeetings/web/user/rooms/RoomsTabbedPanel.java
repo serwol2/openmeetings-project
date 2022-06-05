@@ -20,6 +20,7 @@ package org.apache.openmeetings.web.user.rooms;
 
 import static org.apache.openmeetings.web.app.WebSession.getUserId;
 
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.openmeetings.db.dao.room.RoomDao;
@@ -61,6 +62,6 @@ public class RoomsTabbedPanel extends UserPanel {
 			public WebMarkupContainer getPanel(String panelId) {
 				return new RoomsPanel(panelId, roomDao.getGroupRooms(g.getId()));
 			}
-		}).toList()));
+		}).collect(Collectors.toList())));
 	}
 }

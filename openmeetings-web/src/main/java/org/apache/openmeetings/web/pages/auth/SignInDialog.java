@@ -79,6 +79,7 @@ import de.agilecoders.wicket.extensions.markup.html.bootstrap.spinner.SpinnerAja
 public class SignInDialog extends Modal<String> {
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = LoggerFactory.getLogger(SignInDialog.class);
+	private Form<String> form;
 	private final PasswordTextField passField = new PasswordTextField("pass", Model.of(""));
 	private final RequiredTextField<String> loginField = new RequiredTextField<>("login", Model.of(""));
 	private boolean rememberMe = false;
@@ -100,8 +101,7 @@ public class SignInDialog extends Modal<String> {
 
 	@Override
 	protected void onInitialize() {
-		Form<String> form = new SignInForm("signin");
-		add(form);
+		add(form = new SignInForm("signin"));
 		header(new ResourceModel("108"));
 		show(true);
 		setCloseOnEscapeKey(false);

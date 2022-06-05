@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.persistence.Basic;
@@ -166,7 +167,7 @@ public class User extends HistoricalEntity {
 			if (groupAdmin) {
 				stream = stream.filter(Right::isGroupAdminAllowed);
 			}
-			return stream.toList();
+			return stream.collect(Collectors.toList());
 		}
 	}
 
@@ -318,6 +319,14 @@ public class User extends HistoricalEntity {
 	@Column(name = "external_id")
 	@XmlElement(name = "externalUserId", required = false)
 	private String externalId;
+
+	@XmlElement(name = "externalUserType", required = false)
+	@Transient
+	/**
+	 * @deprecated External group should be used instead
+	 */
+	@Deprecated(since = "5.0")
+	private String externalType;
 
 	/**
 	 * java.util.TimeZone Id
@@ -569,6 +578,22 @@ public class User extends HistoricalEntity {
 				: groupUsers.stream().filter(gu -> gu.getGroup().isExternal()).findFirst()
 				.map(gu -> gu.getGroup().getName());
 		return extType.isPresent() ? extType.get() : null;
+	}
+
+	/**
+	 * @deprecated External group should be used instead
+	 */
+	@Deprecated(since = "5.0")
+	public String getExternalType() {
+		return externalType;
+	}
+
+	/**
+	 * @deprecated External group should be used instead
+	 */
+	@Deprecated(since = "5.0")
+	public void setExternalType(String externalType) {
+		this.externalType = externalType;
 	}
 
 	public Sessiondata getSessionData() {

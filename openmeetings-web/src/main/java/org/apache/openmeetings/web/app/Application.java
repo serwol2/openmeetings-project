@@ -287,10 +287,13 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				Response resp = cycle.getResponse();
-				if (resp instanceof WebResponse wresp && wresp.isHeaderSupported()) {
-					wresp.setHeader("X-XSS-Protection", "1; mode=block");
-					wresp.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-					wresp.setHeader("X-Content-Type-Options", "nosniff");
+				if (resp instanceof WebResponse) {
+					WebResponse wresp = (WebResponse)resp;
+					if (wresp.isHeaderSupported()) {
+						wresp.setHeader("X-XSS-Protection", "1; mode=block");
+						wresp.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+						wresp.setHeader("X-Content-Type-Options", "nosniff");
+					}
 				}
 			}
 		});
@@ -589,16 +592,10 @@ public class Application extends AuthenticatedWebApplication implements IApplica
 		return new UrlValidator(new String[] {"http", "https"}).isValid(url);
 	}
 
-	private static String getValidBaseUrl(String inBaseUrl) {
-		if (isUrlValid(inBaseUrl)) {
-			return inBaseUrl;
-		}
-		return isUrlValid(getBaseUrl()) ? getBaseUrl() : "";
-	}
-
 	public static String urlForPage(Class<? extends Page> clazz, PageParameters pp, String inBaseUrl) {
 		RequestCycle rc = RequestCycle.get();
-		String baseUrl = getValidBaseUrl(inBaseUrl);
+		String baseUrl = isUrlValid(inBaseUrl) ? inBaseUrl
+				: (isUrlValid(getBaseUrl()) ? getBaseUrl() : "");
 		if (!Strings.isEmpty(baseUrl) && !baseUrl.endsWith("/")) {
 			baseUrl += "/";
 		}

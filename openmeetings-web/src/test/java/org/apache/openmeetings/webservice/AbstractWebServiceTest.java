@@ -57,7 +57,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 @Tag("webservice")
-public abstract class AbstractWebServiceTest {
+public class AbstractWebServiceTest {
 	private static final String HOST = "localhost";
 	private static final String CONTEXT = "/openmeetings";
 	private static int port = 8080;

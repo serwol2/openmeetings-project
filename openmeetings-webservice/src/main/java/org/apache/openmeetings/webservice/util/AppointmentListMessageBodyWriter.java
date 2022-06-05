@@ -46,7 +46,8 @@ import com.github.openjson.JSONObject;
 public class AppointmentListMessageBodyWriter implements MessageBodyWriter<List<AppointmentDTO>> {
 	@Override
 	public boolean isWriteable(Class<?> clazz, Type type, Annotation[] annotations, MediaType mediaType) {
-		if (type instanceof ParameterizedType pt) {
+		if (type instanceof ParameterizedType) {
+			ParameterizedType pt = (ParameterizedType)type;
 			Type[] args = pt.getActualTypeArguments();
 			if (args != null && args.length == 1) {
 				return AppointmentDTO.class.equals(args[0]);

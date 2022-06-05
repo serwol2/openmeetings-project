@@ -30,10 +30,8 @@ import javax.persistence.TypedQuery;
 
 import org.apache.openmeetings.db.dao.IDataProviderDao;
 import org.apache.openmeetings.db.dao.basic.ConfigurationDao;
-import org.apache.openmeetings.db.entity.server.LdapConfig;
 import org.apache.openmeetings.db.entity.server.OAuthServer;
 import org.apache.openmeetings.db.util.DaoHelper;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 @Transactional
 public class OAuth2Dao implements IDataProviderDao<OAuthServer> {
-	private static final List<String> searchFields = List.of("name");
+	private static final String[] searchFields = {"name"};
 	@PersistenceContext
 	private EntityManager em;
 	@Autowired
@@ -69,8 +67,9 @@ public class OAuth2Dao implements IDataProviderDao<OAuthServer> {
 	}
 
 	@Override
-	public List<OAuthServer> get(String search, long start, long count, SortParam<String> sort) {
-		return DaoHelper.get(em, OAuthServer.class, false, search, searchFields, true, null, sort, start, count);
+	public List<OAuthServer> get(String search, long start, long count, String order) {
+		return setLimits(em.createQuery(DaoHelper.getSearchQuery("OAuthServer", "s", search, true, false, null, searchFields), OAuthServer.class)
+				, start, count).getResultList();
 	}
 
 	@Override
@@ -81,7 +80,8 @@ public class OAuth2Dao implements IDataProviderDao<OAuthServer> {
 
 	@Override
 	public long count(String search) {
-		return DaoHelper.count(em, LdapConfig.class, search, searchFields, true, null);
+		TypedQuery<Long> q = em.createQuery(DaoHelper.getSearchQuery("OAuthServer", "s", search, true, true, null, searchFields), Long.class);
+		return q.getSingleResult();
 	}
 
 	@Override

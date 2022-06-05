@@ -110,8 +110,8 @@ public class FolderPanel extends Panel implements IDraggableListener, IDroppable
 			protected void onSubmit(AjaxRequestTarget target) {
 				super.onSubmit(target);
 				f.setName(getEditor().getModelObject());
-				if (f instanceof Recording rec) {
-					recDao.update(rec);
+				if (f instanceof Recording) {
+					recDao.update((Recording)f);
 				} else {
 					fileDao.update((FileItem)f);
 				}
@@ -153,8 +153,8 @@ public class FolderPanel extends Panel implements IDraggableListener, IDroppable
 		f.setOwnerId(p.getOwnerId());
 		f.setRoomId(p.getRoomId());
 		f.setGroupId(p.getGroupId());
-		if (f instanceof Recording rec) {
-			recDao.update(rec);
+		if (f instanceof Recording) {
+			recDao.update((Recording)f);
 		} else {
 			fileDao.update((FileItem)f);
 		}
@@ -175,6 +175,16 @@ public class FolderPanel extends Panel implements IDraggableListener, IDroppable
 			treePanel.tree.expand(f);
 		} else {
 			treePanel.update(target, f);
+		}
+	}
+
+	private void setVideoStyle(final BaseFileItem f, StringBuilder style) {
+		style.append("recording ");
+		if (f instanceof Recording) {
+			Status st = ((Recording)f).getStatus();
+			if (Status.RECORDING == st || Status.CONVERTING == st) {
+				style.append("processing ");
+			}
 		}
 	}
 
@@ -216,8 +226,9 @@ public class FolderPanel extends Panel implements IDraggableListener, IDroppable
 	@Override
 	public void onDrop(AjaxRequestTarget target, Component component) {
 		Object o = component.getDefaultModelObject();
-		if (o instanceof BaseFileItem f) {
+		if (o instanceof BaseFileItem) {
 			BaseFileItem p = (BaseFileItem)getDefaultModelObject();
+			BaseFileItem f = (BaseFileItem)o;
 			if (treePanel.isSelected(f)) {
 				moveAll(target, p);
 			} else {
@@ -230,16 +241,6 @@ public class FolderPanel extends Panel implements IDraggableListener, IDroppable
 
 	private class StyleBehavior extends Behavior {
 		private static final long serialVersionUID = 1L;
-
-		private void setVideoStyle(final BaseFileItem f, StringBuilder style) {
-			style.append("recording ");
-			if (f instanceof Recording rec) {
-				Status st = rec.getStatus();
-				if (Status.RECORDING == st || Status.CONVERTING == st) {
-					style.append("processing ");
-				}
-			}
-		}
 
 		private CharSequence getItemStyle() {
 			final BaseFileItem f = (BaseFileItem)getDefaultModelObject();
@@ -264,7 +265,8 @@ public class FolderPanel extends Panel implements IDraggableListener, IDroppable
 					case WML_FILE:
 						style.append(CSS_CLASS_FILE).append("wml ");
 						break;
-					case VIDEO, RECORDING:
+					case VIDEO:
+					case RECORDING:
 						setVideoStyle(f, style);
 						break;
 					case PRESENTATION:

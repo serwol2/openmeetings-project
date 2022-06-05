@@ -364,7 +364,8 @@ public class AppointmentManager {
 
 						if (p != null) {
 							for (Object o : (Collection<?>) p.getValue()) {
-								if (o instanceof Element e) {
+								if (o instanceof Element) {
+									Element e = (Element) o;
 									String name = DomUtil.getAttribute(e, "name", null);
 									if ("VEVENT".equals(name)) {
 										isVevent = true;
@@ -413,7 +414,8 @@ public class AppointmentManager {
 
 		if (property != null) {
 			for (Object o : (Collection<?>) property.getValue()) {
-				if (o instanceof Element e) {
+				if (o instanceof Element) {
+					Element e = (Element) o;
 					value = DomUtil.getTextTrim(e);
 					break;
 				}
@@ -435,8 +437,11 @@ public class AppointmentManager {
 			DavPropertyName calProp = DavPropertyName.create("calendar", CalDAVConstants.NAMESPACE_CALDAV);
 
 			for (Object o : (Collection<?>) resourcetype.getValue()) {
-				if (o instanceof Element e && e.getLocalName().equals(calProp.getName())) {
-					isCalendar = true;
+				if (o instanceof Element) {
+					Element e = (Element) o;
+					if (e.getLocalName().equals(calProp.getName())) {
+						isCalendar = true;
+					}
 				}
 			}
 		}
@@ -531,7 +536,9 @@ public class AppointmentManager {
 			String path = ensureTrailingSlash(calendar.getHref());
 
 			switch (type) {
-				case WEBDAV_SYNC, CTAG, ETAG:
+				case WEBDAV_SYNC:
+				case CTAG:
+				case ETAG:
 					calendarHandler = new EtagsHandler(path, calendar, client, context, appointmentDao, utils);
 					break;
 				default:
@@ -563,7 +570,9 @@ public class AppointmentManager {
 			String path = calendar.getHref();
 
 			switch (type) {
-				case WEBDAV_SYNC, CTAG, ETAG:
+				case WEBDAV_SYNC:
+				case CTAG:
+				case ETAG:
 					calendarHandler = new EtagsHandler(path, calendar, client, context, appointmentDao, utils);
 					break;
 				default:

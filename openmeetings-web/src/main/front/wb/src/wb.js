@@ -84,6 +84,10 @@ module.exports = class Wb {
 		}
 		function _createObject(arr, handler) {
 			fabric.util.enlivenObjects(arr, function(objects) {
+				self.eachCanvas(function(canvas) {
+					canvas.renderOnAddRemove = false;
+				});
+
 				for (let i = 0; i < objects.length; ++i) {
 					const _o = objects[i];
 					_o.loaded = true;
@@ -91,6 +95,7 @@ module.exports = class Wb {
 				}
 
 				self.eachCanvas(function(canvas) {
+					canvas.renderOnAddRemove = true;
 					canvas.requestRenderAll();
 				});
 			});
@@ -458,11 +463,7 @@ module.exports = class Wb {
 			for (let i = 1; i < canvases.length; ++i) {
 				const cc = $('#can-' + this.id + '-slide-' + i).closest('.canvas-container');
 				cc.remove();
-				try { // FIXME TODO HACK
-					canvases[i].dispose();
-				} catch {
-					//no-op
-				}
+				canvases[i].dispose();
 			}
 			$('.room-block .wb-block .wb-video').remove();
 			canvases.splice(1);
@@ -472,12 +473,14 @@ module.exports = class Wb {
 		this.clearSlide = (_sl) => {
 			if (canvases.length > _sl) {
 				const canvas = canvases[_sl];
+				canvas.renderOnAddRemove = false;
 				let arr = canvas.getObjects();
 				while (arr.length > 0) {
 					canvas.remove(arr[arr.length - 1]);
 					arr = canvas.getObjects();
 				}
 				$('.room-block .wb-block .wb-video.slide-' + _sl).remove();
+				canvas.renderOnAddRemove = true;
 				canvas.requestRenderAll();
 			}
 		};

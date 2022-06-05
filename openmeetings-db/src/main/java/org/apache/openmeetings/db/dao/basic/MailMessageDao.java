@@ -26,19 +26,18 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 
 import org.apache.openmeetings.db.dao.IDataProviderDao;
 import org.apache.openmeetings.db.entity.basic.MailMessage;
 import org.apache.openmeetings.db.entity.basic.MailMessage.Status;
-import org.apache.openmeetings.db.util.DaoHelper;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
+import org.apache.wicket.util.string.Strings;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @Transactional
 public class MailMessageDao implements IDataProviderDao<MailMessage> {
-	private static final List<String> searchFields = List.of("recipients", "subject", "body", "lastError");
 	@PersistenceContext
 	private EntityManager em;
 
@@ -58,9 +57,27 @@ public class MailMessageDao implements IDataProviderDao<MailMessage> {
 				, start, count).getResultList();
 	}
 
+	private <T> TypedQuery<T> getQuery(boolean isCount, String search, String order, Class<T> clazz) {
+		StringBuilder sb = new StringBuilder("SELECT ");
+		sb.append(isCount ? "COUNT(m)" : "m")
+			.append(" FROM MailMessage m");
+		if (!Strings.isEmpty(search)) {
+			sb.append(" WHERE m.recipients LIKE :search OR m.subject LIKE :search OR m.body LIKE :search OR m.lastError LIKE :search");
+		}
+		if (!Strings.isEmpty(order)) {
+			sb.append(" ORDER BY m.").append(order);
+		}
+		TypedQuery<T> q = em.createQuery(sb.toString(), clazz);
+		if (!Strings.isEmpty(search)) {
+			q.setParameter("search", String.format("%%%s%%", search));
+		}
+		return q;
+	}
+
 	@Override
-	public List<MailMessage> get(String search, long start, long count, SortParam<String> sort) {
-		return DaoHelper.get(em, MailMessage.class, false, search, searchFields, false, null, sort, start, count);
+	public List<MailMessage> get(String search, long start, long count, String order) {
+		return setLimits(getQuery(false, search, order, MailMessage.class)
+				, start, count).getResultList();
 	}
 
 	@Override
@@ -70,7 +87,7 @@ public class MailMessageDao implements IDataProviderDao<MailMessage> {
 
 	@Override
 	public long count(String search) {
-		return DaoHelper.count(em, MailMessage.class, search, searchFields, false, null);
+		return getQuery(true, search, null, Long.class).getSingleResult();
 	}
 
 	public void resetSendingStatus(Calendar date) {

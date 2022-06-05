@@ -314,7 +314,8 @@ public class RoomPanel extends BasePanel {
 				@Override
 				public void onDrop(AjaxRequestTarget target, Component component) {
 					Object o = component.getDefaultModelObject();
-					if (wb.isVisible() && o instanceof BaseFileItem f) {
+					if (wb.isVisible() && o instanceof BaseFileItem) {
+						BaseFileItem f = (BaseFileItem)o;
 						if (sidebar.getFilesPanel().isSelected(f)) {
 							for (Entry<String, BaseFileItem> e : sidebar.getFilesPanel().getSelected().entrySet()) {
 								wb.sendFileToWb(e.getValue(), false);
@@ -422,7 +423,8 @@ public class RoomPanel extends BasePanel {
 		Client curClient = getClient();
 		if (curClient != null && event.getPayload() instanceof WebSocketPushPayload) {
 			WebSocketPushPayload wsEvent = (WebSocketPushPayload) event.getPayload();
-			if (wsEvent.getMessage() instanceof RoomMessage m) {
+			if (wsEvent.getMessage() instanceof RoomMessage) {
+				RoomMessage m = (RoomMessage)wsEvent.getMessage();
 				IPartialPageRequestHandler handler = wsEvent.getHandler();
 				switch (m.getType()) {
 					case POLL_CREATED:
@@ -452,35 +454,35 @@ public class RoomPanel extends BasePanel {
 						roomClosed.show(handler);
 						break;
 					case REQUEST_RIGHT_MODERATOR:
-						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.REQ_RIGHT_MODERATOR), handler);
+						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.reqRightModerator), handler);
 						break;
 					case REQUEST_RIGHT_PRESENTER:
-						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.REQ_RIGHT_PRESENTER), handler);
+						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.reqRightPresenter), handler);
 						break;
 					case REQUEST_RIGHT_WB:
-						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.REQ_RIGHT_WB), handler);
+						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.reqRightWb), handler);
 						break;
 					case REQUEST_RIGHT_SHARE:
-						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.REQ_RIGHT_SHARE), handler);
+						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.reqRightShare), handler);
 						break;
 					case REQUEST_RIGHT_REMOTE:
-						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.REQ_RIGHT_REMOTE), handler);
+						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.reqRightRemote), handler);
 						break;
 					case REQUEST_RIGHT_A:
-						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.REQ_RIGHT_A), handler);
+						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.reqRightA), handler);
 						break;
 					case REQUEST_RIGHT_AV:
-						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.REQ_RIGHT_AV), handler);
+						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.reqRightAv), handler);
 						break;
 					case REQUEST_RIGHT_MUTE_OTHERS:
-						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.REQ_RIGHT_MUTE_OTHERS), handler);
+						sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.reqRightMuteOthers), handler);
 						break;
 					case ACTIVITY_REMOVE:
 						sidebar.removeActivity(((TextRoomMessage)m).getText(), handler);
 						break;
 					case HAVE_QUESTION:
 						if (curClient.hasRight(Room.Right.MODERATOR) || getUserId().equals(m.getUserId())) {
-							sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.REQ_RIGHT_HAVE_QUESTION), handler);
+							sidebar.addActivity(new Activity((TextRoomMessage)m, Activity.Type.haveQuestion), handler);
 						}
 						break;
 					case KICK:
@@ -567,13 +569,13 @@ public class RoomPanel extends BasePanel {
 			handler.appendJavaScript("Room.addClient(["
 					+ c.toJson(self).toString(new NullStringer()) + "]);");
 		}
-		sidebar.addActivity(new Activity(m, Activity.Type.ROOM_ENTER), handler);
+		sidebar.addActivity(new Activity(m, Activity.Type.roomEnter), handler);
 	}
 
 	private void onRoomExit(TextRoomMessage m, IPartialPageRequestHandler handler) {
 		String uid = m.getText();
 		sidebar.update(handler);
-		sidebar.addActivity(new Activity(m, Activity.Type.ROOM_EXIT), handler);
+		sidebar.addActivity(new Activity(m, Activity.Type.roomExit), handler);
 		handler.appendJavaScript("Room.removeClient('" + uid + "'); Chat.removeTab('" + ID_USER_PREFIX + m.getUserId() + "');");
 	}
 
@@ -673,8 +675,8 @@ public class RoomPanel extends BasePanel {
 
 	@Override
 	public void cleanup(IPartialPageRequestHandler handler) {
-		if (eventDetail instanceof EventDetailDialog evtDialog) {
-			evtDialog.close(handler);
+		if (eventDetail instanceof EventDetailDialog) {
+			((EventDetailDialog)eventDetail).close(handler);
 		}
 		handler.add(getBasePage().getHeader().setVisible(true), getMainPanel().getTopControls().setVisible(true));
 		if (r.isHidden(RoomElement.CHAT)) {
@@ -796,7 +798,7 @@ public class RoomPanel extends BasePanel {
 						if (!c.getRoom().isAudioOnly() && !activityAllowed(c, Client.Activity.VIDEO, c.getRoom())) {
 							c.allow(Room.Right.VIDEO);
 						}
-						streamProcessor.onToggleActivity(c, c.getRoom().isAudioOnly()
+						streamProcessor.toggleActivity(c, c.getRoom().isAudioOnly()
 								? Client.Activity.AUDIO
 								: Client.Activity.AUDIO_VIDEO);
 					}

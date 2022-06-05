@@ -21,7 +21,6 @@ package org.apache.openmeetings.db.dao;
 import java.util.List;
 
 import org.apache.openmeetings.db.entity.IDataProviderEntity;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -63,7 +62,7 @@ public interface IDataProviderDao<T extends IDataProviderEntity> {
 	 * @param order - column and sort order
 	 * @return list of instances in the range specified
 	 */
-	List<T> get(String search, long start, long count, SortParam<String> order);
+	List<T> get(String search, long start, long count, String order);
 
 	/**
 	 * Count the number of instances of {@link T}

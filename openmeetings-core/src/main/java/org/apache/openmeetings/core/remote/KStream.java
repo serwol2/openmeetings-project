@@ -151,7 +151,8 @@ public class KStream extends AbstractStream implements ISipCallbacks {
 			case AUDIO_ONLY:
 				profile = MediaProfileSpecType.WEBM_AUDIO_ONLY;
 				break;
-			case SCREEN, VIDEO_ONLY:
+			case SCREEN:
+			case VIDEO_ONLY:
 			default:
 				profile = MediaProfileSpecType.WEBM_VIDEO_ONLY;
 				break;
@@ -259,9 +260,9 @@ public class KStream extends AbstractStream implements ISipCallbacks {
 		final BaseRtpEndpoint endpoint = getEndpointForUser(sid, uid);
 		final String sdpAnswer = endpoint.processOffer(sdpOffer);
 
-		if (endpoint instanceof WebRtcEndpoint rtcEndpoint) {
+		if (endpoint instanceof WebRtcEndpoint) {
 			log.debug("gather candidates, sid {}, uid {}", sid, uid);
-			rtcEndpoint.gatherCandidates(); // this one might throw Exception
+			((WebRtcEndpoint)endpoint).gatherCandidates(); // this one might throw Exception
 		}
 		log.trace("USER {}: SdpAnswer is {}", this.uid, sdpAnswer);
 		kHandler.sendClient(sid, newKurentoMsg()

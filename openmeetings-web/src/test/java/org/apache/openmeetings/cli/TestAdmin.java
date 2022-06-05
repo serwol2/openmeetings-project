@@ -78,9 +78,8 @@ class TestAdmin {
 	}
 
 	private static void checkError(String... args) throws Exception {
-		Admin a = new Admin();
 		try {
-			a.process(args);
+			new Admin().process(args);
 			fail();
 		} catch (ExitException ee) {
 			assertTrue(true);
@@ -131,16 +130,12 @@ class TestAdmin {
 		//backup
 		a.process("-b");
 		//backup to file
-		File backup = Files.createTempFile("omtempbackup", null).toFile();
-		a.process("-b", "-file", backup.getCanonicalPath());
-		assertTrue(backup.exists(), "backup Should be created");
-		assertTrue(Files.size(backup.toPath()) > 0, "backup shouldn't be empty");
+		a.process("-b", Files.createTempFile("omtempbackup", null).toFile().getCanonicalPath());
 	}
 
 	@Test
 	void testFilesNoDb() throws Exception {
 		//clean-up report
 		new Admin().process("-f");
-		assertTrue(true, "No exception is thrown");
 	}
 }

@@ -23,6 +23,7 @@ import static org.apache.openmeetings.util.OpenmeetingsVariables.ATTR_TITLE;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -100,7 +101,7 @@ public class OmMenuItem implements INavbarComponent {
 
 				@Override
 				protected List<AbstractLink> newSubMenuButtons(String markupId) {
-					return items.stream().map(mItem -> ((OmMenuItem)mItem).createLink(markupId, false)).toList();
+					return items.stream().map(mItem -> ((OmMenuItem)mItem).createLink(markupId, false)).collect(Collectors.toList());
 				}
 			};
 			setAttributes(item);

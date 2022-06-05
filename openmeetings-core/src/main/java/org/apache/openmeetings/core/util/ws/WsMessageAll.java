@@ -20,6 +20,15 @@ package org.apache.openmeetings.core.util.ws;
 
 import org.apache.openmeetings.util.ws.IClusterWsMessage;
 
-public record WsMessageAll(String msg) implements IClusterWsMessage {
+public class WsMessageAll implements IClusterWsMessage {
 	private static final long serialVersionUID = 1L;
+	private final String msg;
+
+	public WsMessageAll(String msg) {
+		this.msg = msg;
+	}
+
+	public String getMsg() {
+		return msg;
+	}
 }

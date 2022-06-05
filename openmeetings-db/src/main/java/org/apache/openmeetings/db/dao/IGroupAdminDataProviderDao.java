@@ -21,7 +21,6 @@ package org.apache.openmeetings.db.dao;
 import java.util.List;
 
 import org.apache.openmeetings.db.entity.IDataProviderEntity;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 
 public interface IGroupAdminDataProviderDao<T extends IDataProviderEntity> extends IDataProviderDao<T> {
 	/**
@@ -34,7 +33,7 @@ public interface IGroupAdminDataProviderDao<T extends IDataProviderEntity> exten
 	 * @param order - column and sort order
 	 * @return list of instances in the range specified
 	 */
-	List<T> adminGet(String search, Long adminId, long start, long count, SortParam<String> order);
+	List<T> adminGet(String search, Long adminId, long start, long count, String order);
 
 	/**
 	 * Get a list of instances of {@link T}
@@ -45,7 +44,7 @@ public interface IGroupAdminDataProviderDao<T extends IDataProviderEntity> exten
 	 * @param order - column and sort order
 	 * @return list of instances in the range specified
 	 */
-	default List<T> adminGet(String search, long start, long count, SortParam<String> order) {
+	default List<T> adminGet(String search, long start, long count, String order) {
 		return get(search, start, count, order);
 	}
 

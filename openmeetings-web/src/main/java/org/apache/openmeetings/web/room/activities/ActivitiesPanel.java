@@ -24,7 +24,6 @@ import static org.apache.openmeetings.web.util.CallbackFunctionHelper.getNamedFu
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang3.time.FastDateFormat;
@@ -44,7 +43,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.PriorityHeaderItem;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
-import org.apache.wicket.util.string.StringValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,14 +58,7 @@ public class ActivitiesPanel extends Panel {
 	private static final String ACTIVITY_FMT = "%s %s [%s]";
 	private static final String ACTIVITY_FMT_RTL = "%3$s %2$s [%1$s]";
 	private enum Action {
-		ACCEPT, DECLINE, CLOSE;
-
-		public static Action of(StringValue val) {
-			if (val.isEmpty()) {
-				return null;
-			}
-			return Action.valueOf(val.toString().toUpperCase(Locale.ROOT));
-		}
+		accept, decline, close
 	}
 	private static final FastDateFormat df = FastDateFormat.getInstance("HH:mm:ss");
 	private final Map<String, Activity> activities = new LinkedHashMap<>();
@@ -87,54 +78,54 @@ public class ActivitiesPanel extends Panel {
 			try {
 				String id = getRequest().getRequestParameters().getParameterValue(PARAM_ID).toString();
 				long roomId = getRequest().getRequestParameters().getParameterValue(PARAM_ROOM_ID).toLong();
-				Action act = Action.of(getRequest().getRequestParameters().getParameterValue(ACTION));
+				Action act = Action.valueOf(getRequest().getRequestParameters().getParameterValue(ACTION).toString());
 				Activity a = activities.get(id);
 				if (a == null || !room.getRoom().getId().equals(roomId)) {
 					log.error("It seems like we are being hacked!!!!");
 					return;
 				}
 				switch (act) {
-					case CLOSE:
+					case close:
 						remove(target, id);
 						break;
-					case DECLINE:
+					case decline:
 						if (room.getClient().hasRight(Right.MODERATOR)) {
 							sendRoom(getRemoveMsg(id));
 						}
 						break;
-					case ACCEPT:
+					case accept:
 						Client client = cm.get(a.getUid());
 						if (room.getClient().hasRight(Right.MODERATOR) && client != null && client.getRoom() != null && roomId == client.getRoom().getId()) {
 							switch (a.getType()) {
-								case REQ_RIGHT_MODERATOR:
+								case reqRightModerator:
 									sendRoom(getRemoveMsg(id));
 									room.allowRight(client, Right.MODERATOR);
 									break;
-								case REQ_RIGHT_AV:
+								case reqRightAv:
 									sendRoom(getRemoveMsg(id));
 									room.allowRight(client, Right.AUDIO, Right.VIDEO);
 									break;
-								case REQ_RIGHT_PRESENTER:
+								case reqRightPresenter:
 									sendRoom(getRemoveMsg(id));
 									room.allowRight(client, Right.PRESENTER);
 									break;
-								case REQ_RIGHT_WB:
+								case reqRightWb:
 									sendRoom(getRemoveMsg(id));
 									room.allowRight(client, Right.WHITEBOARD);
 									break;
-								case REQ_RIGHT_SHARE:
+								case reqRightShare:
 									sendRoom(getRemoveMsg(id));
 									room.allowRight(client, Right.SHARE);
 									break;
-								case REQ_RIGHT_REMOTE:
+								case reqRightRemote:
 									sendRoom(getRemoveMsg(id));
 									room.allowRight(client, Right.REMOTE_CONTROL);
 									break;
-								case REQ_RIGHT_A:
+								case reqRightA:
 									sendRoom(getRemoveMsg(id));
 									room.allowRight(client, Right.AUDIO);
 									break;
-								case REQ_RIGHT_MUTE_OTHERS:
+								case reqRightMuteOthers:
 									sendRoom(getRemoveMsg(id));
 									room.allowRight(client, Right.MUTE_OTHERS);
 									break;
@@ -190,40 +181,38 @@ public class ActivitiesPanel extends Panel {
 		final String name = self ? getString("1362") : a.getName();
 		final String fmt = ((BasePage)getPage()).isRtl() ? ACTIVITY_FMT_RTL : ACTIVITY_FMT;
 		switch (a.getType()) {
-			case ROOM_ENTER:
+			case roomEnter:
 				text = String.format(fmt, name, getString("activities.msg.enter"), df.format(a.getCreated()));
 				break;
-			case ROOM_EXIT:
+			case roomExit:
 				text = String.format(fmt, name, getString("activities.msg.exit"), df.format(a.getCreated()));
 				break;
-			case REQ_RIGHT_MODERATOR:
+			case reqRightModerator:
 				text = String.format(fmt, name, getString("activities.request.right.moderator"), df.format(a.getCreated()));
 				break;
-			case REQ_RIGHT_PRESENTER:
+			case reqRightPresenter:
 				text = String.format(fmt, name, getString("activities.request.right.presenter"), df.format(a.getCreated()));
 				break;
-			case REQ_RIGHT_WB:
+			case reqRightWb:
 				text = String.format(fmt, name, getString("activities.request.right.wb"), df.format(a.getCreated()));
 				break;
-			case REQ_RIGHT_SHARE:
+			case reqRightShare:
 				text = String.format(fmt, name, getString("activities.request.right.share"), df.format(a.getCreated()));
 				break;
-			case REQ_RIGHT_REMOTE:
+			case reqRightRemote:
 				text = String.format(fmt, name, getString("activities.request.right.remote"), df.format(a.getCreated()));
 				break;
-			case REQ_RIGHT_A:
+			case reqRightA:
 				text = String.format(fmt, name, getString("activities.request.right.audio"), df.format(a.getCreated()));
 				break;
-			case REQ_RIGHT_AV:
+			case reqRightAv:
 				text = String.format(fmt, name, getString("activities.request.right.video"), df.format(a.getCreated()));
 				break;
-			case REQ_RIGHT_MUTE_OTHERS:
+			case reqRightMuteOthers:
 				text = String.format(fmt, name, getString("activities.request.right.muteothers"), df.format(a.getCreated()));
 				break;
-			case REQ_RIGHT_HAVE_QUESTION:
+			case haveQuestion:
 				text = String.format(fmt, name, getString("activities.ask.question"), df.format(a.getCreated()));
-				break;
-			default:
 				break;
 		}
 		final JSONObject aobj = new JSONObject()
@@ -235,18 +224,23 @@ public class ActivitiesPanel extends Panel {
 			.put("find", false);
 
 		switch (a.getType()) {
-			case REQ_RIGHT_MODERATOR, REQ_RIGHT_PRESENTER, REQ_RIGHT_WB, REQ_RIGHT_SHARE, REQ_RIGHT_REMOTE
-					, REQ_RIGHT_A, REQ_RIGHT_AV, REQ_RIGHT_MUTE_OTHERS:
+			case reqRightModerator:
+			case reqRightPresenter:
+			case reqRightWb:
+			case reqRightShare:
+			case reqRightRemote:
+			case reqRightA:
+			case reqRightAv:
+			case reqRightMuteOthers:
 				aobj.put("accept", room.getClient().hasRight(Right.MODERATOR));
 				aobj.put("decline", room.getClient().hasRight(Right.MODERATOR));
 				break;
-			case REQ_RIGHT_HAVE_QUESTION:
+			case haveQuestion:
 				aobj.put("find", !self);
-			case ROOM_ENTER, ROOM_EXIT:
+			case roomEnter:
+			case roomExit:
 				aobj.put("accept", false);
 				aobj.put("decline", false);
-				break;
-			default:
 				break;
 		}
 		handler.appendJavaScript(new StringBuilder("Activities.add(").append(aobj.toString()).append(");"));
@@ -267,15 +261,20 @@ public class ActivitiesPanel extends Panel {
 	private static CharSequence getClass(Activity a) {
 		StringBuilder cls = new StringBuilder();
 		switch (a.getType()) {
-			case REQ_RIGHT_MODERATOR, REQ_RIGHT_PRESENTER, REQ_RIGHT_WB, REQ_RIGHT_SHARE, REQ_RIGHT_REMOTE
-					, REQ_RIGHT_A, REQ_RIGHT_AV, REQ_RIGHT_MUTE_OTHERS, REQ_RIGHT_HAVE_QUESTION:
+			case reqRightModerator:
+			case reqRightPresenter:
+			case reqRightWb:
+			case reqRightShare:
+			case reqRightRemote:
+			case reqRightA:
+			case reqRightAv:
+			case reqRightMuteOthers:
+			case haveQuestion:
 				cls.append("bg-warning");
 				break;
-			case ROOM_ENTER, ROOM_EXIT:
+			case roomEnter:
+			case roomExit:
 				cls.append("bg-white auto-clean");
-				break;
-			default:
-				break;
 		}
 		return cls;
 	}

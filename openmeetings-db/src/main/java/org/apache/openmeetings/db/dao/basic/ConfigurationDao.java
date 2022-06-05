@@ -20,8 +20,8 @@ package org.apache.openmeetings.db.dao.basic;
 
 import static org.apache.commons.lang3.math.NumberUtils.toInt;
 import static org.apache.openmeetings.db.util.DaoHelper.setLimits;
-import static org.apache.openmeetings.util.OmVersion.getLine;
 import static org.apache.openmeetings.util.OpenmeetingsVariables.*;
+import static org.apache.openmeetings.util.OmVersion.getLine;
 import static org.apache.wicket.csp.CSPDirectiveSrcValue.SELF;
 import static org.apache.wicket.csp.CSPDirectiveSrcValue.STRICT_DYNAMIC;
 
@@ -34,6 +34,7 @@ import java.util.TimeZone;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 
 import org.apache.openjpa.conf.OpenJPAConfiguration;
 import org.apache.openjpa.event.RemoteCommitProvider;
@@ -50,7 +51,6 @@ import org.apache.openmeetings.util.crypt.CryptProvider;
 import org.apache.wicket.Application;
 import org.apache.wicket.csp.CSPDirective;
 import org.apache.wicket.csp.CSPHeaderConfiguration;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.util.string.Strings;
 import org.slf4j.Logger;
@@ -79,7 +79,7 @@ import com.github.openjson.JSONObject;
 @Transactional
 public class ConfigurationDao implements IDataProviderDao<Configuration> {
 	private static final Logger log = LoggerFactory.getLogger(ConfigurationDao.class);
-	private static final List<String> searchFields = List.of("key", "value");
+	private static final String[] searchFields = {"key", "value"};
 
 	@PersistenceContext
 	private EntityManager em;
@@ -94,8 +94,8 @@ public class ConfigurationDao implements IDataProviderDao<Configuration> {
 	public void updateClusterAddresses(String addresses) throws UnknownHostException {
 		OpenJPAConfiguration cfg = ((OpenJPAEntityManagerSPI)OpenJPAPersistence.cast(em)).getConfiguration();
 		RemoteCommitProvider prov = cfg.getRemoteCommitEventManager().getRemoteCommitProvider();
-		if (prov instanceof TCPRemoteCommitProvider tcpProv) {
-			tcpProv.setAddresses(addresses);
+		if (prov instanceof TCPRemoteCommitProvider) {
+			((TCPRemoteCommitProvider)prov).setAddresses(addresses);
 		}
 	}
 
@@ -202,8 +202,9 @@ public class ConfigurationDao implements IDataProviderDao<Configuration> {
 	}
 
 	@Override
-	public List<Configuration> get(String search, long start, long count, SortParam<String> sort) {
-		return DaoHelper.get(em, Configuration.class, true, search, searchFields, false, null, sort, start, count);
+	public List<Configuration> get(String search, long start, long count, String sort) {
+		return setLimits(em.createQuery(DaoHelper.getSearchQuery("Configuration", "c", search, true, false, sort, searchFields), Configuration.class)
+				, start, count).getResultList();
 	}
 
 	@Override
@@ -213,7 +214,8 @@ public class ConfigurationDao implements IDataProviderDao<Configuration> {
 
 	@Override
 	public long count(String search) {
-		return DaoHelper.count(em, Configuration.class, search, searchFields, true, null);
+		TypedQuery<Long> q = em.createQuery(DaoHelper.getSearchQuery("Configuration", "c", search, true, true, null, searchFields), Long.class);
+		return q.getSingleResult();
 	}
 
 	@Override
@@ -233,9 +235,16 @@ public class ConfigurationDao implements IDataProviderDao<Configuration> {
 			entity = em.merge(entity);
 		}
 		switch (key) {
-			case CONFIG_CAM_FPS, CONFIG_MIC_ECHO, CONFIG_MIC_NOISE, CONFIG_MIC_RATE, CONFIG_KEYCODE_ARRANGE
-					, CONFIG_KEYCODE_MUTE_OTHERS, CONFIG_KEYCODE_MUTE, CONFIG_KEYCODE_QUICKPOLL
-					, CONFIG_KEYCODE_ARRANGE_RESIZE, CONFIG_AUTO_OPEN_SHARING:
+			case CONFIG_CAM_FPS:
+			case CONFIG_MIC_ECHO:
+			case CONFIG_MIC_NOISE:
+			case CONFIG_MIC_RATE:
+			case CONFIG_KEYCODE_ARRANGE:
+			case CONFIG_KEYCODE_MUTE_OTHERS:
+			case CONFIG_KEYCODE_MUTE:
+			case CONFIG_KEYCODE_QUICKPOLL:
+			case CONFIG_KEYCODE_ARRANGE_RESIZE:
+			case CONFIG_AUTO_OPEN_SHARING:
 				reloadRoomSettings();
 				break;
 			case CONFIG_MAX_UPLOAD_SIZE:
@@ -274,8 +283,11 @@ public class ConfigurationDao implements IDataProviderDao<Configuration> {
 			case CONFIG_REST_ALLOW_ORIGIN:
 				reloadRestAllowOrigin();
 				break;
-			case CONFIG_LOGIN_MIN_LENGTH, CONFIG_PASS_MIN_LENGTH, CONFIG_PASS_CHECK_UPPER
-					, CONFIG_PASS_CHECK_DIGIT, CONFIG_PASS_CHECK_SPECIAL:
+			case CONFIG_LOGIN_MIN_LENGTH:
+			case CONFIG_PASS_MIN_LENGTH:
+			case CONFIG_PASS_CHECK_UPPER:
+			case CONFIG_PASS_CHECK_DIGIT:
+			case CONFIG_PASS_CHECK_SPECIAL:
 				reloadLoginPassword();
 				break;
 			case CONFIG_DEFAULT_GROUP_ID:
@@ -293,7 +305,9 @@ public class ConfigurationDao implements IDataProviderDao<Configuration> {
 			case CONFIG_CHAT_SEND_ON_ENTER:
 				reloadChatSendOnEnter();
 				break;
-			case CONFIG_REGISTER_FRONTEND, CONFIG_REGISTER_SOAP, CONFIG_REGISTER_OAUTH:
+			case CONFIG_REGISTER_FRONTEND:
+			case CONFIG_REGISTER_SOAP:
+			case CONFIG_REGISTER_OAUTH:
 				reloadRegister();
 				break;
 			case CONFIG_EMAIL_VERIFICATION:
@@ -308,16 +322,30 @@ public class ConfigurationDao implements IDataProviderDao<Configuration> {
 			case CONFIG_MYROOMS_ENABLED:
 				reloadMyRoomsEnabled();
 				break;
-			case CONFIG_GOOGLE_ANALYTICS_CODE, CONFIG_CSP_FONT, CONFIG_CSP_FRAME, CONFIG_CSP_IMAGE
-					, CONFIG_CSP_MEDIA, CONFIG_CSP_SCRIPT, CONFIG_CSP_STYLE, CONFIG_CSP_ENABLED:
+			case CONFIG_GOOGLE_ANALYTICS_CODE:
+			case CONFIG_CSP_FONT:
+			case CONFIG_CSP_FRAME:
+			case CONFIG_CSP_IMAGE:
+			case CONFIG_CSP_MEDIA:
+			case CONFIG_CSP_SCRIPT:
+			case CONFIG_CSP_STYLE:
+			case CONFIG_CSP_ENABLED:
 				updateCsp();
 				break;
-			case CONFIG_SMTP_SERVER, CONFIG_SMTP_PORT, CONFIG_SMTP_SYSTEM_EMAIL, CONFIG_SMTP_USER
-					, CONFIG_SMTP_PASS, CONFIG_SMTP_TLS, CONFIG_SMTP_SSL, CONFIG_REPLY_TO_ORGANIZER
-					, CONFIG_SMTP_TIMEOUT_CON, CONFIG_SMTP_TIMEOUT:
+			case CONFIG_SMTP_SERVER:
+			case CONFIG_SMTP_PORT:
+			case CONFIG_SMTP_SYSTEM_EMAIL:
+			case CONFIG_SMTP_USER:
+			case CONFIG_SMTP_PASS:
+			case CONFIG_SMTP_TLS:
+			case CONFIG_SMTP_SSL:
+			case CONFIG_REPLY_TO_ORGANIZER:
+			case CONFIG_SMTP_TIMEOUT_CON:
+			case CONFIG_SMTP_TIMEOUT:
 				reloadMailSettings();
 				break;
-			case CONFIG_APPOINTMENT_REMINDER_MINUTES, CONFIG_APPOINTMENT_PRE_START_MINUTES:
+			case CONFIG_APPOINTMENT_REMINDER_MINUTES:
+			case CONFIG_APPOINTMENT_PRE_START_MINUTES:
 				reloadAppointmentSettings();
 				break;
 			case CONFIG_RECORDING_ENABLED:
@@ -325,8 +353,6 @@ public class ConfigurationDao implements IDataProviderDao<Configuration> {
 				break;
 			case CONFIG_THEME:
 				reloadTheme();
-				break;
-			default:
 				break;
 		}
 		return entity;

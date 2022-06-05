@@ -26,6 +26,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.openmeetings.core.remote.KurentoHandler;
@@ -80,7 +81,7 @@ public class ConnectionsPanel extends AdminBasePanel {
 						, streamProcessor.getStreams()
 						.stream()
 						.map(KStreamDto::new)
-					).toList();
+					).collect(Collectors.toList());
 			}
 
 			@Override
@@ -101,7 +102,8 @@ public class ConnectionsPanel extends AdminBasePanel {
 
 			@Override
 			protected void populateItem(final Item<IDataProviderEntity> item) {
-				if (item.getModelObject() instanceof KStreamDto kStream) {
+				if (item.getModelObject() instanceof KStreamDto) {
+					KStreamDto kStream = (KStreamDto)item.getModelObject();
 					item.add(new Label("type", kStream.getType() + " " + kStream.getStreamType()));
 					item.add(new Label("login", kStream.getUid()));
 					item.add(new Label("since", getDateFormat().format(kStream.getConnectedSince())));
@@ -109,7 +111,8 @@ public class ConnectionsPanel extends AdminBasePanel {
 					item.add(new Label("server", ""));
 					item.add(new Label("kick", ""));
 				}
-				if (item.getModelObject() instanceof Client c) {
+				if (item.getModelObject() instanceof Client) {
+					Client c = (Client)item.getModelObject();
 					item.add(new Label("type", "html5"));
 					item.add(new Label("login", c.getUser().getLogin()));
 					item.add(new Label("since", getDateFormat().format(c.getConnectedSince())));

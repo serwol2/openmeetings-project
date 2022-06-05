@@ -21,9 +21,7 @@
 <!DOCTYPE html>
 <html xmlns:wicket="http://wicket.apache.org/dtds.data/wicket-9.xsd">
 <wicket:panel>
-	<div class="col-6 d-inline-block">
-		<input type="text" wicket:id="captchaText" wicket:message="title:captcha.text" class="captcha-text form-control"/>
-	</div>
+	<input type="text" wicket:id="captchaText" wicket:message="title:captcha.text" class="captcha-text"/><br/>
 	<img wicket:id="captcha" class="captcha-img"/>
 	<button wicket:id="refresh" wicket:message="alt:lbl.refresh,title:lbl.refresh"></button>
 </wicket:panel>

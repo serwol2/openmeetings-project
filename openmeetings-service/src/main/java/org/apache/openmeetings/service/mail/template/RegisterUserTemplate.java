@@ -18,9 +18,6 @@
  */
 package org.apache.openmeetings.service.mail.template;
 
-import static org.apache.openmeetings.util.OpenmeetingsVariables.getApplicationName;
-import static org.apache.openmeetings.util.OpenmeetingsVariables.getBaseUrl;
-
 import org.apache.wicket.core.util.string.ComponentRenderer;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -39,7 +36,6 @@ public class RegisterUserTemplate extends AbstractTemplatePanel {
 			.add(new ExternalLink("verification_url1", verificationUrl))
 			.setVisible(verificationUrl != null));
 		add(new Label("groupLbl", getString("511", locale)));
-		add(new ExternalLink("url", getBaseUrl(), getApplicationName()));
 	}
 
 	public static String getEmail(String username, String email, String verificationUrl) {

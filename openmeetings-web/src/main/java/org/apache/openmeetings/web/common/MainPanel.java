@@ -406,8 +406,8 @@ public class MainPanel extends Panel {
 
 	private BasePanel getCurrentPanel() {
 		Component prev = contents.get(CHILD_ID);
-		if (prev instanceof BasePanel basePrev) {
-			return basePrev;
+		if (prev instanceof BasePanel) {
+			return (BasePanel)prev;
 		}
 		return null;
 	}
@@ -423,7 +423,7 @@ public class MainPanel extends Panel {
 			}
 			if (updateFragment) {
 				UrlFragment uf = new UrlFragment(handler);
-				uf.set(f.getArea().zone(), f.getType());
+				uf.set(f.getArea().name(), f.getType());
 			}
 		}
 	}

@@ -43,8 +43,7 @@ public class UploadDialog extends Modal<String> {
 		setCloseOnEscapeKey(false);
 		setBackdrop(Backdrop.STATIC);
 
-		wsUpload = new RoomUploadForm("wsupload", roomFiles);
-		add(wsUpload);
+		add(wsUpload = new RoomUploadForm("wsupload", roomFiles));
 		addButton(OmModalCloseButton.of("85"));
 
 		super.onInitialize();

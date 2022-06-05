@@ -18,9 +18,9 @@
  */
 package org.apache.openmeetings.webservice.schema;
 
-import org.apache.openmeetings.db.dto.basic.Info;
-
 import io.swagger.v3.oas.annotations.media.Schema;
+
+import org.apache.openmeetings.db.dto.basic.Info;
 
 /**
  *
@@ -31,14 +31,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * See https://issues.apache.org/jira/browse/OPENMEETINGS-2667
  *
  */
-@Schema(example = """
-		{
-		  "info": {
-		    "version": "7.0.0-SNAPSHOT",
-		    "revision": "525bd84",
-		    "buildDate": "2021-09-03T22:07:29Z"
-		  }
-		}""")
+@Schema(example = "{\n"
+		+ "    \"info\": {\n"
+		+ "        \"version\": \"7.0.0-SNAPSHOT\",\n"
+		+ "        \"revision\": \"525bd84\",\n"
+		+ "        \"buildDate\": \"2021-09-03T22:07:29Z\"\n"
+		+ "    }\n"
+		+ "}")
 public class InfoWrapper {
 	private Info info;
 

@@ -18,7 +18,6 @@
  */
 package org.apache.openmeetings.db.dao.user;
 
-import static org.apache.openmeetings.db.util.DaoHelper.getRoot;
 import static org.apache.openmeetings.db.util.DaoHelper.setLimits;
 
 import java.util.Collection;
@@ -26,23 +25,17 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import org.apache.openmeetings.db.dao.IGroupAdminDataProviderDao;
 import org.apache.openmeetings.db.entity.user.Group;
-import org.apache.openmeetings.db.entity.user.GroupUser;
 import org.apache.openmeetings.db.util.DaoHelper;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @Transactional
 public class GroupDao implements IGroupAdminDataProviderDao<Group> {
-	private static final List<String> searchFields = List.of("name");
+	private static final String[] searchFields = {"name"};
 	@PersistenceContext
 	private EntityManager em;
 
@@ -74,24 +67,17 @@ public class GroupDao implements IGroupAdminDataProviderDao<Group> {
 	}
 
 	@Override
-	public List<Group> get(String search, long start, long count, SortParam<String> sort) {
-		return DaoHelper.get(em, Group.class, false, search, searchFields, true
-				, null
-				, sort, start, count);
-	}
-
-	private Predicate getAdminFilter(Long adminId, CriteriaBuilder builder, CriteriaQuery<?> query) {
-		Root<GroupUser> root = getRoot(query, GroupUser.class);
-		return builder.and(builder.equal(root.get("user").get("id"), adminId), builder.isTrue(root.get("moderator")));
+	public List<Group> get(String search, long start, long count, String sort) {
+		return setLimits(em.createQuery(DaoHelper.getSearchQuery("Group", "g", search, true, false, sort, searchFields), Group.class)
+				, start, count).getResultList();
 	}
 
 	@Override
-	public List<Group> adminGet(String search, Long adminId, long start, long count, SortParam<String> sort) {
-		return DaoHelper.get(em, GroupUser.class, Group.class
-				, (builder, root) -> root.get("group")
-				, true, search, searchFields, true
-				, (b, q) -> getAdminFilter(adminId, b, q)
-				, sort, start, count);
+	public List<Group> adminGet(String search, Long adminId, long start, long count, String order) {
+		return setLimits(em.createQuery(DaoHelper.getSearchQuery("GroupUser gu, IN(gu.group)", "g", null, search, true, true, false
+				, "gu.user.id = :adminId AND gu.moderator = true", order, searchFields), Group.class)
+					.setParameter("adminId", adminId)
+				, start, count).getResultList();
 	}
 
 	@Override
@@ -101,15 +87,16 @@ public class GroupDao implements IGroupAdminDataProviderDao<Group> {
 
 	@Override
 	public long count(String search) {
-		return DaoHelper.count(em, Group.class, search, searchFields, true, null);
+		return em.createQuery(DaoHelper.getSearchQuery("Group", "o", search, true, true, null, searchFields), Long.class)
+				.getSingleResult();
 	}
 
 	@Override
 	public long adminCount(String search, Long adminId) {
-		return DaoHelper.count(em, GroupUser.class
-				, (builder, root) -> builder.countDistinct(root.get("group"))
-				, search, searchFields, false
-				, (b, q) -> getAdminFilter(adminId, b, q.distinct(true)));
+		return em.createQuery(DaoHelper.getSearchQuery("GroupUser gu, IN(gu.group)", "g", null, search, true, true, true
+				, "gu.user.id = :adminId AND gu.moderator = true", null, searchFields), Long.class)
+				.setParameter("adminId", adminId)
+				.getSingleResult();
 	}
 
 	public List<Group> get(Collection<Long> ids) {

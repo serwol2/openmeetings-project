@@ -108,7 +108,6 @@ class TestUserGroup extends AbstractOmServerTest {
 	@Test
 	@Tag("heavy-test")
 	void add10kUsers() throws Exception {
-		final int amount = 10_000;
 		List<Group> groups = groupDao.get(GROUP_NAME, 0, 1, null);
 		Group g = null;
 		if (groups == null || groups.isEmpty()) {
@@ -118,13 +117,10 @@ class TestUserGroup extends AbstractOmServerTest {
 		} else {
 			g = groups.get(0);
 		}
-		long count = userDao.count();
-		for (int i = 0; i < amount; ++i) {
+		for (int i = 0; i < 10000; ++i) {
 			User u = createUser();
 			u.addGroup(g);
 			userDao.update(u, null);
 		}
-		long newCount = userDao.count();
-		assertEquals(count + amount, newCount, "All users should be added");
 	}
 }

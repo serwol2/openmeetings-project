@@ -38,20 +38,17 @@ class TestImportUser extends AbstractTestImport {
 
 	@Test
 	void importUserNE() throws Exception {
-		File configRoot = new File(getClass().getClassLoader().getResource(BACKUP_ROOT + "config/skip/configs.xml").toURI())
-				.getParentFile();
 		Assertions.assertThrows(BackupException.class, () -> {
-			backupImport.importUsers(configRoot);
+			File configs = new File(getClass().getClassLoader().getResource(BACKUP_ROOT + "config/skip/configs.xml").toURI());
+			backupImport.importUsers(configs.getParentFile());
 		});
 	}
 
 	@Test
 	void importUsers() throws Exception {
 		long userCount = userDao.count();
-		File userRoot = new File(getClass().getClassLoader().getResource(BACKUP_ROOT + "user/users.xml").toURI())
-				.getParentFile();
-		backupImport.importGroups(userRoot);
-		backupImport.importUsers(userRoot);
+		File users = new File(getClass().getClassLoader().getResource(BACKUP_ROOT + "user/users.xml").toURI());
+		backupImport.importUsers(users.getParentFile());
 		assertEquals(userCount + 8, userDao.count(), "Users should be added");
 		User ext = userDao.getExternalUser("234", "TheBestCms");
 		assertNotNull(ext, "External user should be imported");

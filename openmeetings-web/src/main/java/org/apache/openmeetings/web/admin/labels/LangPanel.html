@@ -29,7 +29,7 @@
 					<i class="fas fa-plus"></i>
 				</button>
 				<button wicket:id="deleteLangBtn" wicket:message="title:363"></button>
-				<select wicket:id="language" class="form-select"></select>
+				<select wicket:id="language" class="form-control"></select>
 				<button wicket:id="export"></button>
 				<button class="fileupload fileupload-new m-0 btn btn-file btn-xs btn-primary" data-provides="fileupload">
 					<wicket:message key="387"/>
@@ -59,17 +59,13 @@
 			<div class="scrollcontent" id="adminForm">
 				<fieldset>
 					<legend><wicket:message key="353" /></legend>
-					<div class="formelement row">
-						<label wicket:for="key" class="form-label col-3 text-right"><wicket:message key="165" /></label>
-						<div class="col-8 p-0">
-							<input type="text" wicket:id="key" class="form-control"/>
-						</div>
+					<div class="formelement">
+						<label wicket:for="key" class="col-3 text-right"><wicket:message key="165" /></label>
+						<input type="text" wicket:id="key" class="col-8"/>
 					</div>
-					<div class="formelement row">
-						<label wicket:for="value" class="form-label col-3 text-right"><wicket:message key="271" /></label>
-						<div class="col-8 p-0">
-							<textarea wicket:id="value" class="form-control"></textarea>
-						</div>
+					<div class="formelement">
+						<label wicket:for="value" class="col-3 text-right"><wicket:message key="271" /></label>
+						<textarea wicket:id="value" class="col-8"></textarea>
 					</div>
 				</fieldset>
 				<div class="bottom-bumper"></div>

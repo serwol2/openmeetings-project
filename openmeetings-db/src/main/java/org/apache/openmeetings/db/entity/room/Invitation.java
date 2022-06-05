@@ -19,7 +19,6 @@
 package org.apache.openmeetings.db.entity.room;
 
 import java.util.Date;
-import java.util.stream.Stream;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -52,6 +51,14 @@ import org.apache.openmeetings.db.entity.user.User;
 })
 public class Invitation extends HistoricalEntity {
 	private static final long serialVersionUID = 1L;
+	public static final String SELECT_I = "SELECT i ";
+	public static final String SELECT_COUNT = "SELECT COUNT(i) ";
+	public static final String BY_ALL = " FROM Invitation i WHERE i.deleted = false";
+	public static final String BY_GROUP = BY_ALL + " AND i.invitedBy.id IN "
+			+ "(SELECT gu1.user.id FROM GroupUser gu1 WHERE gu1.group.id IN "
+			+ "    (SELECT gu.group.id FROM GroupUser gu WHERE gu.moderator = true AND gu.user.id = :userId)"
+			+ ") ";
+	public static final String BY_USER = BY_ALL + " AND i.invitedBy.id = :userId";
 
 	public enum MessageType {
 		CREATE
@@ -60,20 +67,12 @@ public class Invitation extends HistoricalEntity {
 	}
 
 	public enum Valid {
-		ONE_TIME(3)
-		, PERIOD(2)
-		, ENDLESS(1);
-		private final int code;
-
-		private Valid(int code) {
-			this.code = code;
-		}
+		ONE_TIME
+		, PERIOD
+		, ENDLESS;
 
 		public static Valid fromInt(int valid) {
-			return Stream.of(Valid.values())
-					.filter(v -> v.code == valid)
-					.findAny()
-					.orElse(ONE_TIME);
+			return valid == 1 ? ENDLESS : (valid == 2 ? PERIOD : ONE_TIME);
 		}
 	}
 

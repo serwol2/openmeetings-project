@@ -47,6 +47,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.openmeetings.db.dao.file.FileItemDao;
 import org.apache.openmeetings.db.dto.room.Whiteboard;
@@ -126,7 +127,7 @@ public class WbPanel extends AbstractWbPanel {
 	private final SerializableConsumer<Whiteboard> addUndo = wb -> {
 		JSONArray arr = getArray(wb.toJson(), null);
 		if (arr.length() != 0) {
-			addUndo(wb.getId(), new UndoObject(UndoObject.Type.REMOVE, arr));
+			addUndo(wb.getId(), new UndoObject(UndoObject.Type.remove, arr));
 		}
 	};
 	@SpringBean
@@ -144,7 +145,7 @@ public class WbPanel extends AbstractWbPanel {
 					, List.of(OmFileHelper.getPublicClipartsDir().list())
 						.stream()
 						.sorted()
-						.toList())
+						.collect(Collectors.toList()))
 			{
 				private static final long serialVersionUID = 1L;
 
@@ -192,7 +193,8 @@ public class WbPanel extends AbstractWbPanel {
 			return;
 		}
 		switch (a) {
-			case CREATE_OBJ, MODIFY_OBJ:
+			case CREATE_OBJ:
+			case MODIFY_OBJ:
 			{
 				JSONObject o = obj.optJSONObject("obj");
 				if (o != null && "pointer".equals(o.getString(ATTR_OMTYPE))) {
@@ -317,7 +319,7 @@ public class WbPanel extends AbstractWbPanel {
 					JSONObject o = obj.getJSONObject("obj");
 					wb.put(o.getString("uid"), o);
 					wbm.update(roomId, wb);
-					addUndo(wb.getId(), new UndoObject(UndoObject.Type.ADD, o));
+					addUndo(wb.getId(), new UndoObject(UndoObject.Type.add, o));
 					sendWbOthers(WbAction.CREATE_OBJ, obj);
 				}
 					break;
@@ -337,7 +339,7 @@ public class WbPanel extends AbstractWbPanel {
 					}
 					if (arr.length() != 0) {
 						wbm.update(roomId, wb);
-						addUndo(wb.getId(), new UndoObject(UndoObject.Type.MODIFY, undo));
+						addUndo(wb.getId(), new UndoObject(UndoObject.Type.modify, undo));
 					}
 					sendWbOthers(WbAction.MODIFY_OBJ, obj);
 				}
@@ -356,7 +358,7 @@ public class WbPanel extends AbstractWbPanel {
 					}
 					if (undo.length() != 0) {
 						wbm.update(roomId, wb);
-						addUndo(wb.getId(), new UndoObject(UndoObject.Type.REMOVE, undo));
+						addUndo(wb.getId(), new UndoObject(UndoObject.Type.remove, undo));
 					}
 					sendWbAll(WbAction.DELETE_OBJ, obj);
 				}
@@ -364,7 +366,7 @@ public class WbPanel extends AbstractWbPanel {
 				case CLEAR_SLIDE:
 				{
 					wbm.cleanSlide(roomId, obj.getLong("wbId"), obj.getInt(ATTR_SLIDE)
-							, (wb, arr) -> addUndo(wb.getId(), new UndoObject(UndoObject.Type.REMOVE, arr)));
+							, (wb, arr) -> addUndo(wb.getId(), new UndoObject(UndoObject.Type.remove, arr)));
 				}
 					break;
 				case SAVE:
@@ -378,7 +380,7 @@ public class WbPanel extends AbstractWbPanel {
 					if (uo != null) {
 						Whiteboard wb = wbm.get(roomId).get(wbId);
 						switch (uo.getType()) {
-							case ADD:
+							case add:
 							{
 								JSONObject o = new JSONObject(uo.getObject());
 								wb.remove(o.getString("uid"));
@@ -386,7 +388,7 @@ public class WbPanel extends AbstractWbPanel {
 								sendWbAll(WbAction.DELETE_OBJ, obj.put("obj", new JSONArray().put(o)));
 							}
 								break;
-							case REMOVE:
+							case remove:
 							{
 								JSONArray arr = new JSONArray(uo.getObject());
 								for (int i  = 0; i < arr.length(); ++i) {
@@ -397,7 +399,7 @@ public class WbPanel extends AbstractWbPanel {
 								sendWbAll(WbAction.CREATE_OBJ, obj.put("obj", new JSONArray(uo.getObject())));
 							}
 								break;
-							case MODIFY:
+							case modify:
 							{
 								JSONArray arr = new JSONArray(uo.getObject());
 								for (int i  = 0; i < arr.length(); ++i) {

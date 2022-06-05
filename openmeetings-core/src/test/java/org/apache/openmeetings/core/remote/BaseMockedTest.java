@@ -97,15 +97,6 @@ public class BaseMockedTest {
 		handler.init();
 	}
 
-	void mockWs(MockedStatic<WebSocketHelper> wsHelperMock) {
-		wsHelperMock.when(() -> WebSocketHelper.sendClient(any(IWsClient.class), any(JSONObject.class))).thenAnswer(new Answer<Void>() {
-			@Override
-			public Void answer(InvocationOnMock invocation) throws Throwable {
-				return null;
-			}
-		});
-	}
-
 	void runWrapped(Runnable task) {
 		try (MockedStatic<AbstractStream> streamMock = mockStatic(AbstractStream.class);
 				MockedStatic<WebSocketHelper> wsHelperMock = mockStatic(WebSocketHelper.class);
@@ -117,7 +108,12 @@ public class BaseMockedTest {
 			Set<Object> mocks = newMockSafeHashSet();
 			new MockScanner(this, BaseMockedTest.class).addPreparedMocks(mocks);
 			new MockScanner(this, this.getClass()).addPreparedMocks(mocks);
-			mockWs(wsHelperMock);
+			wsHelperMock.when(() -> WebSocketHelper.sendClient(any(IWsClient.class), any(JSONObject.class))).thenAnswer(new Answer<Void>() {
+				@Override
+				public Void answer(InvocationOnMock invocation) throws Throwable {
+					return null;
+				}
+			});
 			streamMock.when(() -> AbstractStream.createWebRtcEndpoint(any(MediaPipeline.class), anyBoolean(), any())).thenReturn(mock(WebRtcEndpoint.class));
 			streamMock.when(() -> AbstractStream.createRecorderEndpoint(any(MediaPipeline.class), anyString(), any(MediaProfileSpecType.class))).thenReturn(mock(RecorderEndpoint.class));
 			streamMock.when(() -> AbstractStream.createPlayerEndpoint(any(MediaPipeline.class), anyString())).thenReturn(mock(PlayerEndpoint.class));

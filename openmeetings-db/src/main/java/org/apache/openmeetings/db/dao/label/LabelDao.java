@@ -70,10 +70,8 @@ import org.slf4j.LoggerFactory;
  */
 public class LabelDao implements IDataProviderDao<StringLabel>{
 	private static final Logger log = LoggerFactory.getLogger(LabelDao.class);
-	private static final String RANGE_START = "rangeStart";
-	private static final String RANGE_END = "rangeEnd";
-	public static final String ENTRY_ELEMENT = "entry";
-	public static final String KEY_ATTR = "key";
+	private static final String ENTRY_ELEMENT = "entry";
+	private static final String KEY_ATTR = "key";
 	public static final String APP_RESOURCES_PREFIX = "Application";
 	public static final String APP_RESOURCES_SUFFIX = ".properties.xml";
 	private static final OmLanguage LNG_ENGLISH = new OmLanguage(1L, Locale.ENGLISH);
@@ -90,8 +88,8 @@ public class LabelDao implements IDataProviderDao<StringLabel>{
 				.addAttribute("id", "" + e.getKey())
 				.addAttribute("code", e.getValue().getLocale().toLanguageTag())
 				.addAttribute("tip", e.getValue().getTip())
-				.addAttribute(RANGE_START, "" + e.getValue().getRangeStart())
-				.addAttribute(RANGE_END, "" + e.getValue().getRangeEnd());
+				.addAttribute("rangeStart", "" + e.getValue().getRangeStart())
+				.addAttribute("rangeStart", "" + e.getValue().getRangeEnd());
 		}
 		XmlExport.toXml(getLangFile(), d);
 	}
@@ -130,8 +128,8 @@ public class LabelDao implements IDataProviderDao<StringLabel>{
 				}
 				languages.put(id, new OmLanguage(id, Locale.forLanguageTag(code))
 						.setTip(item.attributeValue("tip"))
-						.setRangeStart(Optional.ofNullable(item.attributeValue(RANGE_START)).map(s -> s.charAt(0)).orElse('A'))
-						.setRangeEnd(Optional.ofNullable(item.attributeValue(RANGE_END)).map(s -> s.charAt(0)).orElse('Z'))
+						.setRangeStart(Optional.ofNullable(item.attributeValue("rangeStart")).map(s -> s.charAt(0)).orElse('A'))
+						.setRangeEnd(Optional.ofNullable(item.attributeValue("rangeEnd")).map(s -> s.charAt(0)).orElse('Z'))
 					);
 			}
 		} catch (Exception e) {
@@ -214,7 +212,7 @@ public class LabelDao implements IDataProviderDao<StringLabel>{
 	}
 
 	@Override
-	public List<StringLabel> get(String search, long start, long count, SortParam<String> order) {
+	public List<StringLabel> get(String search, long start, long count, String order) {
 		throw UNSUPPORTED;
 	}
 

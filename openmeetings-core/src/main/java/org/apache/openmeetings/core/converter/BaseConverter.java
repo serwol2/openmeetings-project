@@ -74,7 +74,23 @@ public abstract class BaseConverter {
 	@Autowired
 	protected RecordingDao recordingDao;
 
-	protected record Dimension(int width, int height) {}
+	protected static class Dimension {
+		private final int width;
+		private final int height;
+
+		public Dimension(int width, int height) {
+			this.width = width;
+			this.height = height;
+		}
+
+		public int getWidth() {
+			return width;
+		}
+
+		public int getHeight() {
+			return height;
+		}
+	}
 
 	private String getPath(String key, String app) {
 		final String cfg = cfgDao.getString(key, "");
@@ -179,34 +195,39 @@ public abstract class BaseConverter {
 	}
 
 	protected RecordingChunk waitForTheStream(long chunkId) {
-		RecordingChunk chunk = null;
+		RecordingChunk chunk = chunkDao.get(chunkId);
 		try {
-			long counter = 0;
-			long maxTimestamp = 0;
-			while (true) {
-				chunk = chunkDao.get(chunkId);
+			if (chunk.getStreamStatus() != Status.STOPPED) {
+				log.debug("### Chunk Stream not yet written to disk {}", chunkId);
+				long counter = 0;
+				long maxTimestamp = 0;
+				while (true) {
+					log.trace("### Stream not yet written Thread Sleep - {}", chunkId);
 
-				if (chunk.getStreamStatus() == Status.STOPPED) {
-					printChunkInfo(chunk, "Stream now written");
-					log.debug("### Chunk stopped, unblocking thread ... " );
-					break;
-				}
-				File chunkFlv = getRecordingChunk(chunk.getRecording().getRoomId(), chunk.getStreamName());
-				if (chunkFlv.exists() && maxTimestamp < chunkFlv.lastModified()) {
-					maxTimestamp = chunkFlv.lastModified();
-				}
-				if (maxTimestamp + TIME_TO_WAIT_FOR_FRAME < System.currentTimeMillis()) {
-					log.debug("### long time without any update, closing ... ");
-					chunk.setStreamStatus(Status.STOPPED);
-					chunkDao.update(chunk);
-					break;
-				}
-				if (++counter % 1000 == 0) {
-					printChunkInfo(chunk, "Still waiting");
-				}
+					chunk = chunkDao.get(chunkId);
 
-				log.trace("### Stream not yet written Thread Sleep - {}", chunkId);
-				Thread.sleep(100L);
+					if (chunk.getStreamStatus() == Status.STOPPED) {
+						printChunkInfo(chunk, "Stream now written");
+						log.debug("### Thread continue ... " );
+						break;
+					} else {
+						File chunkFlv = getRecordingChunk(chunk.getRecording().getRoomId(), chunk.getStreamName());
+						if (chunkFlv.exists() && maxTimestamp < chunkFlv.lastModified()) {
+							maxTimestamp = chunkFlv.lastModified();
+						}
+						if (maxTimestamp + TIME_TO_WAIT_FOR_FRAME < System.currentTimeMillis()) {
+							log.debug("### long time without any update, closing ... ");
+							chunk.setStreamStatus(Status.STOPPED);
+							chunkDao.update(chunk);
+							break;
+						}
+					}
+					if (++counter % 1000 == 0) {
+						printChunkInfo(chunk, "Still waiting");
+					}
+
+					Thread.sleep(100L);
+				}
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();

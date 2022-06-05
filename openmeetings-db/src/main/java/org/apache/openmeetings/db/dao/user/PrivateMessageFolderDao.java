@@ -29,7 +29,6 @@ import javax.persistence.PersistenceContext;
 
 import org.apache.openmeetings.db.dao.IDataProviderDao;
 import org.apache.openmeetings.db.entity.user.PrivateMessageFolder;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -98,7 +97,7 @@ public class PrivateMessageFolderDao implements IDataProviderDao<PrivateMessageF
 	}
 
 	@Override
-	public List<PrivateMessageFolder> get(String search, long start, long count, SortParam<String> order) {
+	public List<PrivateMessageFolder> get(String search, long start, long count, String order) {
 		throw UNSUPPORTED;
 	}
 
