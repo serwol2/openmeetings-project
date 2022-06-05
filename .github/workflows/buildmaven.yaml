@@ -28,7 +28,12 @@ jobs:
         #run: mvn install -P allModules,quick,mysql -pl openmeetings-util,openmeetings-db,openmeetings-core,openmeetings-install,openmeetings-service,openmeetings-web,openmeetings-server,openmeetings-webservice -Dwicket.configuration=DEVELOPMENT
         run: mvn clean install -PallModules --update-snapshots package -Drat.numUnapprovedLicenses=200 
                # mvn --batch-mode --update-snapshots package
-      # - uses: actions/upload-artifact@v3
-      #   with:
-      #     name: Package
-      #     path: /home/runner/work/openmeetings-project/openmeetings-project/openmeetings-service/target/openmeetings-service-7.0.0-SNAPSHOT.jar   
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Package
+          path: /home/runner/work/openmeetings-project/openmeetings-project/openmeetings-service/target/openmeetings-service-6.0.0-SNAPSHOT.jar
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Package1
+          path: /home/runner/work/openmeetings-project/openmeetings-project/openmeetings-service/target/*.*    

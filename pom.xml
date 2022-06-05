@@ -1247,15 +1247,15 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<modules>
-				<!-- <module>openmeetings-util</module>
+				<module>openmeetings-util</module>
 				<module>openmeetings-db</module>
 				<module>openmeetings-core</module>
 				<module>openmeetings-install</module>
 				<module>openmeetings-service</module>
 				<module>openmeetings-webservice</module>
 				<module>openmeetings-web</module> 
-				<module>openmeetings-screenshare</module> -->
-				<module>openmeetings-server</module>
+				<!-- <module>openmeetings-screenshare</module> 
+				<module>openmeetings-server</module> -->
 			</modules>
 		</profile>
 		<profile>
