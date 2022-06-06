@@ -27,7 +27,7 @@ jobs:
         run: mvn clean install -PallModules -Drat.numUnapprovedLicenses=200 -DskipTests
 
       - name: Publish to GitHub Packages Apache Maven
-        run: mvn deploy
+        run: mvn deploy -Drat.numUnapprovedLicenses=200
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB1_TOKEN }} 
 
