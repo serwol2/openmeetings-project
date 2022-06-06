@@ -24,23 +24,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Maven
-        run: mvn clean install -PallModules -Drat.numUnapprovedLicenses=200 -DskipTests
-
-  publish-snapshot:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up settings.xml for GitHub Packages
-        uses: actions/setup-java@v3
-        with:
-          java-version: "11"
-          distribution: 'temurin'
-
-      - name: Publish SNAPSHOT version to GitHub Packages (we can skip tests, since we only deploy, if the build workflow succeeded)
-        run: mvn -B --no-transfer-progress deploy -DskipTests -Drat.numUnapprovedLicenses=200 #--projects GitHub-serwol2-Maven-Packages 
+        run: mvn clean install -PallModules -Pgithub deploy -Drat.numUnapprovedLicenses=200 -DskipTests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB1_TOKEN }}      
 
