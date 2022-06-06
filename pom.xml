@@ -148,6 +148,17 @@
 		<name>Apache Software Foundation</name>
 		<url>https://apache.org</url>
 	</organization>
+	
+	<distributionManagement>
+	<repository>
+		<id>github</id>
+		<name>GitHub serwol2 Apache Maven Packages</name>
+		<url>https://maven.pkg.github.com/serwol2/openmeetings-project</url>
+	</repository>
+	</distributionManagement>
+
+
+
 	<licenses>
 		<license>
 			<name>The Apache Software License, Version 2.0</name>
@@ -1679,13 +1690,13 @@
 			</activation>
 			<modules>
 				<module>openmeetings-util</module>
-				<module>openmeetings-db</module>
+				<!-- <module>openmeetings-db</module>
 				<module>openmeetings-core</module>
 				<module>openmeetings-install</module>
 				<module>openmeetings-service</module>
 				<module>openmeetings-webservice</module>
 				<module>openmeetings-web</module>
-				<!-- <module>openmeetings-screenshare</module>
+				<module>openmeetings-screenshare</module>
 				<module>openmeetings-server</module> -->
 			</modules>
 		</profile>
