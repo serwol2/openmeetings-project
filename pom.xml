@@ -150,12 +150,11 @@
 	</organization>
 	
 	<distributionManagement>
-		
-		<Repository>
+		<repository>
 			<id>github</id>
 			<name>GitHub serwol2 Apache Maven Packages</name>
 			<url>https://maven.pkg.github.com/serwol2/openmeetings-project</url>
-		</Repository>
+		</repository>
 	</distributionManagement>
 
 
