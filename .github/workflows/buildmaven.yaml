@@ -24,7 +24,7 @@ jobs:
           distribution: 'temurin'
           server-id: github
           erver-username: serwol2 # env variable name for username
-          server-password: ${{ secrets.GITHUB_TOKEN }}
+          server-password: ${{ secrets.GITHUB1_TOKEN }}
           #check-latest: true
           # cache: maven
       - name: Build with Maven
