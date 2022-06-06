@@ -22,16 +22,27 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-          server-id: github
-          server-username: serwol2 # env variable name for username
-          server-password: ${{ secrets.GITHUB1_TOKEN }}
-          #check-latest: true
-          # cache: maven
+
       - name: Build with Maven
-        #run: mvn install -P allModules,quick,mysql -pl openmeetings-util,openmeetings-db,openmeetings-core,openmeetings-install,openmeetings-service,openmeetings-web,openmeetings-server,openmeetings-webservice -Dwicket.configuration=DEVELOPMENT
-        run: mvn clean install -PallModules -Pgithub deploy -Drat.numUnapprovedLicenses=200 -DskipTests --update-snapshots package
-        #run: mvn clean install -PallModules -Drat.numUnapprovedLicenses=200 -DskipTests
-        # env:
+        run: mvn clean install -PallModules -Drat.numUnapprovedLicenses=200 -DskipTests
+
+      - name: Publish to GitHub Packages Apache Maven
+        run: mvn deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB1_TOKEN }} 
+
+
+
+      #     server-id: github
+      #     server-username: serwol2 # env variable name for username
+      #     server-password: ${{ secrets.GITHUB1_TOKEN }}
+      #     #check-latest: true
+      #     # cache: maven
+      # - name: Build with Maven
+      #   #run: mvn install -P allModules,quick,mysql -pl openmeetings-util,openmeetings-db,openmeetings-core,openmeetings-install,openmeetings-service,openmeetings-web,openmeetings-server,openmeetings-webservice -Dwicket.configuration=DEVELOPMENT
+      #   run: mvn clean install -PallModules -Pgithub deploy -Drat.numUnapprovedLicenses=200 -DskipTests --update-snapshots package
+      #   #run: mvn clean install -PallModules -Drat.numUnapprovedLicenses=200 -DskipTests
+      #   # env:
 
         #   GITHUB_USER_REF: ${{ secrets.GIT_USERNAME }}
 
