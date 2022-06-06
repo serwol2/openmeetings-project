@@ -23,17 +23,17 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      - name: Build with Maven
-        run: mvn clean install -PallModules -Pgithub deploy -Drat.numUnapprovedLicenses=200 -DskipTests
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB1_TOKEN }}      
+      # - name: Build with Maven
+      #   run: mvn clean install -PallModules -Pgithub deploy -Drat.numUnapprovedLicenses=200 -DskipTests
+      #   # env:
+      #   #   GITHUB_TOKEN: ${{ secrets.GITHUB1_TOKEN }}      
 
   
 
-      # - name: Publish to GitHub Packages Apache Maven
-      #   run: mvn deploy -Drat.numUnapprovedLicenses=200 -DskipTests
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB1_TOKEN }} 
+      - name: Publish to GitHub Packages Apache Maven
+        run: mvn clear deploy -PallModules -Drat.numUnapprovedLicenses=200 -DskipTests
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB1_TOKEN }} 
 
 
 
