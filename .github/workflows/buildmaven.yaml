@@ -37,6 +37,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: "11"
+          distribution: 'temurin'
 
       - name: Publish SNAPSHOT version to GitHub Packages (we can skip tests, since we only deploy, if the build workflow succeeded)
         run: mvn -B --no-transfer-progress deploy -DskipTests -Drat.numUnapprovedLicenses=200 --projects GitHub-serwol2-Maven-Packages 
